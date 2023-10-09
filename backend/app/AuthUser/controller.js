@@ -83,6 +83,15 @@ const loginUser = async (req, res) => {
         },
       });
 
+      // username input tidak sama dengan username di database
+      if (username !== user.username) {
+        return res.status(400).json({
+          code: "400",
+          status: "BAD_REQUEST",
+          errors: "User not found",
+        });
+      }
+
       // USERNAME TIDAK ADA DI DATABASE
       if (!user)
         return res.status(400).json({
@@ -90,6 +99,15 @@ const loginUser = async (req, res) => {
           status: "BAD_REQUEST",
           errors: "User not found",
         });
+
+      // User sedang login di akun lain
+      if (user.token) {
+        return res.status(403).json({
+          code: "403",
+          status: "FORBIDDEN",
+          errors: "Akun sedang login di perangkat lain",
+        });
+      }
 
       // PASSWORD TIDAK COCOK
       const match = await bcrypt.compare(password, user.password);
@@ -109,7 +127,7 @@ const loginUser = async (req, res) => {
       const name = user.name;
 
       const token = jwt.sign({ id_user, username, role }, tokenSecret, {
-        expiresIn: "1d",
+        expiresIn: "2d",
       });
 
       await User.update(

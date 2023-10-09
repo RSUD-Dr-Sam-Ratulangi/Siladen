@@ -24,8 +24,18 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PushNotification from 'react-native-push-notification';
 import {io} from 'socket.io-client';
+import {API_HOST} from '../../../config';
+import {useDispatch} from 'react-redux';
+import {
+  saveIdUserAction,
+  saveNameAction,
+  saveRoleAction,
+  saveTokenAction,
+  saveUsernameAction,
+} from '../../../redux/action';
+import {CommonActions} from '@react-navigation/native';
 
-const socket = io('https://backend-pelaporaninsiden.glitch.me');
+// const socket = io(API_HOST);
 
 const PasswordInput = ({placeholder, onChangeText, value}: any) => {
   const [secureTextEntry, setSecureTextEntry] = useState(true);
@@ -52,23 +62,37 @@ const PasswordInput = ({placeholder, onChangeText, value}: any) => {
 };
 
 const Login = ({navigation}: any) => {
+  const dispatch = useDispatch();
+  // let dataAwal = useSelector((data: any) => data.value);
+  // const [valueRedux, setValueRedux] = useState(dataAwal);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    socket.on('pesan', data => {
-      console.log('Pesan diterima dari server:', data);
-      // Tampilkan notifikasi push
-      PushNotification.localNotification({
-        channelId: 'tes-channel1',
-        title: 'test title server',
-        message: 'test body',
-      });
-    });
+    // socket.on('pesan', data => {
+    //   console.log('Pesan diterima dari server:', data);
+    //   // Tampilkan notifikasi push
+    //   PushNotification.localNotification({
+    //     channelId: 'tes-channel1',
+    //     title: 'test title server',
+    //     message: 'test body',
+    //   });
+    // });
+    console.log('ini api host: ', API_HOST);
+
+    // console.log('ini nilai awal: ', valueRedux);
   }, []);
 
+  // useEffect(() => {
+  //   setValueRedux(dataAwal);
+  //   console.log('setelah ubah usestae: ', valueRedux);
+  // }, [dataAwal]);
+
   const triggerNotification = () => {
+    // const dataAwal = useSelector((data: any) => data.value);
+    // setValueRedux(dataAwal);
+    // dispatch(printAction('jerico'));
     PushNotification.localNotification({
       channelId: 'tes-channel1',
       title: 'Notifikasi Test',
@@ -84,27 +108,51 @@ const Login = ({navigation}: any) => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(
-        'https://backend-pelaporan-final.glitch.me/auth/user/login',
-        {
-          username,
-          password,
-        },
-      );
+      const response = await axios.post(`${API_HOST}/auth/user/login`, {
+        username,
+        password,
+      });
       console.log('ini response: ', response.data);
       const token = response.data.data.token;
       console.log('ini token: ', token);
 
-      await AsyncStorage.setItem('token', token);
+      const id_user = response.data.data.id_user;
+      const name = response.data.data.name;
+      const role = response.data.data.role;
 
-      const value = await AsyncStorage.getItem('token');
-      console.log('ini adalah value: ', value);
+      await AsyncStorage.setItem('id_user', id_user);
+      await AsyncStorage.setItem('name', name);
+      await AsyncStorage.setItem('token', token);
+      await AsyncStorage.setItem('role', role);
+
+      const tokenAsync = await AsyncStorage.getItem('token');
+      const nameAsync = await AsyncStorage.getItem('name');
+      const idUserAsync = await AsyncStorage.getItem('id_user');
+      const roleAsync = await AsyncStorage.getItem('role');
+
+      console.log('ini adalah token: ', tokenAsync);
+      console.log('ini name dari asyn storage: ', nameAsync);
+      console.log('ini id user dari asyn: ', idUserAsync);
+      console.log('ini role dari asyn: ', roleAsync);
+
       if (response.data.code == '200') {
         const dataUser = response.data.data;
         if (dataUser.role !== 'admin') {
+          dispatch(saveIdUserAction(dataUser.id_user));
+          dispatch(saveNameAction(dataUser.name));
+          dispatch(saveRoleAction(dataUser.role));
+          dispatch(saveTokenAction(dataUser.token));
+          dispatch(saveUsernameAction(dataUser.username));
+
           console.log('ini di LOGIN: ', dataUser);
           console.log('ini di LOGIN id user: ', dataUser.id_user);
-          navigation.navigate('Navigation', dataUser);
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [{name: 'Navigation'}],
+            }),
+          );
+
           setUsername('');
           setPassword('');
         } else {
@@ -117,10 +165,14 @@ const Login = ({navigation}: any) => {
       setIsLoading(false);
       console.log(error);
       if (error.response) {
-        Alert.alert(
-          'Login Gagal',
-          'Username tidak ditemukan atau password salah.',
-        );
+        if (error.response.data.code === '403') {
+          Alert.alert('Login Gagal', 'Akun sedang login di perangkat lain');
+        } else {
+          Alert.alert(
+            'Login Gagal',
+            'Username tidak ditemukan atau password salah.',
+          );
+        }
       } else if (error.request) {
         Alert.alert(
           'Kesalahan Jaringan',
@@ -133,6 +185,7 @@ const Login = ({navigation}: any) => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Gap height={90} />
+      {/* <Text>{valueRedux}</Text> */}
       <View style={styles.logoContainer}>
         <Image source={Logo} resizeMode="contain" style={styles.logo} />
         <Text style={styles.txtLogo}>RSUD Dr.Sam Ratulangi{'\n'}Tondano</Text>
@@ -159,7 +212,9 @@ const Login = ({navigation}: any) => {
       </TouchableOpacity>
       <Gap height={40} />
       {isLoading ? (
-        <ActivityIndicator size="large" color={MyColor.Primary} />
+        <View style={{height: 45}}>
+          <ActivityIndicator size="large" color={MyColor.Primary} />
+        </View>
       ) : (
         <Button
           label="Masuk"
@@ -180,13 +235,13 @@ const Login = ({navigation}: any) => {
           navigation.navigate('SignUp');
         }}
       />
-      <TouchableOpacity
+      {/* <TouchableOpacity
         style={{width: 100, height: 30, backgroundColor: 'pink'}}
         onPress={() => {
           triggerNotification();
         }}>
         <Text style={{color: 'black'}}>Trigger Notifikasi</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </ScrollView>
   );
 };

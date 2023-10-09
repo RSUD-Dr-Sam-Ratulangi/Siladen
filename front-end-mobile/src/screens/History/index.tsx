@@ -6,7 +6,8 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
+import {useFocusEffect} from '@react-navigation/native';
 import Header from '../../components/molecules/Header';
 import {MyColor} from '../../components/atoms/MyColor';
 import {
@@ -19,6 +20,8 @@ import {
 import {MyFont} from '../../components/atoms/MyFont';
 import Gap from '../../components/atoms/Gap';
 import axios from 'axios';
+import {useSelector} from 'react-redux';
+import {ImagePlaceHolder} from '../../assets/images';
 
 interface Laporan {
   status: string;
@@ -28,22 +31,35 @@ interface Laporan {
 }
 
 const History = ({navigation, route}: any) => {
+  // const dataUser = useSelector((data: any) => data);
   const [laporan, setLaporan] = useState<Laporan[]>([]);
-  const dataUser = route.params;
+  // const dataUser = route.params;
+  // const dataUser =
 
-  useEffect(() => {
-    getAllLaporan();
-  }, []);
+  const idUser = useSelector((data: any) => data.id_user);
+  const token = useSelector((data: any) => data.token);
+
+  const dataUser = {
+    id_user: idUser,
+    token,
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      getAllLaporan();
+      console.log('ini so masuk di history: ', dataUser);
+    }, []),
+  );
 
   const getAllLaporan = async () => {
     if (dataUser.id_user) {
-      console.log('test: ', dataUser);
+      console.log('tes: ', dataUser);
       try {
         const headers = {
           Authorization: `Bearer ${dataUser.token}`,
         };
         const response = await axios.get(
-          `https://backend-pelaporan-final.glitch.me/api/laporan/${dataUser.id_user}`,
+          `https://backend-pelaporan-final.glitch.me/api/laporan/user/${dataUser.id_user}`,
           {headers},
         );
         console.log('halo ', response.data);
@@ -100,13 +116,21 @@ const History = ({navigation, route}: any) => {
     }
   };
 
-  function convertToWITDate(utcDate: any) {
-    const offset = 8; // Offset waktu WIT dari UTC adalah +7 jam
-    const localTime = new Date(utcDate.getTime() + offset * 60 * 60 * 1000);
+  function formatHour(date: any) {
+    const localTime = new Date(date.getTime());
 
-    const year = localTime.getUTCFullYear().toString();
-    const month = getMonthName(localTime.getUTCMonth());
-    const day = localTime.getUTCDate().toString();
+    const hours = localTime.getHours().toString().padStart(2, '0');
+    const minutes = localTime.getMinutes().toString().padStart(2, '0');
+
+    return `${hours}:${minutes}`;
+  }
+
+  function formatDate(date: any) {
+    const localTime = new Date(date.getTime());
+
+    const year = localTime.getFullYear().toString();
+    const month = getMonthName(localTime.getMonth());
+    const day = localTime.getDate().toString();
 
     return `${day} ${month} ${year}`;
   }
@@ -162,16 +186,6 @@ const History = ({navigation, route}: any) => {
   //   },
   // ];
 
-  function convertToWITHour(utcDate: any) {
-    const offset = 8; // Offset waktu WIT dari UTC adalah +7 jam
-    const localTime = new Date(utcDate.getTime() + offset * 60 * 60 * 1000);
-
-    const hours = localTime.getUTCHours().toString().padStart(2, '0');
-    const minutes = localTime.getUTCMinutes().toString().padStart(2, '0');
-
-    return `${hours}:${minutes}`;
-  }
-
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Header />
@@ -193,7 +207,7 @@ const History = ({navigation, route}: any) => {
             </Text>
             <TouchableOpacity
               style={styles.createReportButton}
-              onPress={() => navigation.navigate('FotoPendukung')}>
+              onPress={() => navigation.navigate('BuatLaporan', dataUser)}>
               <Text style={styles.createReportButtonText}>
                 Tekan disini untuk {'\n'}membuat laporan baru!
               </Text>
@@ -216,16 +230,21 @@ const History = ({navigation, route}: any) => {
                 onPress={() =>
                   navigation.navigate('DetailLaporan', {
                     id_laporan: item.id_laporan,
+                    status: item.status,
+                    // dataUser: dataUser,
                   })
                 }>
                 <View style={{flexDirection: 'row', columnGap: 20}}>
-                  <Image source={{uri: item.gambar}} style={styles.cardImage} />
-                  <View>
+                  <Image
+                    source={item.gambar ? {uri: item.gambar} : ImagePlaceHolder}
+                    style={styles.cardImage}
+                  />
+                  <View style={{width: 150}}>
                     <Text style={styles.txtCardTime}>
-                      {convertToWITHour(new Date(item.tanggal_laporan_dikirim))}
+                      {formatHour(new Date(item.tanggal_laporan_dikirim))}
                     </Text>
                     <Text style={styles.txtCard}>
-                      {convertToWITDate(new Date(item.tanggal_laporan_dikirim))}
+                      {formatDate(new Date(item.tanggal_laporan_dikirim))}
                     </Text>
                     <Text style={styles.txtCardStatus}>
                       {convertStatus(item.status)}
@@ -265,7 +284,7 @@ const styles = StyleSheet.create({
   cardContent: {
     padding: 20,
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-evenly',
     height: 120,
     marginBottom: 20,
     borderRadius: 20,

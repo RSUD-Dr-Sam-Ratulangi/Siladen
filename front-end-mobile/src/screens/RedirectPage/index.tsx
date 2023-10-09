@@ -7,7 +7,7 @@ const RedirectPage = ({navigation, route}: any) => {
 
   useEffect(() => {
     const navigateToDashboard = setTimeout(() => {
-      navigation.replace('BuatLaporan', dataUser);
+      navigation.replace('BuatLaporan');
     }, 0);
 
     return () => clearTimeout(navigateToDashboard);

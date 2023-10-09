@@ -24,8 +24,8 @@ const WelcomePage = ({navigation}: any) => {
   const createChannel = () => {
     PushNotification.createChannel(
       {
-        channelId: 'tes-channel1', // Ganti dengan ID kanal yang Anda inginkan
-        channelName: 'myChannel', // Ganti dengan nama kanal yang Anda inginkan
+        channelId: 'tes-channel1',
+        channelName: 'myChannel',
       },
       created => {},
     );
@@ -73,7 +73,7 @@ const WelcomePage = ({navigation}: any) => {
           <Gap height={20} />
           <TouchableOpacity
             style={[styles.btn, {backgroundColor: 'transparent'}]}
-            onPress={() => navigation.navigate('KategoriBidang')}>
+            onPress={() => navigation.navigate('BuatLaporan')}>
             <Text style={[styles.btnTxt, {color: MyColor.Primary}]}>
               Buat Laporan{'\n'}
               <Text style={{fontFamily: 'Poppins-Bold'}}>secara anonim</Text>

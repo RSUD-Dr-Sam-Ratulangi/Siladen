@@ -1,5 +1,12 @@
-import {StyleSheet, Text, View, ScrollView} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
+import React, {useEffect, useState, useCallback} from 'react';
+import {useFocusEffect} from '@react-navigation/native';
 import Header from '../../components/molecules/Header';
 import {MyColor} from '../../components/atoms/MyColor';
 import {
@@ -12,6 +19,7 @@ import axios from 'axios';
 import {MyFont} from '../../components/atoms/MyFont';
 import Gap from '../../components/atoms/Gap';
 import Line from '../../components/atoms/Line';
+import {useSelector} from 'react-redux';
 
 interface JumlahLaporan {
   jumlah_keseluruhan: number;
@@ -22,32 +30,42 @@ interface JumlahLaporan {
 }
 
 const AdminHistoryItems = ({navigation, route}: any) => {
-  const dataUser = route.params;
+  // const dataUser = route.params;
+  const tokenSelector = useSelector((data: any) => data.token);
+
+  const dataUser = {
+    token: tokenSelector,
+  };
+
   const [jumlahLaporan, setJumlahLaporan] = useState<JumlahLaporan | null>(
     null,
   );
   const today = new Date();
 
-  useEffect(() => {
-    getJumlahLaporan();
-  }, []);
+  // useEffect(() => {
+  //   getJumlahLaporan();
+  //   console.log('ini di adminhistoryitems: ', dataUser);
+  // }, []);
+  useFocusEffect(
+    useCallback(() => {
+      getJumlahLaporan();
+    }, []),
+  );
 
   const getJumlahLaporan = async () => {
-    if (dataUser.id_user) {
-      try {
-        const headers = {
-          Authorization: `Bearer ${dataUser.token}`, // Tambahkan token ke header dengan format Bearer
-        };
+    try {
+      const headers = {
+        Authorization: `Bearer ${dataUser.token}`, // Tambahkan token ke header dengan format Bearer
+      };
 
-        const response = await axios.get(
-          `https://backend-pelaporan-final.glitch.me/api/laporan/amount`,
-          {headers},
-        );
-        setJumlahLaporan(response.data.data);
-        console.log('jumlah laporan: ', response.data.data);
-      } catch (error) {
-        console.log(error);
-      }
+      const response = await axios.get(
+        `https://backend-pelaporan-final.glitch.me/api/laporan/amount`,
+        {headers},
+      );
+      setJumlahLaporan(response.data.data);
+      console.log('jumlah laporan: ', response.data.data);
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -63,7 +81,14 @@ const AdminHistoryItems = ({navigation, route}: any) => {
     <ScrollView style={styles.container}>
       <Header />
       <View style={styles.content}>
-        <View style={[styles.card, {backgroundColor: MyColor.Primary}]}>
+        <TouchableOpacity
+          style={[styles.card, {backgroundColor: MyColor.Primary}]}
+          onPress={() => {
+            navigation.navigate('AdminHistoryByStatus', {
+              dataUser: dataUser,
+              status: 'dalam antrian',
+            });
+          }}>
           <View>
             <Text style={styles.txtStatus}>Dalam Antrian</Text>
             <IconWaktu />
@@ -74,8 +99,15 @@ const AdminHistoryItems = ({navigation, route}: any) => {
             </Text>
             <Text style={styles.txt}>Laporan</Text>
           </View>
-        </View>
-        <View style={[styles.card, {backgroundColor: '#A37F00'}]}>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.card, {backgroundColor: '#A37F00'}]}
+          onPress={() => {
+            navigation.navigate('AdminHistoryByStatus', {
+              dataUser: dataUser,
+              status: 'investigasi',
+            });
+          }}>
           <View>
             <Text style={styles.txtStatus}>Sedang Di Investigasi</Text>
             <IconSedangDitindak />
@@ -86,8 +118,15 @@ const AdminHistoryItems = ({navigation, route}: any) => {
             </Text>
             <Text style={styles.txt}>Laporan</Text>
           </View>
-        </View>
-        <View style={[styles.card, {backgroundColor: '#008656'}]}>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.card, {backgroundColor: '#008656'}]}
+          onPress={() => {
+            navigation.navigate('AdminHistoryByStatus', {
+              dataUser: dataUser,
+              status: 'laporan selesai',
+            });
+          }}>
           <View>
             <Text style={styles.txtStatus}>Laporan Selesai</Text>
             <IconCentang />
@@ -98,19 +137,26 @@ const AdminHistoryItems = ({navigation, route}: any) => {
             </Text>
             <Text style={styles.txt}>Laporan</Text>
           </View>
-        </View>
-        <View style={[styles.card, {backgroundColor: '#8D0000'}]}>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.card, {backgroundColor: '#8D0000'}]}
+          onPress={() => {
+            navigation.navigate('AdminHistoryByStatus', {
+              dataUser: dataUser,
+              status: 'laporan ditolak',
+            });
+          }}>
           <View>
             <Text style={styles.txtStatus}>Laporan Ditolak</Text>
             <IconTolak />
           </View>
           <View style={{alignItems: 'center'}}>
             <Text style={styles.txtJumlah}>
-              {jumlahLaporan ? jumlahLaporan.jumlah_laporan_ditolak : 0}
+              {jumlahLaporan?.jumlah_laporan_ditolak}
             </Text>
             <Text style={styles.txt}>Laporan</Text>
           </View>
-        </View>
+        </TouchableOpacity>
         <View style={{padding: 20}}>
           <Line height={3} />
         </View>

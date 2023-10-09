@@ -15,6 +15,8 @@ import IconSettings from './IconSetting.svg';
 import iconNews from './news.png';
 import IconGaleri from './gallery-wide-svgrepo-com.svg';
 import IconCamera from './camera-svgrepo-com.svg';
+import IconDropDown from './triangle-svgrepo-com 1.svg';
+import IconX from './White_X_in_red_background.svg';
 
 export {
   IconPanahKanan,
@@ -34,4 +36,6 @@ export {
   IconGaleri,
   IconCamera,
   IconSettings,
+  IconDropDown,
+  IconX,
 };

@@ -46,7 +46,7 @@ const Navigation = ({navigation, route}: any) => {
       <Tab.Screen
         name="HomePage"
         component={HomePage}
-        initialParams={dataUser}
+        // initialParams={dataUser}
         options={{
           headerShown: false,
           tabBarIcon: ({focused}) => (
@@ -63,7 +63,7 @@ const Navigation = ({navigation, route}: any) => {
       <Tab.Screen
         name="History"
         component={History}
-        initialParams={dataUser}
+        // initialParams={dataUser}
         options={{
           headerShown: false,
           tabBarIcon: ({focused}) => (

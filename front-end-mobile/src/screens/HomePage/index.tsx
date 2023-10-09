@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useMemo, useCallback} from 'react';
 import {
   Image,
   ScrollView,
@@ -12,7 +12,7 @@ import Header from '../../components/molecules/Header';
 import {MyFont} from '../../components/atoms/MyFont';
 import {MyColor} from '../../components/atoms/MyColor';
 import Gap from '../../components/atoms/Gap';
-import {Ilustrasi, Ilustrasi1} from '../../assets/images';
+import {Ilustrasi, Ilustrasi1, ImagePlaceHolder} from '../../assets/images';
 import {
   IconCentang,
   IconLaporan,
@@ -22,23 +22,64 @@ import {
   IconWaktu,
 } from '../../assets/icons';
 import axios from 'axios';
+import {useSelector, useDispatch} from 'react-redux';
+import {useFocusEffect} from '@react-navigation/native';
+import PushNotification from 'react-native-push-notification';
+import {API_HOST} from '../../../config';
+import socket from '../../../socket';
 
 interface Laporan {
+  id_laporan: string;
   tanggal_laporan_dikirim: Date;
   gambar: string;
   status: string;
 }
 
 const HomePage = ({navigation, route}: any) => {
+  // const dataUser = useSelector((data: any) => ({
+  //   id_user: selectUserId(data),
+  //   name: selectUserName(data),
+  //   token: selectUserToken(data),
+  // }));
+
+  const idUser = useSelector((data: any) => data.id_user);
+  const nameUser = useSelector((data: any) => data.name);
+  const token = useSelector((data: any) => data.token);
+
+  const dataUser = {
+    name: nameUser,
+    id_user: idUser,
+    token: token,
+  };
+
   const today = new Date();
   const [name, setName] = useState('');
   const [latestLaporan, setLatestLaporan] = useState<Laporan[]>([]);
-  const dataUser = route.params;
+  // const dataUser = route.params;
 
   useEffect(() => {
     setName(dataUser.name);
     getLatestLaporan();
+    console.log('ehem: ', dataUser);
+    console.log('INI EE id user memang: ', dataUser);
+
+    // konfigurasi socket
+    socket.emit('join chat', dataUser.id_user);
+    socket.emit('join admin', 'admin');
+    socket.on('message received', message => {
+      PushNotification.localNotification({
+        channelId: 'tes-channel1',
+        title: 'Response dari Admin!',
+        message,
+      });
+    });
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      getLatestLaporan();
+    }, []),
+  );
 
   const getLatestLaporan = async () => {
     if (dataUser.id_user) {
@@ -181,7 +222,7 @@ const HomePage = ({navigation, route}: any) => {
             </Text>
             <TouchableOpacity
               style={styles.createReportButton}
-              onPress={() => navigation.navigate('BuatLaporan', dataUser)}>
+              onPress={() => navigation.navigate('BuatLaporan')}>
               <Text style={styles.createReportButtonText}>
                 Tekan disini untuk {'\n'}membuat laporan baru!
               </Text>
@@ -192,19 +233,29 @@ const HomePage = ({navigation, route}: any) => {
           <View style={styles.card}>
             <Text style={styles.txtCardTitle}>Laporan Terakhir Anda</Text>
             {latestLaporan && latestLaporan[0] && (
-              <View
+              <TouchableOpacity
                 style={[
                   styles.cardContent,
                   {
                     backgroundColor: getStatusColor(latestLaporan[0].status),
                   },
-                ]}>
+                ]}
+                onPress={() =>
+                  navigation.navigate('DetailLaporan', {
+                    id_laporan: latestLaporan[0].id_laporan,
+                    status: latestLaporan[0].status,
+                  })
+                }>
                 <View style={{flexDirection: 'row', columnGap: 20}}>
                   <Image
-                    source={{uri: latestLaporan[0].gambar}}
+                    source={
+                      latestLaporan[0].gambar
+                        ? {uri: latestLaporan[0].gambar}
+                        : ImagePlaceHolder
+                    }
                     style={styles.cardImage}
                   />
-                  <View>
+                  <View style={{width: 150}}>
                     <Text style={styles.txtCardTime}>
                       {formatHour(
                         new Date(latestLaporan[0].tanggal_laporan_dikirim),
@@ -221,7 +272,7 @@ const HomePage = ({navigation, route}: any) => {
                   </View>
                 </View>
                 {getStatusIcon(latestLaporan[0].status)}
-              </View>
+              </TouchableOpacity>
             )}
           </View>
         )}
@@ -234,23 +285,26 @@ const HomePage = ({navigation, route}: any) => {
       <View style={styles.card}>
         <Text style={styles.txtCardTitle}>Riwayat Laporan</Text>
         {latestLaporan.slice(1, 3).map((item: any, index) => (
-          <View
+          <TouchableOpacity
             style={[
               styles.cardContent,
               {
                 backgroundColor: getStatusColor(item.status),
               },
             ]}
-            key={index}>
+            key={index}
+            onPress={() =>
+              navigation.navigate('DetailLaporan', {
+                id_laporan: item.id_laporan,
+                status: item.status,
+              })
+            }>
             <View style={{flexDirection: 'row', columnGap: 20}}>
               <Image
-                source={{
-                  uri: item.gambar,
-                }}
+                source={item.gambar ? {uri: item.gambar} : ImagePlaceHolder}
                 style={styles.cardImage}
               />
-              <View>
-                <Text style={styles.txtCard}>{item.kategori_bidang}</Text>
+              <View style={{width: 150}}>
                 <Text style={styles.txtCardTime}>
                   {formatHour(new Date(item.tanggal_laporan_dikirim))}
                 </Text>
@@ -263,7 +317,7 @@ const HomePage = ({navigation, route}: any) => {
               </View>
             </View>
             {getStatusIcon(item.status)}
-          </View>
+          </TouchableOpacity>
         ))}
         <Pressable
           style={styles.cardFooter}
@@ -436,7 +490,7 @@ const styles = StyleSheet.create({
   cardContent: {
     padding: 20,
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-evenly',
     height: 120,
     width: '100%',
   },

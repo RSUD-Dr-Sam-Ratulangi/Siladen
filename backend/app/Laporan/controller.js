@@ -266,6 +266,7 @@ const getLaporanByIdLaporan = async (req, res, next) => {
         },
         attributes: [
           "id_laporan",
+          "id_user",
           "nama_pasien",
           "no_rekam_medis",
           "ruangan",
@@ -304,6 +305,7 @@ const getLaporanByIdLaporan = async (req, res, next) => {
 
       const revLaporan = {
         id_laporan: laporan.id_laporan,
+        id_user: laporan.id_user,
         nama_pasien: laporan.nama_pasien,
         no_rekam_medis: laporan.no_rekam_medis,
         ruangan: laporan.ruangan,
@@ -349,6 +351,7 @@ const getLaporanByIdLaporan = async (req, res, next) => {
             model: Laporan,
             attributes: [
               "id_laporan",
+              "id_user",
               "nama_pasien",
               "no_rekam_medis",
               "ruangan",
@@ -383,6 +386,7 @@ const getLaporanByIdLaporan = async (req, res, next) => {
 
       const revLaporan = {
         id_laporan: laporan.laporan.id_laporan,
+        id_user: laporan.laporan.id_user,
         nama_pasien: laporan.laporan.nama_pasien,
         no_rekam_medis: laporan.laporan.no_rekam_medis,
         ruangan: laporan.laporan.ruangan,

@@ -6,28 +6,89 @@ import {
   TextInput as Input,
   TouchableOpacity,
   Alert,
+  BackHandler,
 } from 'react-native';
-import React, {useState, useEffect} from 'react';
+import {useFocusEffect} from '@react-navigation/native';
+import React, {useState, useEffect, useCallback} from 'react';
 import Title from '../../components/atoms/Title';
 import Button from '../../components/atoms/Button';
 import {MyColor} from '../../components/atoms/MyColor';
 import {MyFont} from '../../components/atoms/MyFont';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import Gap from '../../components/atoms/Gap';
+import {useSelector, useDispatch} from 'react-redux';
+import {
+  saveNamePasienAction,
+  saveNoMRAction,
+  saveRuanganAction,
+  saveAgeAction,
+  saveAgeNoAction,
+  saveSelectedAgeTypeAction,
+  saveAsuransiAction,
+  saveJenisKelaminAction,
+  saveWaktuMendapatPelayananAction,
+  saveWaktuInsidenAction,
+  saveInsidenAction,
+  saveKronologiInsidenAction,
+  saveInsidenTerjadiPadaPasienAction,
+  savePelaporPertamaAction,
+  savePasienTerkaitAction,
+  saveDampakInsidenAction,
+  saveLokasiInsidenAction,
+  saveProbabilitasAction,
+  saveUnitTerkaitAction,
+  saveTindakLanjutAction,
+  saveTindakLanjutOlehAction,
+  saveIsPernahTerjadiAction,
+  saveDeskripsiPernahTerjadiAction,
+  savePernahTerjadiAction,
+  saveImageCameraAction,
+} from '../../../redux/action';
 
 const DataKarakteristikPasien = ({navigation, route}: any) => {
-  const dataUser = route.params;
-  const [name, setName] = useState('');
-  const [nomorMR, setNomorMR] = useState('');
-  const [ruangan, setRuangan] = useState('');
-  const [age, setAge] = useState('');
-  const [ageNo, setAgeNo] = useState('');
-  const [selectedAgeType, setSelectedAgeType] = useState('');
-  const [insurance, setInsurance] = useState('');
-  const [gender, setGender] = useState('');
+  const dispatch = useDispatch();
+  // const dataUser = useSelector((data: any) => data);
+  // const dataUser = route.params;
+  const idUser = useSelector((data: any) => data.id_user);
+  const namePasienSelector = useSelector((data: any) => data.namePasien);
+  const noMRSelector = useSelector((data: any) => data.noMR);
+  const ruanganSelector = useSelector((data: any) => data.ruangan);
+  const ageSelector = useSelector((data: any) => data.age);
+  const ageNoSelector = useSelector((data: any) => data.ageNo);
+  const selectedAgeTypeSelector = useSelector(
+    (data: any) => data.selectedAgeType,
+  );
+  const asuransiSelector = useSelector((data: any) => data.asuransi);
+  const jenisKelaminSelector = useSelector((data: any) => data.jenisKelamin);
+  const waktuMendapatPelayananSelector = useSelector(
+    (data: any) => data.waktuMendapatPelayanan,
+  );
   const [isDateTimePickerVisible, setDateTimePickerVisible] = useState(false);
+
+  const dataUser = {
+    namePasien: namePasienSelector,
+    noMR: noMRSelector,
+    ruangan: ruanganSelector,
+    age: ageSelector,
+    ageNo: ageNoSelector,
+    selectedAgeType: selectedAgeTypeSelector,
+    asuransi: asuransiSelector,
+    jenisKelamin: jenisKelaminSelector,
+    waktuMendapatPelayanan: waktuMendapatPelayananSelector,
+  };
+
+  const [name, setName] = useState(dataUser.namePasien);
+  const [nomorMR, setNomorMR] = useState(dataUser.noMR);
+  const [ruangan, setRuangan] = useState(dataUser.ruangan);
+  const [age, setAge] = useState(dataUser.age);
+  const [ageNo, setAgeNo] = useState(dataUser.ageNo);
+  const [selectedAgeType, setSelectedAgeType] = useState(
+    dataUser.selectedAgeType,
+  );
+  const [insurance, setInsurance] = useState(dataUser.asuransi);
+  const [gender, setGender] = useState(dataUser.jenisKelamin);
   const [waktuMendapatPelayanan, setWaktuMendapatPelayanan] = useState(
-    new Date(),
+    new Date(dataUser.waktuMendapatPelayanan),
   );
 
   const isBulanDisabled = Number(ageNo) > 11;
@@ -111,12 +172,7 @@ const DataKarakteristikPasien = ({navigation, route}: any) => {
       setInsurance(option);
     };
     return (
-      <View
-        style={{
-          flexDirection: 'row',
-          gap: 10,
-          flexWrap: 'wrap',
-        }}>
+      <View style={styles.containerBtn}>
         <TouchableOpacity
           style={[
             styles.button2,
@@ -308,14 +364,104 @@ const DataKarakteristikPasien = ({navigation, route}: any) => {
     );
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      const backAction = () => {
+        Alert.alert(
+          'Peringatan!',
+          'Jika anda kembali maka semua perubahan anda akan dihapus',
+          [
+            {
+              text: 'Batal',
+              onPress: () => null,
+              style: 'cancel',
+            },
+            {
+              text: 'OK',
+              onPress: () => {
+                if (!idUser) {
+                  dispatch(saveNamePasienAction(''));
+                  dispatch(saveNoMRAction(''));
+                  dispatch(saveRuanganAction(''));
+                  dispatch(saveAgeAction(''));
+                  dispatch(saveAgeNoAction(''));
+                  dispatch(saveSelectedAgeTypeAction(''));
+                  dispatch(saveAsuransiAction(''));
+                  dispatch(saveJenisKelaminAction(''));
+                  dispatch(saveWaktuMendapatPelayananAction(new Date()));
+
+                  dispatch(saveWaktuInsidenAction(new Date()));
+                  dispatch(saveInsidenAction(''));
+                  dispatch(saveKronologiInsidenAction(''));
+                  dispatch(saveInsidenTerjadiPadaPasienAction(''));
+                  dispatch(savePelaporPertamaAction(''));
+                  dispatch(savePasienTerkaitAction(0));
+                  dispatch(saveDampakInsidenAction(''));
+                  dispatch(saveLokasiInsidenAction(''));
+                  dispatch(saveProbabilitasAction(''));
+                  dispatch(saveUnitTerkaitAction(''));
+                  dispatch(saveTindakLanjutAction(''));
+                  dispatch(saveTindakLanjutOlehAction(''));
+                  dispatch(saveIsPernahTerjadiAction(false));
+                  dispatch(saveDeskripsiPernahTerjadiAction(''));
+                  dispatch(savePernahTerjadiAction(''));
+
+                  dispatch(saveImageCameraAction({}));
+                  navigation.navigate('WelcomePage');
+                } else {
+                  dispatch(saveNamePasienAction(''));
+                  dispatch(saveNoMRAction(''));
+                  dispatch(saveRuanganAction(''));
+                  dispatch(saveAgeAction(''));
+                  dispatch(saveAgeNoAction(''));
+                  dispatch(saveSelectedAgeTypeAction(''));
+                  dispatch(saveAsuransiAction(''));
+                  dispatch(saveJenisKelaminAction(''));
+                  dispatch(saveWaktuMendapatPelayananAction(new Date()));
+
+                  dispatch(saveWaktuInsidenAction(new Date()));
+                  dispatch(saveInsidenAction(''));
+                  dispatch(saveKronologiInsidenAction(''));
+                  dispatch(saveInsidenTerjadiPadaPasienAction(''));
+                  dispatch(savePelaporPertamaAction(''));
+                  dispatch(savePasienTerkaitAction(0));
+                  dispatch(saveDampakInsidenAction(''));
+                  dispatch(saveLokasiInsidenAction(''));
+                  dispatch(saveProbabilitasAction(''));
+                  dispatch(saveUnitTerkaitAction(''));
+                  dispatch(saveTindakLanjutAction(''));
+                  dispatch(saveTindakLanjutOlehAction(''));
+                  dispatch(saveIsPernahTerjadiAction(false));
+                  dispatch(saveDeskripsiPernahTerjadiAction(''));
+                  dispatch(savePernahTerjadiAction(''));
+
+                  dispatch(saveImageCameraAction({}));
+                  navigation.navigate('Navigation');
+                }
+              },
+            },
+          ],
+        );
+        return true;
+      };
+
+      const backHandler = BackHandler.addEventListener(
+        'hardwareBackPress',
+        backAction,
+      );
+
+      return () => backHandler.remove();
+    }, []),
+  );
+
   return (
     <ScrollView contentContainerStyle={{flexGrow: 1}}>
       <View style={styles.container}>
         <Title label="Data Karakteristik Pasien" />
-        <Text style={styles.txtSection}>Nama</Text>
+        <Text style={styles.txtSection}>Nama Pasien</Text>
         <Input
           style={styles.inputBox}
-          placeholder="Nama anda"
+          // placeholder="Nama anda"
           placeholderTextColor="#787878"
           onChangeText={setName}
           value={name}
@@ -324,7 +470,7 @@ const DataKarakteristikPasien = ({navigation, route}: any) => {
         <Input
           keyboardType="numeric"
           style={styles.inputBox}
-          placeholder="Nomor MR anda"
+          // placeholder="Nomor MR anda"
           placeholderTextColor="#787878"
           onChangeText={setNomorMR}
           value={nomorMR}
@@ -363,44 +509,151 @@ const DataKarakteristikPasien = ({navigation, route}: any) => {
         <Gap height={30} />
       </View>
       <View style={styles.footer}>
-        <Button
-          label="Menu Utama"
-          backgroundColor={MyColor.Light}
-          textColor={MyColor.Primary}
-          width={126}
-          onClick={() => {
-            navigation.navigate('DataKarakteristikPasien');
-          }}
-        />
+        {!idUser ? (
+          <Button
+            label="Kembali"
+            backgroundColor={MyColor.Light}
+            textColor={MyColor.Primary}
+            width={126}
+            onClick={() => {
+              Alert.alert(
+                'Peringatan!',
+                'Jika anda kembali maka semua perubahan anda akan dihapus',
+                [
+                  {
+                    text: 'Batal',
+                    onPress: () => null,
+                    style: 'cancel',
+                  },
+                  {
+                    text: 'OK',
+                    onPress: () => {
+                      dispatch(saveNamePasienAction(''));
+                      dispatch(saveNoMRAction(''));
+                      dispatch(saveRuanganAction(''));
+                      dispatch(saveAgeAction(''));
+                      dispatch(saveAgeNoAction(''));
+                      dispatch(saveSelectedAgeTypeAction(''));
+                      dispatch(saveAsuransiAction(''));
+                      dispatch(saveJenisKelaminAction(''));
+                      dispatch(saveWaktuMendapatPelayananAction(new Date()));
+
+                      dispatch(saveWaktuInsidenAction(new Date()));
+                      dispatch(saveInsidenAction(''));
+                      dispatch(saveKronologiInsidenAction(''));
+                      dispatch(saveInsidenTerjadiPadaPasienAction(''));
+                      dispatch(savePelaporPertamaAction(''));
+                      dispatch(savePasienTerkaitAction(0));
+                      dispatch(saveDampakInsidenAction(''));
+                      dispatch(saveLokasiInsidenAction(''));
+                      dispatch(saveProbabilitasAction(''));
+                      dispatch(saveUnitTerkaitAction(''));
+                      dispatch(saveTindakLanjutAction(''));
+                      dispatch(saveTindakLanjutOlehAction(''));
+                      dispatch(saveIsPernahTerjadiAction(false));
+                      dispatch(saveDeskripsiPernahTerjadiAction(''));
+                      dispatch(savePernahTerjadiAction(''));
+
+                      dispatch(saveImageCameraAction({}));
+                      navigation.navigate('WelcomePage');
+                    },
+                  },
+                ],
+              );
+            }}
+          />
+        ) : (
+          <Button
+            label="Menu Utama"
+            backgroundColor={MyColor.Light}
+            textColor={MyColor.Primary}
+            width={126}
+            onClick={() => {
+              Alert.alert(
+                'Peringatan!',
+                'Jika anda kembali maka semua perubahan anda akan dihapus',
+                [
+                  {
+                    text: 'Batal',
+                    onPress: () => null,
+                    style: 'cancel',
+                  },
+                  {
+                    text: 'OK',
+                    onPress: () => {
+                      dispatch(saveNamePasienAction(''));
+                      dispatch(saveNoMRAction(''));
+                      dispatch(saveRuanganAction(''));
+                      dispatch(saveAgeAction(''));
+                      dispatch(saveAgeNoAction(''));
+                      dispatch(saveSelectedAgeTypeAction(''));
+                      dispatch(saveAsuransiAction(''));
+                      dispatch(saveJenisKelaminAction(''));
+                      dispatch(saveWaktuMendapatPelayananAction(new Date()));
+                      dispatch(saveWaktuInsidenAction(new Date()));
+                      dispatch(saveInsidenAction(''));
+                      dispatch(saveKronologiInsidenAction(''));
+                      dispatch(saveInsidenTerjadiPadaPasienAction(''));
+                      dispatch(savePelaporPertamaAction(''));
+                      dispatch(savePasienTerkaitAction(0));
+                      dispatch(saveDampakInsidenAction(''));
+                      dispatch(saveLokasiInsidenAction(''));
+                      dispatch(saveProbabilitasAction(''));
+                      dispatch(saveUnitTerkaitAction(''));
+                      dispatch(saveTindakLanjutAction(''));
+                      dispatch(saveTindakLanjutOlehAction(''));
+                      dispatch(saveIsPernahTerjadiAction(false));
+                      dispatch(saveDeskripsiPernahTerjadiAction(''));
+                      dispatch(savePernahTerjadiAction(''));
+
+                      dispatch(saveImageCameraAction({}));
+                      navigation.navigate('Navigation');
+                    },
+                  },
+                ],
+              );
+            }}
+          />
+        )}
         <Button
           label="Selanjutnya"
           backgroundColor={MyColor.Primary}
           textColor={MyColor.Light}
           width={173}
           onClick={() => {
+            dispatch(saveNamePasienAction(name));
+            dispatch(saveNoMRAction(nomorMR));
+            dispatch(saveRuanganAction(ruangan));
+            dispatch(saveAgeAction(age));
+            dispatch(saveAgeNoAction(ageNo));
+            dispatch(saveSelectedAgeTypeAction(selectedAgeType));
+            dispatch(saveAsuransiAction(insurance));
+            dispatch(saveJenisKelaminAction(gender));
+            dispatch(saveWaktuMendapatPelayananAction(waktuMendapatPelayanan));
+
             navigation.navigate(
               'RincianKejadian',
-              {
-                dataUser,
-                name,
-                nomorMR,
-                ruangan,
-                age,
-                insurance,
-                gender,
-                waktuMendapatPelayanan: waktuMendapatPelayanan.toISOString(),
-              },
-              console.log(
-                'ini data karakteristik pasien: ',
-                dataUser,
-                name,
-                nomorMR,
-                ruangan,
-                age,
-                insurance,
-                gender,
-                waktuMendapatPelayanan,
-              ),
+              // {
+              //   dataUser,
+              //   name,
+              //   nomorMR,
+              //   ruangan,
+              //   age,
+              //   insurance,
+              //   gender,
+              //   waktuMendapatPelayanan: waktuMendapatPelayanan.toISOString(),
+              // },
+              // console.log(
+              //   'ini data karakteristik pasien: ',
+              //   dataUser,
+              //   name,
+              //   nomorMR,
+              //   ruangan,
+              //   age,
+              //   insurance,
+              //   gender,
+              //   waktuMendapatPelayanan,
+              // ),
             );
           }}
         />
@@ -440,6 +693,14 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 10,
   },
+  containerBtn: {
+    flexDirection: 'row',
+    gap: 10,
+    flexWrap: 'wrap',
+    maxWidth: 360,
+    alignSelf: 'center',
+    justifyContent: 'space-between',
+  },
   button: {
     height: 40,
     alignItems: 'center',
@@ -449,7 +710,6 @@ const styles = StyleSheet.create({
     backgroundColor: MyColor.Light,
   },
   button2: {
-    marginRight: 'auto',
     height: 52,
     width: 100,
     alignItems: 'center',
