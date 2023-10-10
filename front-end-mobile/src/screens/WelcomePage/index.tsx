@@ -16,24 +16,15 @@ import {MyFont} from '../../components/atoms/MyFont';
 import {IconBuatLaporan, IconBuatLaporanAnonim} from '../../assets/icons';
 import LinearGradient from 'react-native-linear-gradient';
 import PushNotification from 'react-native-push-notification';
+import {useSelector, useDispatch} from 'react-redux';
+import {saveChannelIdAction} from '../../../redux/action';
 
 const screenWidth = Dimensions.get('window').width;
 const w = screenWidth * 0.85;
 
 const WelcomePage = ({navigation}: any) => {
-  const createChannel = () => {
-    PushNotification.createChannel(
-      {
-        channelId: 'tes-channel1',
-        channelName: 'myChannel',
-      },
-      created => {},
-    );
-  };
-
-  useEffect(() => {
-    createChannel();
-  }, []);
+  const dispatch = useDispatch();
+  const timestamp = Date.now();
 
   return (
     <ScrollView style={styles.container}>

@@ -7,6 +7,7 @@ import {MyFont} from '../../components/atoms/MyFont';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch} from 'react-redux';
 import {
+  saveChannelIdAction,
   saveIdUserAction,
   saveNameAction,
   saveRoleAction,
@@ -14,12 +15,44 @@ import {
 } from '../../../redux/action';
 import {API_HOST} from '../../../config';
 import axios from 'axios';
+import PushNotification from 'react-native-push-notification';
 
 const SplashScreen = ({navigation, route}: any) => {
+  const timestamp = Date.now();
   const dispatch = useDispatch();
   useEffect(() => {
     cekAuth();
   }, [navigation]);
+
+  PushNotification.getChannels(function (channel_ids) {
+    console.log(channel_ids);
+    console.log('ini timestamp', timestamp);
+
+    if (channel_ids.length < 1) {
+      PushNotification.createChannel(
+        {
+          // channelId: `tes-channel1`,
+          channelId: `${timestamp}`,
+          // channelId: pake user pe id
+          channelName: 'myChannel',
+        },
+        created => {},
+      );
+      (async () => {
+        console.log('ini e timestamp: ', timestamp.toString());
+        const timestampString = timestamp.toString();
+        await AsyncStorage.setItem('channel_id', timestampString);
+      })();
+    }
+    (async () => {
+      console.log('masuk dalam');
+      const item = await AsyncStorage.getItem('channel_id');
+      dispatch(saveChannelIdAction(item));
+      console.log('ini channel id: ', item);
+    })();
+
+    console.log('ini channel id notif: ', channel_ids);
+  });
 
   const cekAuth = async () => {
     try {
@@ -90,7 +123,7 @@ const SplashScreen = ({navigation, route}: any) => {
         <Gap height={100} />
         <Text style={styles.txt}>RSUD Dr.Sam Ratulangi{'\n'}Tondano</Text>
         <Gap height={80} />
-        <Text style={styles.txtVersion}>v. 0.0.1</Text>
+        <Text style={styles.txtVersion}>v. 1.0.0</Text>
       </ImageBackground>
     </View>
   );

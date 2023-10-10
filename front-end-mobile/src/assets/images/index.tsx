@@ -4,6 +4,7 @@ import BackgroundRS1 from './RSUD_Sam_Ratulangi_Tondano_1.png';
 import Ilustrasi from './ilustrasi.png';
 import Ilustrasi1 from './ilustrasi1.png';
 import ImagePlaceHolder from './placeholderNoImage.png';
+import ProfilePlaceHolder from './placeholder_profile.png';
 
 export {
   Logo,
@@ -12,4 +13,5 @@ export {
   Ilustrasi,
   Ilustrasi1,
   ImagePlaceHolder,
+  ProfilePlaceHolder,
 };

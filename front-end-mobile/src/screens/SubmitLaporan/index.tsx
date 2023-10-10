@@ -36,6 +36,7 @@ import {
 } from '../../../redux/action';
 import socket from '../../../socket';
 import {API_HOST} from '../../../config';
+import {CommonActions} from '@react-navigation/native';
 
 const SubmitLaporan = ({navigation, route}: any) => {
   const dispatch = useDispatch();
@@ -244,7 +245,7 @@ const SubmitLaporan = ({navigation, route}: any) => {
           dispatch(saveDeskripsiPernahTerjadiAction(''));
           dispatch(savePernahTerjadiAction(''));
 
-          dispatch(saveImageCameraAction({}));
+          dispatch(saveImageCameraAction(null));
           socket.emit('message admin', 'helo admin, saya sudah submit laporan');
           Alert.alert(
             'Laporan Terkirim',
@@ -254,9 +255,21 @@ const SubmitLaporan = ({navigation, route}: any) => {
                 text: 'OK',
                 onPress: () => {
                   if (!dataUser.id_user) {
-                    navigation.navigate('WelcomePage');
+                    socket.off('message received');
+                    navigation.dispatch(
+                      CommonActions.reset({
+                        index: 0,
+                        routes: [{name: 'WelcomePage'}],
+                      }),
+                    );
                   } else {
-                    navigation.navigate('Navigation');
+                    socket.off('message received');
+                    navigation.dispatch(
+                      CommonActions.reset({
+                        index: 0,
+                        routes: [{name: 'Navigation'}],
+                      }),
+                    );
                   }
                 },
               },

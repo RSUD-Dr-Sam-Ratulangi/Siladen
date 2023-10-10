@@ -28,6 +28,7 @@ import axios from 'axios';
 import {useSelector} from 'react-redux';
 import socket from '../../../socket';
 import PushNotification from 'react-native-push-notification';
+// import {saveChannelIdAction} from '../../../redux/action';
 
 interface Laporan {
   id_laporan: string;
@@ -37,6 +38,7 @@ interface Laporan {
 }
 
 const AdminHomepage = ({navigation, route}: any) => {
+  const channel_ids = useSelector((data: any) => data.channelId);
   // console.log('in homepage admin: ', route.params);
   // const dataUser = route.params;
   const tokenSelector = useSelector((data: any) => data.token);
@@ -65,12 +67,13 @@ const AdminHomepage = ({navigation, route}: any) => {
     socket.emit('join admin', 'admin');
     socket.on('admin received', message => {
       PushNotification.localNotification({
-        channelId: 'tes-channel1',
+        channelId: `${channel_ids}`,
         title: 'Ada Laporan Baru!',
         message: 'Segera Periksa laporan ini',
       });
       console.log('ini pesan dari user', message);
     });
+    console.log('ini channel idlkl: ', channel_ids);
   }, []);
 
   const getTodayReports = async () => {

@@ -41,7 +41,7 @@ const HomePage = ({navigation, route}: any) => {
   //   name: selectUserName(data),
   //   token: selectUserToken(data),
   // }));
-
+  const channel_ids = useSelector((data: any) => data.channelId);
   const idUser = useSelector((data: any) => data.id_user);
   const nameUser = useSelector((data: any) => data.name);
   const token = useSelector((data: any) => data.token);
@@ -68,7 +68,7 @@ const HomePage = ({navigation, route}: any) => {
     socket.emit('join admin', 'admin');
     socket.on('message received', message => {
       PushNotification.localNotification({
-        channelId: 'tes-channel1',
+        channelId: `${channel_ids}`,
         title: 'Response dari Admin!',
         message,
       });

@@ -33,6 +33,8 @@ import {
   savePernahTerjadi,
   // FOTO PENDUKUNG
   saveImageCamera,
+  // CHANNEL ID
+  saveChannelId,
 } from './tipe';
 
 const initData = {
@@ -69,6 +71,8 @@ const initData = {
   pernahTerjadi: '',
   // FOTO PENDUKUNG
   imageCamera: null,
+  // CHANNEL ID
+  channelId: [],
 };
 
 export const rootReducer = (state = initData, action: any) => {
@@ -167,6 +171,10 @@ export const rootReducer = (state = initData, action: any) => {
 
     case saveImageCamera:
       return {...state, imageCamera: action.data};
+
+    case saveChannelId:
+      console.log('ini masuk save channel: ', action.data);
+      return {...state, channelId: action.data};
 
     default:
       return state;

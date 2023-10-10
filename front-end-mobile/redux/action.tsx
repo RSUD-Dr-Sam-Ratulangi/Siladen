@@ -32,6 +32,8 @@ import {
   savePernahTerjadi,
   // FOTO PENDUKUNG
   saveImageCamera,
+  // channel id
+  saveChannelId,
 } from './tipe';
 
 export const saveIdUserAction = (data: string) => ({
@@ -179,7 +181,11 @@ export const savePernahTerjadiAction = (data: string) => ({
   data,
 });
 
-export const saveImageCameraAction = (data: object) => ({
+export const saveImageCameraAction = (data: any) => ({
   type: saveImageCamera,
+  data,
+});
+export const saveChannelIdAction = (data: any) => ({
+  type: saveChannelId,
   data,
 });

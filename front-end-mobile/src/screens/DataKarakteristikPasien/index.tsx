@@ -8,7 +8,7 @@ import {
   Alert,
   BackHandler,
 } from 'react-native';
-import {useFocusEffect} from '@react-navigation/native';
+import {CommonActions, useFocusEffect} from '@react-navigation/native';
 import React, {useState, useEffect, useCallback} from 'react';
 import Title from '../../components/atoms/Title';
 import Button from '../../components/atoms/Button';
@@ -44,6 +44,7 @@ import {
   savePernahTerjadiAction,
   saveImageCameraAction,
 } from '../../../redux/action';
+import socket from '../../../socket';
 
 const DataKarakteristikPasien = ({navigation, route}: any) => {
   const dispatch = useDispatch();
@@ -380,6 +381,7 @@ const DataKarakteristikPasien = ({navigation, route}: any) => {
               text: 'OK',
               onPress: () => {
                 if (!idUser) {
+                  socket.off('message received');
                   dispatch(saveNamePasienAction(''));
                   dispatch(saveNoMRAction(''));
                   dispatch(saveRuanganAction(''));
@@ -406,9 +408,10 @@ const DataKarakteristikPasien = ({navigation, route}: any) => {
                   dispatch(saveDeskripsiPernahTerjadiAction(''));
                   dispatch(savePernahTerjadiAction(''));
 
-                  dispatch(saveImageCameraAction({}));
+                  dispatch(saveImageCameraAction(null));
                   navigation.navigate('WelcomePage');
                 } else {
+                  socket.off('message received');
                   dispatch(saveNamePasienAction(''));
                   dispatch(saveNoMRAction(''));
                   dispatch(saveRuanganAction(''));
@@ -435,8 +438,13 @@ const DataKarakteristikPasien = ({navigation, route}: any) => {
                   dispatch(saveDeskripsiPernahTerjadiAction(''));
                   dispatch(savePernahTerjadiAction(''));
 
-                  dispatch(saveImageCameraAction({}));
-                  navigation.navigate('Navigation');
+                  dispatch(saveImageCameraAction(null));
+                  navigation.dispatch(
+                    CommonActions.reset({
+                      index: 0,
+                      routes: [{name: 'Navigation'}],
+                    }),
+                  );
                 }
               },
             },
@@ -528,6 +536,7 @@ const DataKarakteristikPasien = ({navigation, route}: any) => {
                   {
                     text: 'OK',
                     onPress: () => {
+                      socket.off('message received');
                       dispatch(saveNamePasienAction(''));
                       dispatch(saveNoMRAction(''));
                       dispatch(saveRuanganAction(''));
@@ -554,7 +563,7 @@ const DataKarakteristikPasien = ({navigation, route}: any) => {
                       dispatch(saveDeskripsiPernahTerjadiAction(''));
                       dispatch(savePernahTerjadiAction(''));
 
-                      dispatch(saveImageCameraAction({}));
+                      dispatch(saveImageCameraAction(null));
                       navigation.navigate('WelcomePage');
                     },
                   },
@@ -581,6 +590,7 @@ const DataKarakteristikPasien = ({navigation, route}: any) => {
                   {
                     text: 'OK',
                     onPress: () => {
+                      socket.off('message received');
                       dispatch(saveNamePasienAction(''));
                       dispatch(saveNoMRAction(''));
                       dispatch(saveRuanganAction(''));
@@ -606,8 +616,13 @@ const DataKarakteristikPasien = ({navigation, route}: any) => {
                       dispatch(saveDeskripsiPernahTerjadiAction(''));
                       dispatch(savePernahTerjadiAction(''));
 
-                      dispatch(saveImageCameraAction({}));
-                      navigation.navigate('Navigation');
+                      dispatch(saveImageCameraAction(null));
+                      navigation.dispatch(
+                        CommonActions.reset({
+                          index: 0,
+                          routes: [{name: 'Navigation'}],
+                        }),
+                      );
                     },
                   },
                 ],

@@ -32,6 +32,8 @@ import {useSelector, useDispatch} from 'react-redux';
 import {saveImageCameraAction} from '../../../redux/action';
 import {white} from 'react-native-paper/lib/typescript/styles/themes/v2/colors';
 interface ImageData {
+  height: number;
+  width: number;
   uri: string;
   fileSize: number;
 }
@@ -188,6 +190,40 @@ const FotoPendukung = ({navigation, route}: any) => {
     }
   };
 
+  // const [compressedImageURI, setCompressedImageURI] = useState<string | null>(
+  //   null,
+  // );
+
+  // const compressImage = async (imageURI: string, quality: number = 0.5) => {
+  //   const image = new Image();
+  //   image.src = imageURI;
+
+  //   image.onload = () => {
+  //     const canvas = document.createElement('canvas');
+  //     const ctx = canvas.getContext('2d')!;
+
+  //     // Menetapkan ukuran canvas sesuai dengan gambar asli
+  //     canvas.width = image.width;
+  //     canvas.height = image.height;
+
+  //     // Menggambar gambar asli ke canvas
+  //     ctx.drawImage(image, 0, 0);
+
+  //     // Mengkompress gambar di canvas
+  //     const compressedImageURI = canvas.toDataURL('image/jpeg', quality);
+
+  //     // Menetapkan hasil kompresi ke state
+  //     setCompressedImageURI(compressedImageURI);
+  //   };
+  // };
+
+  // useEffect(() => {
+  //   if (imageCamera && imageCamera.uri) {
+  //     // Memanggil fungsi kompresi gambar ketika gambar terpilih
+  //     compressImage(imageCamera.uri, 0.5); // Ganti 0.5 dengan tingkat kompresi yang Anda inginkan
+  //   }
+  // }, [imageCamera]);
+
   return (
     <ScrollView contentContainerStyle={{flexGrow: 1}}>
       <View style={styles.container}>
@@ -213,13 +249,7 @@ const FotoPendukung = ({navigation, route}: any) => {
                 backgroundColor: 'black',
               }}>
               <TouchableOpacity
-                style={{
-                  height: 40,
-                  width: 40,
-                  position: 'absolute',
-                  alignSelf: 'flex-end',
-                  zIndex: 50,
-                }}
+                style={styles.deleteImage}
                 onPress={() => setImageCamera(null)}>
                 <IconX />
               </TouchableOpacity>
@@ -322,7 +352,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   deleteImage: {
-    alignSelf: 'center',
+    height: 40,
+    width: 40,
+    position: 'absolute',
+    alignSelf: 'flex-end',
+    zIndex: 50,
   },
   footer: {
     backgroundColor: MyColor.Light,

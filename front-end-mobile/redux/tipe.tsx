@@ -34,3 +34,6 @@ export const savePernahTerjadi = 'SAVE_PERNAH_TERJADI';
 
 // FOTO PENDUKUNG
 export const saveImageCamera = 'SAVE_IMAGE_CAMERA';
+
+// channelId
+export const saveChannelId = 'SAVE_CHANNEL_ID';
