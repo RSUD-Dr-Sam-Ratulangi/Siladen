@@ -42,6 +42,16 @@ const VerifyTokenAdmin = async (req, res, next) => {
     next();
   } catch (error) {
     if (error.message === "jwt expired") {
+      User.update(
+        {
+          token: null,
+        },
+        {
+          where: {
+            token,
+          },
+        }
+      );
       return res.status(401).json({
         code: "401",
         status: "UNAUTHORIZED",

@@ -6,6 +6,7 @@ import {
   Image,
   TextInput as Input,
   ScrollView,
+  Linking,
 } from 'react-native';
 import Gap from '../../components/atoms/Gap';
 import {Logo} from '../../assets/images';
@@ -15,7 +16,35 @@ import {IconPanahKanan} from '../../assets/icons';
 import Button from '../../components/atoms/Button';
 
 const ForgetPass = ({navigation}: any) => {
-  const [username, setUsername] = useState('');
+  const phoneNumber = '+6281234567890';
+
+  const handleTelepon = () => {
+    Linking.openURL(`tel:${phoneNumber}`)
+      .then(result => {
+        if (result) {
+          console.log('Aplikasi telepon telah dibuka');
+        } else {
+          console.log('Gagal membuka aplikasi telepon');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+  };
+
+  const handleWhatsApp = () => {
+    Linking.openURL(`whatsapp://send?phone=${phoneNumber}`)
+      .then(result => {
+        if (result) {
+          console.log('Aplikasi WhatsApp telah dibuka');
+        } else {
+          console.log('Gagal membuka aplikasi WhatsApp');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -38,12 +67,14 @@ const ForgetPass = ({navigation}: any) => {
             width={110}
             backgroundColor="transparent"
             textColor={MyColor.Primary}
+            onClick={handleTelepon}
           />
           <Button
             label="Whatsapp"
             width={110}
             backgroundColor="transparent"
             textColor={MyColor.Primary}
+            onClick={handleWhatsApp}
           />
         </View>
       </View>

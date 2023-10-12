@@ -16,24 +16,15 @@ import {MyFont} from '../../components/atoms/MyFont';
 import {IconBuatLaporan, IconBuatLaporanAnonim} from '../../assets/icons';
 import LinearGradient from 'react-native-linear-gradient';
 import PushNotification from 'react-native-push-notification';
+import {useSelector, useDispatch} from 'react-redux';
+import {saveChannelIdAction} from '../../../redux/action';
 
 const screenWidth = Dimensions.get('window').width;
 const w = screenWidth * 0.85;
 
 const WelcomePage = ({navigation}: any) => {
-  const createChannel = () => {
-    PushNotification.createChannel(
-      {
-        channelId: 'tes-channel1', // Ganti dengan ID kanal yang Anda inginkan
-        channelName: 'myChannel', // Ganti dengan nama kanal yang Anda inginkan
-      },
-      created => {},
-    );
-  };
-
-  useEffect(() => {
-    createChannel();
-  }, []);
+  const dispatch = useDispatch();
+  const timestamp = Date.now();
 
   return (
     <ScrollView style={styles.container}>
@@ -73,7 +64,7 @@ const WelcomePage = ({navigation}: any) => {
           <Gap height={20} />
           <TouchableOpacity
             style={[styles.btn, {backgroundColor: 'transparent'}]}
-            onPress={() => navigation.navigate('KategoriBidang')}>
+            onPress={() => navigation.navigate('BuatLaporan')}>
             <Text style={[styles.btnTxt, {color: MyColor.Primary}]}>
               Buat Laporan{'\n'}
               <Text style={{fontFamily: 'Poppins-Bold'}}>secara anonim</Text>

@@ -8,6 +8,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import Gap from '../../components/atoms/Gap';
 import {Logo} from '../../assets/images';
@@ -19,6 +20,9 @@ import {
   IconPanahKanan,
 } from '../../assets/icons';
 import Button from '../../components/atoms/Button';
+import {useDispatch} from 'react-redux';
+import axios from 'axios';
+import {API_HOST} from '../../../config';
 
 const PasswordInput = ({placeholder, onChangeText, value}: any) => {
   const [secureTextEntry, setSecureTextEntry] = useState(true);
@@ -45,14 +49,18 @@ const PasswordInput = ({placeholder, onChangeText, value}: any) => {
 };
 
 const SignUp = ({navigation}: any) => {
+  const dispatch = useDispatch();
+  const role = 'user';
+  const [name, setName] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [konfirmasi_password, setKonfirmasi_password] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const Register = () => {
-    if (!username || !password || !confirmPassword) {
+  const Register = async () => {
+    if (!name || !username || !password || !konfirmasi_password) {
       Alert.alert('Harap isi semua field');
-    } else if (password !== confirmPassword) {
+    } else if (password !== konfirmasi_password) {
       Alert.alert(
         'Password Tidak Cocok',
         'Password dan konfirmasi password harus sama.',
@@ -61,8 +69,33 @@ const SignUp = ({navigation}: any) => {
     // else if( username === data.username){
     //   Alert.alert('Username sudah pernah digunakan')
     // }
-    else {
-      navigation.navigate('Login');
+    setIsLoading(true);
+    try {
+      const response = await axios.post(`${API_HOST}/auth/user/register`, {
+        name,
+        username,
+        password,
+        konfirmasi_password,
+        role,
+      });
+      console.log('ini respons registrasi: ', response.data.data);
+      if (response.data.code == '201') {
+        Alert.alert('Akun berhasil dibuat');
+        setTimeout(() => {
+          navigation.navigate('Login');
+        }, 5000);
+        setName('');
+        setUsername('');
+        setPassword('');
+        setKonfirmasi_password('');
+      }
+      setIsLoading(false);
+    } catch (error: any) {
+      setIsLoading(false);
+      if (error.response.data.code === '409') {
+        Alert.alert('Username sudah pernah digunakan');
+      }
+      console.log(error.response.data.code);
     }
   };
 
@@ -76,7 +109,15 @@ const SignUp = ({navigation}: any) => {
       <Gap height={40} />
       <Text style={styles.txt}>Buat Laporan dengan Akun{'\n'}</Text>
       <Text style={styles.txtBold}>Silahkan buat akun Anda{'\n'}</Text>
-      <Gap height={40} />
+      <Gap height={30} />
+      <Input
+        style={styles.txtInput}
+        placeholder="Masukan nama lengkap Anda"
+        placeholderTextColor="#787878"
+        onChangeText={setName}
+        value={name}
+      />
+      {/* <Gap height={10} /> */}
       <Input
         style={styles.txtInput}
         placeholder="Masukan username Anda"
@@ -84,7 +125,7 @@ const SignUp = ({navigation}: any) => {
         onChangeText={setUsername}
         value={username}
       />
-      <Gap height={30} />
+      {/* <Gap height={30} /> */}
       <PasswordInput
         placeholder="Masukan password Anda"
         onChangeText={setPassword}
@@ -93,18 +134,24 @@ const SignUp = ({navigation}: any) => {
       <Gap height={10} />
       <PasswordInput
         placeholder={`Masukan lagi password yang sama`}
-        onChangeText={setConfirmPassword}
-        value={confirmPassword}
+        onChangeText={setKonfirmasi_password}
+        value={konfirmasi_password}
       />
       <Gap height={30} />
-      <Button
-        label="Daftar"
-        width={193}
-        backgroundColor={MyColor.Primary}
-        textColor="#efefef"
-        onClick={Register}
-        icons={<IconPanahKanan />}
-      />
+      {isLoading ? (
+        <View style={{height: 45}}>
+          <ActivityIndicator size="large" color={MyColor.Primary} />
+        </View>
+      ) : (
+        <Button
+          label="Daftar"
+          width={193}
+          backgroundColor={MyColor.Primary}
+          textColor="#efefef"
+          onClick={Register}
+          icons={<IconPanahKanan />}
+        />
+      )}
       <Gap height={10} />
       <Button
         label="Sudah punya akun"

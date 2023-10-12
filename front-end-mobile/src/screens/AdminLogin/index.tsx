@@ -24,6 +24,13 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PushNotification from 'react-native-push-notification';
 import {io} from 'socket.io-client';
+import {useDispatch} from 'react-redux';
+import {
+  saveTokenAction,
+  saveNameAction,
+  saveRoleAction,
+} from '../../../redux/action';
+import {CommonActions} from '@react-navigation/native';
 
 const socket = io('https://backend-pelaporan-final.glitch.me.glitch.me');
 
@@ -52,6 +59,7 @@ const PasswordInput = ({placeholder, onChangeText, value}: any) => {
 };
 
 const AdminLogin = ({navigation}: any) => {
+  const dispatch = useDispatch();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -75,16 +83,34 @@ const AdminLogin = ({navigation}: any) => {
       const token = response.data.data.token;
       console.log('ini token: ', token);
 
+      const id_user = response.data.data.id_user;
+      const name = response.data.data.name;
+      const role = response.data.data.role;
+
+      await AsyncStorage.setItem('id_user', id_user);
+      await AsyncStorage.setItem('name', name);
       await AsyncStorage.setItem('token', token);
+      await AsyncStorage.setItem('role', role);
 
       const value = await AsyncStorage.getItem('token');
       console.log('ini adalah value: ', value);
       if (response.data.code == '200') {
         const dataUser = response.data.data;
         if (dataUser.role === 'admin') {
+          dispatch(saveTokenAction(dataUser.token));
+          dispatch(saveNameAction(dataUser.name));
+          dispatch(saveRoleAction(dataUser.role));
           console.log('ini di LOGIN: ', dataUser);
           console.log('ini di LOGIN id user: ', dataUser.id_user);
-          navigation.navigate('AdminHomepage', dataUser);
+          // navigation.navigate('AdminHomepage');
+
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [{name: 'AdminHomepage'}],
+            }),
+          );
+
           setUsername('');
           setPassword('');
         } else {
@@ -97,10 +123,14 @@ const AdminLogin = ({navigation}: any) => {
       setIsLoading(false);
       console.log(error);
       if (error.response) {
-        Alert.alert(
-          'Login Gagal',
-          'Username tidak ditemukan atau password salah.',
-        );
+        if (error.response.data.code === '403') {
+          Alert.alert('Login Gagal', 'Akun sedang login di perangkat lain');
+        } else {
+          Alert.alert(
+            'Login Gagal',
+            'Username tidak ditemukan atau password salah.',
+          );
+        }
       } else if (error.request) {
         Alert.alert(
           'Kesalahan Jaringan',

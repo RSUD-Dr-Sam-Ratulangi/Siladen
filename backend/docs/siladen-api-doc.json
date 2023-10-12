@@ -258,6 +258,21 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Mencoba login dengan akun yang sementara digunakan oleh user lain",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                },
+                "example": {
+                  "code": "403",
+                  "status": "FORBIDDEN",
+                  "errors": "Akun sedang login di perangkat lain"
+                }
+              }
+            }
           }
         }
       }
@@ -1289,6 +1304,9 @@
                         "id_laporan": {
                           "type": "integer"
                         },
+                        "id_user": {
+                          "type": "string"
+                        },
                         "nama_pasien": {
                           "type": "string"
                         },
@@ -1381,6 +1399,7 @@
                       "status": "OK",
                       "data": {
                         "id_laporan": 15,
+                        "id_user": "dd976c30-55c1-45bf-82c7-d0e23d002531",
                         "nama_pasien": "Josua Tumatar",
                         "no_rekam_medis": "123458",
                         "ruangan": "Poli umum",
@@ -1417,6 +1436,7 @@
                       "status": "OK",
                       "data": {
                         "id_laporan": 15,
+                        "id_user": "dd976c30-55c1-45bf-82c7-d0e23d002531",
                         "nama_pasien": "Josua Tumatar",
                         "no_rekam_medis": "123458",
                         "ruangan": "Poli umum",
@@ -1453,6 +1473,7 @@
                       "status": "OK",
                       "data": {
                         "id_laporan": 15,
+                        "id_user": "dd976c30-55c1-45bf-82c7-d0e23d002531",
                         "nama_pasien": "Josua Tumatar",
                         "no_rekam_medis": "123458",
                         "ruangan": "Poli umum",
@@ -1489,6 +1510,7 @@
                       "status": "OK",
                       "data": {
                         "id_laporan": 15,
+                        "id_user": "dd976c30-55c1-45bf-82c7-d0e23d002531",
                         "nama_pasien": "Josua Wuisan",
                         "no_rekam_medis": "123458",
                         "ruangan": "Poli umum",

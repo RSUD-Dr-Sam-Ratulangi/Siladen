@@ -6,7 +6,7 @@ import {
   View,
   TextInput as Input,
 } from 'react-native';
-import React, {useState, useEffect, useReducer} from 'react';
+import React, {useState, useEffect} from 'react';
 import Title from '../../components/atoms/Title';
 import {MyFont} from '../../components/atoms/MyFont';
 import {MyColor} from '../../components/atoms/MyColor';
@@ -15,6 +15,24 @@ import Gap from '../../components/atoms/Gap';
 import Button from '../../components/atoms/Button';
 import {IconPanahKanan} from '../../assets/icons';
 import axios from 'axios';
+import {useSelector, useDispatch} from 'react-redux';
+import {
+  saveWaktuInsidenAction,
+  saveInsidenAction,
+  saveKronologiInsidenAction,
+  saveInsidenTerjadiPadaPasienAction,
+  savePelaporPertamaAction,
+  savePasienTerkaitAction,
+  saveDampakInsidenAction,
+  saveLokasiInsidenAction,
+  saveProbabilitasAction,
+  saveUnitTerkaitAction,
+  saveTindakLanjutAction,
+  saveTindakLanjutOlehAction,
+  saveIsPernahTerjadiAction,
+  saveDeskripsiPernahTerjadiAction,
+  savePernahTerjadiAction,
+} from '../../../redux/action';
 
 interface JenisPasien {
   id_jenis_pasien: number;
@@ -22,25 +40,114 @@ interface JenisPasien {
 }
 
 const RincianKejadian = ({navigation, route}: any) => {
-  const dataUser = route.params;
+  const dispatch = useDispatch();
+  // const dataUser = useSelector((data: any) => data);
+  // const dataUser = route.params;
+
+  const tokenSelector = useSelector((data: any) => data.token);
+  const waktuInsidenSelector = useSelector((data: any) => data.waktuInsiden);
+  const insidenSelector = useSelector((data: any) => data.insiden);
+  const kronologiInsidenSelector = useSelector(
+    (data: any) => data.kronologiInsiden,
+  );
+  const insidenTerjadiPadaPasienSelector = useSelector(
+    (data: any) => data.insidenTerjadiPadaPasien,
+  );
+  const pelaporPertamaSelector = useSelector(
+    (data: any) => data.pelaporPertama,
+  );
+  const pasienTerkaitSelector = useSelector((data: any) => data.pasienTerkait);
+  const dampakInsidenSelector = useSelector((data: any) => data.dampakInsiden);
+  const lokasiInsidenSelector = useSelector((data: any) => data.lokasiInsiden);
+  const probabilitasSelector = useSelector((data: any) => data.probabilitas);
+  const unitTerkaitSelector = useSelector((data: any) => data.unitTerkait);
+  const tindakLanjutSelector = useSelector((data: any) => data.tindakLanjut);
+  const tindakLanjutOlehSelector = useSelector(
+    (data: any) => data.tindakLanjutOleh,
+  );
+  const isPernahTerjadiSelector = useSelector(
+    (data: any) => data.isPernahTerjadi,
+  );
+  const deskripsiPernahTerjadiSelector = useSelector(
+    (data: any) => data.deskripsiPernahTerjadi,
+  );
+  const pernahTerjadiSelector = useSelector((data: any) => data.pernahTerjadi);
+
+  const namePasienSelector = useSelector((data: any) => data.namePasien);
+  const noMRSelector = useSelector((data: any) => data.noMR);
+  const ruanganSelector = useSelector((data: any) => data.ruangan);
+  const ageSelector = useSelector((data: any) => data.age);
+  const ageNoSelector = useSelector((data: any) => data.ageNo);
+  const selectedAgeTypeSelector = useSelector(
+    (data: any) => data.selectedAgeType,
+  );
+  const asuransiSelector = useSelector((data: any) => data.asuransi);
+  const jenisKelaminSelector = useSelector((data: any) => data.jenisKelamin);
+  const waktuMendapatPelayananSelector = useSelector(
+    (data: any) => data.waktuMendapatPelayanan,
+  );
+
+  const dataUserCoba = {
+    namePasien: namePasienSelector,
+    noMR: noMRSelector,
+    ruangan: ruanganSelector,
+    age: ageSelector,
+    ageNo: ageNoSelector,
+    selectedAgeType: selectedAgeTypeSelector,
+    asuransi: asuransiSelector,
+    jenisKelamin: jenisKelaminSelector,
+    waktuMendapatPelayanan: waktuMendapatPelayananSelector,
+  };
+
+  const dataUser = {
+    token: tokenSelector,
+    waktuInsiden: waktuInsidenSelector,
+    insiden: insidenSelector,
+    kronologiInsiden: kronologiInsidenSelector,
+    insidenTerjadiPadaPasien: insidenTerjadiPadaPasienSelector,
+    pelaporPertama: pelaporPertamaSelector,
+    pasienTerkait: pasienTerkaitSelector,
+    dampakInsiden: dampakInsidenSelector,
+    lokasiInsiden: lokasiInsidenSelector,
+    probabilitas: probabilitasSelector,
+    unitTerkait: unitTerkaitSelector,
+    tindakLanjut: tindakLanjutSelector,
+    tindakLanjutOleh: tindakLanjutOlehSelector,
+    isPernahTerjadi: isPernahTerjadiSelector,
+    deskripsiPernahTerjadi: deskripsiPernahTerjadiSelector,
+    pernahTerjadi: pernahTerjadiSelector,
+  };
+
   const [isDateTimePickerVisible, setDateTimePickerVisible] = useState(false);
-  const [waktuInsiden, setWaktuInsiden] = useState(new Date());
-  const [insiden, setInsiden] = useState('');
-  const [kronologiInsiden, setKronologiInsiden] = useState('');
-  const [insidenTerjadiPadaPasien, setInsidenTerjadiPadaPasien] = useState('');
-  const [pelaporPertama, setPelaporPertama] = useState('');
+  const [waktuInsiden, setWaktuInsiden] = useState(
+    new Date(dataUser.waktuInsiden),
+  );
+  const [insiden, setInsiden] = useState(dataUser.insiden);
+  const [kronologiInsiden, setKronologiInsiden] = useState(
+    dataUser.kronologiInsiden,
+  );
+  const [insidenTerjadiPadaPasien, setInsidenTerjadiPadaPasien] = useState(
+    dataUser.insidenTerjadiPadaPasien,
+  );
+  const [pelaporPertama, setPelaporPertama] = useState(dataUser.pelaporPertama);
   const [jenisPasien, setJenisPasien] = useState<JenisPasien[]>([]);
-  const [pasienTerkait, setPasienTerkait] = useState(0);
-  const [dampakInsiden, setDampakInsiden] = useState('');
-  const [lokasiInsiden, setLokasiInsiden] = useState('');
-  const [probabilitas, setProbabilitas] = useState('');
-  const [unitTerkait, setUnitTerkait] = useState('');
-  const [tindakLanjut, setTindakLanjut] = useState('');
-  const [tindakLanjutOleh, setTindakLanjutOleh] = useState('');
-  const [isPernahTerjadi, setIsPernahTerjadi]: any = useState(undefined);
-  const [deskripsiPernahTerjadi, setDeskripsiPernahTerjadi] = useState('');
+  const [pasienTerkait, setPasienTerkait] = useState(dataUser.pasienTerkait);
+  const [dampakInsiden, setDampakInsiden] = useState(dataUser.dampakInsiden);
+  const [lokasiInsiden, setLokasiInsiden] = useState(dataUser.lokasiInsiden);
+  const [probabilitas, setProbabilitas] = useState(dataUser.probabilitas);
+  const [unitTerkait, setUnitTerkait] = useState(dataUser.unitTerkait);
+  const [tindakLanjut, setTindakLanjut] = useState(dataUser.tindakLanjut);
+  const [tindakLanjutOleh, setTindakLanjutOleh] = useState(
+    dataUser.tindakLanjutOleh,
+  );
+  const [isPernahTerjadi, setIsPernahTerjadi]: any = useState(
+    dataUser.isPernahTerjadi,
+  );
+  const [deskripsiPernahTerjadi, setDeskripsiPernahTerjadi] = useState(
+    dataUser.deskripsiPernahTerjadi,
+  );
   // let pernahTerjadi = '';
-  const [pernahTerjadi, setPernahTerjadi] = useState('');
+  const [pernahTerjadi, setPernahTerjadi] = useState(dataUser.pernahTerjadi);
 
   useEffect(() => {}, [pasienTerkait]);
 
@@ -57,6 +164,12 @@ const RincianKejadian = ({navigation, route}: any) => {
 
   useEffect(() => {
     getJenisPasien();
+
+    console.log('ini data user di rincian kejadian oi: ', dataUser);
+    console.log(
+      'ini data user di rincian kejadian oi di coba : ',
+      dataUserCoba,
+    );
   }, []);
 
   const datePick = () => {
@@ -86,7 +199,7 @@ const RincianKejadian = ({navigation, route}: any) => {
     return (
       <View>
         <TouchableOpacity
-          style={[styles.button, {height: 40, width: '100%'}]}
+          style={styles.timePicker}
           onPress={showDateTimePicker}>
           <Text style={styles.txtButton}>{formatDateTime(waktuInsiden)}</Text>
         </TouchableOpacity>
@@ -213,9 +326,9 @@ const RincianKejadian = ({navigation, route}: any) => {
   const getJenisPasien = async () => {
     try {
       const headers = {
-        Authorization: `Bearer ${dataUser.dataUser.token}`, // Tambahkan token ke header dengan format Bearer
+        Authorization: `Bearer ${dataUser.token}`, // Tambahkan token ke header dengan format Bearer
       };
-      console.log('ini headers: ', dataUser.dataUser.token);
+      console.log('ini headers: ', dataUser.token);
       const response = await axios.get(
         `https://backend-pelaporan-final.glitch.me/api/jenis_pasien`,
         {headers},
@@ -264,7 +377,7 @@ const RincianKejadian = ({navigation, route}: any) => {
       console.log('ini dampak insiden: ', option);
     };
     return (
-      <View style={[styles.containerBtn, {justifyContent: 'center'}]}>
+      <View style={styles.containerBtn}>
         <TouchableOpacity
           style={[
             styles.button,
@@ -359,7 +472,7 @@ const RincianKejadian = ({navigation, route}: any) => {
       console.log('ini probabilitas: ', option);
     };
     return (
-      <View style={[styles.containerBtn, {justifyContent: 'center'}]}>
+      <View style={styles.containerBtn}>
         <TouchableOpacity
           style={[
             styles.button,
@@ -505,7 +618,7 @@ const RincianKejadian = ({navigation, route}: any) => {
           <TouchableOpacity
             style={[
               styles.button,
-              {width: 'auto', flex: 1},
+              {flex: 1},
               isPernahTerjadi === true && styles.selectedButton,
             ]}
             onPress={() => handlePernahTerjadi(true)}>
@@ -520,7 +633,7 @@ const RincianKejadian = ({navigation, route}: any) => {
           <TouchableOpacity
             style={[
               styles.button,
-              {width: 'auto', flex: 1},
+              {flex: 1},
               isPernahTerjadi === false && styles.selectedButton,
             ]}
             onPress={() => handlePernahTerjadi(false)}>
@@ -588,7 +701,7 @@ const RincianKejadian = ({navigation, route}: any) => {
         <Text style={styles.txtSection}>Insiden yang terjadi pada pasien</Text>
         <Input
           style={styles.inputBox}
-          placeholder="Penyakit dalam dan Subspesialisasinya"
+          // placeholder="Penyakit dalam dan Subspesialisasinya"
           placeholderTextColor="#787878"
           onChangeText={setInsidenTerjadiPadaPasien}
           value={insidenTerjadiPadaPasien}
@@ -653,6 +766,23 @@ const RincianKejadian = ({navigation, route}: any) => {
           textColor={MyColor.Primary}
           width={126}
           onClick={() => {
+            dispatch(saveWaktuInsidenAction(waktuInsiden));
+            dispatch(saveInsidenAction(insiden));
+            dispatch(saveKronologiInsidenAction(kronologiInsiden));
+            dispatch(
+              saveInsidenTerjadiPadaPasienAction(insidenTerjadiPadaPasien),
+            );
+            dispatch(savePelaporPertamaAction(pelaporPertama));
+            dispatch(savePasienTerkaitAction(pasienTerkait));
+            dispatch(saveDampakInsidenAction(dampakInsiden));
+            dispatch(saveLokasiInsidenAction(lokasiInsiden));
+            dispatch(saveProbabilitasAction(probabilitas));
+            dispatch(saveUnitTerkaitAction(unitTerkait));
+            dispatch(saveTindakLanjutAction(tindakLanjut));
+            dispatch(saveTindakLanjutOlehAction(tindakLanjutOleh));
+            dispatch(saveIsPernahTerjadiAction(isPernahTerjadi));
+            dispatch(saveDeskripsiPernahTerjadiAction(deskripsiPernahTerjadi));
+            dispatch(savePernahTerjadiAction(pernahTerjadi));
             navigation.navigate('DataKarakteristikPasien');
           }}
         />
@@ -663,23 +793,42 @@ const RincianKejadian = ({navigation, route}: any) => {
           width={173}
           icons={<IconPanahKanan />}
           onClick={() => {
-            navigation.navigate('FotoPendukung', {
-              ...dataUser,
-
-              waktuInsiden: waktuInsiden.toISOString(),
-              insiden,
-              kronologiInsiden,
-              insidenTerjadiPadaPasien,
-              pelaporPertama,
-              pasienTerkait,
-              lokasiInsiden,
-              unitTerkait,
-              tindakLanjut,
-              tindakLanjutOleh,
-              pernahTerjadi,
-              dampakInsiden,
-              probabilitas,
-            });
+            dispatch(saveWaktuInsidenAction(waktuInsiden));
+            dispatch(saveInsidenAction(insiden));
+            dispatch(saveKronologiInsidenAction(kronologiInsiden));
+            dispatch(
+              saveInsidenTerjadiPadaPasienAction(insidenTerjadiPadaPasien),
+            );
+            dispatch(savePelaporPertamaAction(pelaporPertama));
+            dispatch(savePasienTerkaitAction(pasienTerkait));
+            dispatch(saveDampakInsidenAction(dampakInsiden));
+            dispatch(saveLokasiInsidenAction(lokasiInsiden));
+            dispatch(saveProbabilitasAction(probabilitas));
+            dispatch(saveUnitTerkaitAction(unitTerkait));
+            dispatch(saveTindakLanjutAction(tindakLanjut));
+            dispatch(saveTindakLanjutOlehAction(tindakLanjutOleh));
+            dispatch(saveIsPernahTerjadiAction(isPernahTerjadi));
+            dispatch(saveDeskripsiPernahTerjadiAction(deskripsiPernahTerjadi));
+            dispatch(savePernahTerjadiAction(pernahTerjadi));
+            navigation.navigate(
+              'FotoPendukung',
+              // {
+              //   ...dataUser,
+              //   waktuInsiden: waktuInsiden.toISOString(),
+              //   insiden,
+              //   kronologiInsiden,
+              //   insidenTerjadiPadaPasien,
+              //   pelaporPertama,
+              //   pasienTerkait,
+              //   lokasiInsiden,
+              //   unitTerkait,
+              //   tindakLanjut,
+              //   tindakLanjutOleh,
+              //   pernahTerjadi,
+              //   dampakInsiden,
+              //   probabilitas,
+              // }
+            );
           }}
         />
       </View>
@@ -740,16 +889,29 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
     flexWrap: 'wrap',
+    maxWidth: 360,
+    alignSelf: 'center',
+    // backgroundColor: 'green',
+    // justifyContent: 'space-between',
     // justifyContent: 'space-around',
   },
   button: {
-    marginRight: 'auto',
     height: 52,
-    width: 100,
+    minWidth: 100,
+    maxWidth: 150,
+    width: '30%',
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 10,
     backgroundColor: MyColor.Light,
+  },
+  timePicker: {
+    width: '100%',
+    // maxWidth: 380,
+    backgroundColor: MyColor.Light,
+    borderRadius: 10,
+    height: 40,
+    justifyContent: 'center',
   },
   selectedButton: {
     backgroundColor: MyColor.Primary,
