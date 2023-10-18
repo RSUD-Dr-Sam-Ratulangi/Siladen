@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "API Aplikasi Pelaporan Insiden",
-    "description": "OpenAPI for Aplikasi Pelaporan Insiden RESTful API. API ini menggunakan Authentikasi JWT. Untuk status 'dalam antrian' akan kedaluwarsa dalam waktu 2 x 24 jam. Dan pada server akan selalu dilakukan pengecekan terhadap laporan dengan status 'dalam antrian' setiap 6 jam",
+    "description": "OpenAPI for Aplikasi Pelaporan Insiden RESTful API. API ini menggunakan Authentikasi JWT. Untuk status 'dalam antrian' akan kedaluwarsa dalam waktu 2 x 24 jam. Dan pada server akan selalu dilakukan pengecekan terhadap laporan dengan status 'dalam antrian' setiap 6 jam.",
     "contact": {
       "name": "Jerico Katong",
       "email": "jericokatong@gmail.com"
