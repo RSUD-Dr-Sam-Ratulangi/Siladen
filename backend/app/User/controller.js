@@ -6,7 +6,7 @@ const User = require("./model");
 const getAllUser = async (req, res) => {
   try {
     const users = await User.findAll({
-      attributes: ["id_user", "name", "username", "role", "token"],
+      attributes: ["id_user", "name", "username", "role", "job", "token"],
     });
 
     res.status(200).json({
@@ -33,7 +33,7 @@ const getUserById = async (req, res) => {
       where: {
         id_user,
       },
-      attributes: ["id_user", "name", "username", "role"],
+      attributes: ["id_user", "name", "username", "job", "role"],
     });
 
     if (!user) {

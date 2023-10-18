@@ -4,14 +4,14 @@ const { dbName, dbUsername, dbPassword, dbHostname, port } = require("../config/
 const db = new Sequelize(dbName, dbUsername, dbPassword, {
   host: dbHostname,
   port,
-  dialect: "mariadb",
+  dialect: "mysql",
   // timezone: "Asia/Makassar",
 });
 
 db.authenticate()
   .then(() => {
     console.log("Koneksi berhasil");
-    // db.sync()
+    // db.sync({ force: true })
     //   .then(() => {
     //     console.log("All models were synchronized successfuly");
     //   })

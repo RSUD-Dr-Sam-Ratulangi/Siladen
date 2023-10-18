@@ -9,6 +9,9 @@ var debug = require("debug")("backend:server");
 var http = require("http");
 const { Server } = require("socket.io");
 
+const { Op } = require("sequelize");
+const Laporan = require("../app/Laporan/model");
+const db = require("../database");
 require("../database");
 
 /**
@@ -29,10 +32,36 @@ const io = new Server(server, {
   },
 });
 
+setInterval(async () => {
+  const dateNow = new Date();
+
+  const t = await db.transaction();
+  try {
+    const update = await Laporan.update(
+      {
+        status: "laporan kedaluwarsa",
+      },
+      {
+        where: {
+          status: "dalam antrian",
+          tanggal_laporan_kedaluwarsa: {
+            [Op.lt]: dateNow,
+          },
+        },
+        transaction: t,
+      }
+    );
+
+    await t.commit();
+    console.log(`Jumlah baris yang diperbarui: ${update[0]}`);
+  } catch (error) {
+    await t.rollback();
+    console.error("Terjadi kesalahan:", error);
+  }
+}, 6 * 60 * 60 * 1000);
+
 io.on("connection", (Socket) => {
   console.log("User Connected");
-
-  // Socket.emit("client 2", "hallllllll");
 
   Socket.on("join chat", (room) => {
     Socket.join(room);

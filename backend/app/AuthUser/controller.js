@@ -9,6 +9,7 @@ const { tokenSecret } = require("../../config");
 //@access          Public
 const registerUser = async (req, res) => {
   const { name, username, password, konfirmasi_password, role } = req.body;
+  const job = req.body.job ? req.body.job : null;
 
   if (name && username && password && konfirmasi_password && role) {
     try {
@@ -41,6 +42,7 @@ const registerUser = async (req, res) => {
         username,
         password: hashingPassword,
         role,
+        job,
       });
 
       res.status(201).json({
@@ -51,6 +53,7 @@ const registerUser = async (req, res) => {
           username,
           password,
           role,
+          job,
         },
       });
     } catch (error) {
@@ -125,9 +128,10 @@ const loginUser = async (req, res) => {
       const id_user = user.id_user;
       const role = user.role;
       const name = user.name;
+      const job = user.job;
 
       const token = jwt.sign({ id_user, username, role }, tokenSecret, {
-        expiresIn: "2d",
+        expiresIn: "3d",
       });
 
       await User.update(
@@ -166,6 +170,7 @@ const loginUser = async (req, res) => {
           name,
           username,
           role,
+          job,
           token,
         },
       });
@@ -186,6 +191,9 @@ const loginUser = async (req, res) => {
   }
 };
 
+//@description     Logout User
+//@route           DEL /auth/user/logout
+//@access          Protected
 const logoutUser = async (req, res) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
@@ -226,7 +234,7 @@ const logoutUser = async (req, res) => {
     return res.status(200).json({
       code: "200",
       status: "OK",
-      success: update ? true : false,
+      success: update[0] ? true : false,
     });
   } catch (error) {
     res.status(500).json({
@@ -237,8 +245,132 @@ const logoutUser = async (req, res) => {
   }
 };
 
+//@description     Reset Password User
+//@route           PATCH /auth/user/password/reset
+//@access          Protected
+const resetPasswordUser = async (req, res) => {
+  const { old_username, new_password } = req.body;
+
+  if (old_username && new_password) {
+    try {
+      const user = await User.findOne({
+        where: {
+          username: old_username,
+        },
+      });
+
+      if (!user) {
+        return res.status(404).json({
+          code: "404",
+          status: "NOT_FOUND",
+          errors: "User is not found",
+        });
+      }
+      // Enkripsi password
+      const salt = await bcrypt.genSalt();
+      const hashingPassword = await bcrypt.hash(new_password, salt);
+      const update = await User.update(
+        {
+          password: hashingPassword,
+        },
+        {
+          where: {
+            id_user: user.id_user,
+          },
+        }
+      );
+
+      return res.status(200).json({
+        code: "200",
+        status: "OK",
+        success: update[0] ? true : false,
+      });
+    } catch (error) {
+      res.status(500).json({
+        code: "500",
+        status: "INTERNAL_SERVER_ERROR",
+        errors: error.message,
+      });
+    }
+  } else {
+    res.status(400).json({
+      code: "400",
+      status: "BAD_REQUEST",
+      errors: "All fields are required: old_username and new_password",
+    });
+  }
+};
+
+//@description     Reset Session User
+//@route           PATCH /auth/user/session/reset
+//@access          Protected
+const resetSessionUser = async (req, res) => {
+  const { username } = req.body;
+
+  if (username) {
+    try {
+      const user = await User.findOne({
+        where: {
+          username,
+        },
+      });
+
+      if (!user) {
+        return res.status(404).json({
+          code: "404",
+          status: "NOT_FOUND",
+          errors: "User is not found",
+        });
+      }
+
+      const update = await User.update(
+        {
+          token: null,
+        },
+        {
+          where: {
+            id_user: user.id_user,
+          },
+        }
+      );
+
+      return res.status(200).json({
+        code: "200",
+        status: "OK",
+        success: update[0] ? true : false,
+      });
+    } catch (error) {
+      res.status(500).json({
+        code: "500",
+        status: "INTERNAL_SERVER_ERROR",
+        errors: error.message,
+      });
+    }
+  } else {
+    res.status(400).json({
+      code: "400",
+      status: "BAD_REQUEST",
+      errors: "There's no username",
+    });
+  }
+};
+
+//@description     Cek Session User
+//@route           GET /auth/user/session
+//@access          Protected
+const cekSessionUser = async (req, res) => {
+  res.status(200).json({
+    code: "200",
+    status: "OK",
+    session: true,
+  });
+};
+
 module.exports = {
   registerUser,
   loginUser,
   logoutUser,
+  resetPasswordUser,
+  resetSessionUser,
+  cekSessionUser,
 };
