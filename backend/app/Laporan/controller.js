@@ -815,10 +815,31 @@ const getLaporanAmount = async (req, res) => {
 //@route           POST /api/laporan/user/:id_user
 //@access          Public
 const postLaporanByUser = async (req, res) => {
-  // const kriteriaWord = ["sakit", "kebakaran", "kecelakaan"];
-  // let tingkat_prioritas;
-  const tanggal_laporan_dikirim = new Date();
-  const tanggal_laporan_kedaluwarsa = new Date(tanggal_laporan_dikirim);
+  const options = {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  };
+
+  const dateNow = new Date();
+
+  const tanggal_laporan_dikirim = new Date(
+    dateNow.toLocaleTimeString("en-US", {
+      timeZone: "Asia/Makassar",
+      ...options,
+    })
+  );
+
+  const tanggal_laporan_kedaluwarsa = new Date(
+    dateNow.toLocaleTimeString("en-US", {
+      timeZone: "Asia/Makassar",
+      ...options,
+    })
+  );
   tanggal_laporan_kedaluwarsa.setHours(tanggal_laporan_kedaluwarsa.getHours() + 48);
   // console.log("ini waktu sekarang loh: ", tanggalSekarang);
 
@@ -998,9 +1019,31 @@ const postLaporanByUser = async (req, res) => {
 const postLaporanByAnonim = async (req, res) => {
   let url_gambar = null;
 
-  const tanggal_laporan_dikirim = new Date();
-  const tanggal_laporan_kedaluwarsa = new Date(tanggal_laporan_dikirim);
-  tanggal_laporan_kedaluwarsa.setHours(tanggal_laporan_kedaluwarsa.getHours() + 48);
+  const options = {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  };
+
+  const dateNow = new Date();
+
+  const tanggal_laporan_dikirim = new Date(
+    dateNow.toLocaleTimeString("en-US", {
+      timeZone: "Asia/Makassar",
+      ...options,
+    })
+  );
+
+  const tanggal_laporan_kedaluwarsa = new Date(
+    dateNow.toLocaleTimeString("en-US", {
+      timeZone: "Asia/Makassar",
+      ...options,
+    })
+  );
   if (req.file) {
     const fileName = req.file.originalname;
     const fileSize = req.file.size;
