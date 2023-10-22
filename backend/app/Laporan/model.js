@@ -1,4 +1,4 @@
-const { DataTypes } = require("sequelize");
+const { DataTypes, Sequelize } = require("sequelize");
 const db = require("../../database");
 const User = require("../User/model");
 const JenisPasien = require("../JenisPasien/model");
@@ -109,15 +109,28 @@ const Laporan = db.define(
       allowNull: false,
     },
     status: {
-      type: DataTypes.ENUM("dalam antrian", "investigasi", "laporan selesai", "laporan ditolak"),
+      type: DataTypes.ENUM("dalam antrian", "investigasi", "laporan selesai", "laporan kedaluwarsa"),
       allowNull: false,
+      defaultValue: "dalam antrian",
       validate: {
-        isIn: [["dalam antrian", "investigasi", "laporan selesai", "laporan ditolak"]],
+        isIn: [["dalam antrian", "investigasi", "laporan selesai", "laporan kedaluwarsa"]],
       },
     },
     tanggal_laporan_dikirim: {
       type: DataTypes.DATE,
       allowNull: false,
+      // defaultValue: Sequelize.fn("NOW"),
+    },
+    tanggal_laporan_kedaluwarsa: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      // defaultValue: new Date(new Date().getTime() + 48 * 60 * 60 * 1000),
+      // defaultValue: Sequelize.literal("DATE_ADD(NOW(), INTERVAL 48 HOUR TO SECOND)"),
+      // defaultValue: Sequelize.literal("DATE_ADD(NOW(), INTERVAL 5 MINUTE)"),
+    },
+    diinvestigasi_oleh: {
+      type: DataTypes.UUID,
+      allowNull: true,
     },
     gambar: {
       type: DataTypes.TEXT,
@@ -132,9 +145,20 @@ const Laporan = db.define(
 
 User.hasMany(Laporan, {
   foreignKey: "id_user",
+  as: "pelapor",
 });
 Laporan.belongsTo(User, {
   foreignKey: "id_user",
+  as: "pelapor",
+});
+
+User.hasMany(Laporan, {
+  foreignKey: "diinvestigasi_oleh",
+  as: "investigator",
+});
+Laporan.belongsTo(User, {
+  foreignKey: "diinvestigasi_oleh",
+  as: "investigator",
 });
 
 JenisPasien.hasMany(Laporan, {

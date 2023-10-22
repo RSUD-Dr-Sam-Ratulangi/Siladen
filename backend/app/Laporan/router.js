@@ -9,11 +9,12 @@ const {
   getLaporanToday,
   getLaporanCurrentMonth,
   getLaporanAmount,
+  getAmountLaporanByUserId,
   postLaporanByUser,
   postLaporanByAnonim,
   updateStatusLaporanInvestigasi,
   updateStatusLaporanSelesai,
-  updateStatusLaporanTolak,
+  updateStatusLaporanKedaluwarsa,
 } = require("./controller");
 
 const VerifyTokenAdmin = require("../../middleware/VerifyTokenAdmin");
@@ -25,6 +26,7 @@ router.get("/laporan", VerifyTokenAdmin, getAllLaporan);
 router.get("/laporan/current/day", VerifyTokenAdmin, getLaporanToday);
 router.get("/laporan/current/month", VerifyTokenAdmin, getLaporanCurrentMonth);
 router.get("/laporan/amount", VerifyTokenAdmin, getLaporanAmount);
+router.get("/laporan/amount/user/:id_user", VerifyTokenUser, getAmountLaporanByUserId);
 
 router.get("/laporan/detail/:id_laporan", VerifyTokenUser, getLaporanByIdLaporan);
 router.get("/laporan/user/:id_user", VerifyTokenUser, getLaporanByUserId);
@@ -35,6 +37,6 @@ router.post("/laporan/anonim", upload.single("gambar"), postLaporanByAnonim);
 
 router.patch("/laporan/status/investigasi/:id_laporan", VerifyTokenAdmin, updateStatusLaporanInvestigasi);
 router.patch("/laporan/status/selesai/:id_laporan", VerifyTokenAdmin, updateStatusLaporanSelesai);
-router.patch("/laporan/status/tolak/:id_laporan", VerifyTokenAdmin, updateStatusLaporanTolak);
+router.patch("/laporan/status/kedaluwarsa/:id_laporan", VerifyTokenAdmin, updateStatusLaporanKedaluwarsa);
 
 module.exports = router;

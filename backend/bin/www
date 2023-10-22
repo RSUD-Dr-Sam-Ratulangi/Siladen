@@ -9,6 +9,9 @@ var debug = require("debug")("backend:server");
 var http = require("http");
 const { Server } = require("socket.io");
 
+const { Op } = require("sequelize");
+const Laporan = require("../app/Laporan/model");
+const db = require("../database");
 require("../database");
 
 /**
@@ -29,20 +32,48 @@ const io = new Server(server, {
   },
 });
 
+// interval setiap 6 jam cek status dalam antrian
+setInterval(async () => {
+  const dateNow = new Date();
+
+  console.log("a");
+  const t = await db.transaction();
+  try {
+    const update = await Laporan.update(
+      {
+        status: "laporan kedaluwarsa",
+      },
+      {
+        where: {
+          status: "dalam antrian",
+          tanggal_laporan_kedaluwarsa: {
+            [Op.lt]: dateNow,
+          },
+        },
+        transaction: t,
+      }
+    );
+
+    await t.commit();
+    console.log(`Jumlah baris yang diperbarui: ${update[0]}`);
+  } catch (error) {
+    await t.rollback();
+    console.error("Terjadi kesalahan:", error);
+  }
+}, 6 * 60 * 60 * 1000);
+
 io.on("connection", (Socket) => {
   console.log("User Connected");
 
-  // Socket.emit("client 2", "hallllllll");
-
   Socket.on("join chat", (room) => {
     Socket.join(room);
-    console.log("User Joined Room: ", +room);
+    console.log("User Joined Room: ", room);
   });
 
   Socket.on("new message", (data) => {
     console.log("dari admin ini");
     console.log(data.id_user);
-    Socket.to(data.id_user).emit("message received", data.message);
+    Socket.to(data.id_user).emit("message received", data);
   });
 
   Socket.on("join admin", (room) => {
@@ -50,8 +81,8 @@ io.on("connection", (Socket) => {
     console.log("user join admin " + room);
   });
 
-  Socket.on("message admin", (message) => {
-    Socket.to("admin").emit("admin received", message);
+  Socket.on("message admin", (data) => {
+    Socket.to("admin").emit("admin received", data);
   });
 
   Socket.on("disconnect", (reason) => {
