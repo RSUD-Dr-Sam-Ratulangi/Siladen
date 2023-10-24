@@ -9,12 +9,15 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  Pressable,
+  Modal,
 } from 'react-native';
 import Gap from '../../components/atoms/Gap';
 import {Logo} from '../../assets/images';
 import {MyFont} from '../../components/atoms/MyFont';
 import {MyColor} from '../../components/atoms/MyColor';
 import {
+  IconDropDown,
   IconMataTerbuka,
   IconMataTertutup,
   IconPanahKanan,
@@ -32,7 +35,7 @@ const PasswordInput = ({placeholder, onChangeText, value}: any) => {
   };
 
   return (
-    <View style={styles.passwordInputContainer}>
+    <View style={styles.InputContainer}>
       <Input
         style={styles.txtInputPassword}
         placeholder={placeholder}
@@ -42,7 +45,11 @@ const PasswordInput = ({placeholder, onChangeText, value}: any) => {
         value={value}
       />
       <TouchableOpacity onPress={toggleSecureTextEntry}>
-        {secureTextEntry ? <IconMataTertutup /> : <IconMataTerbuka />}
+        {secureTextEntry ? (
+          <IconMataTertutup stroke={'black'} />
+        ) : (
+          <IconMataTerbuka stroke={'black'} />
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -53,37 +60,38 @@ const SignUp = ({navigation}: any) => {
   const role = 'user';
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
+  const [job, setJob] = useState('');
   const [password, setPassword] = useState('');
   const [konfirmasi_password, setKonfirmasi_password] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const Register = async () => {
-    if (!name || !username || !password || !konfirmasi_password) {
+    setIsLoading(true);
+    if (!name || !username || !password || !konfirmasi_password || !job) {
+      setIsLoading(false);
       Alert.alert('Harap isi semua field');
     } else if (password !== konfirmasi_password) {
+      setIsLoading(false);
       Alert.alert(
         'Password Tidak Cocok',
         'Password dan konfirmasi password harus sama.',
       );
     }
-    // else if( username === data.username){
-    //   Alert.alert('Username sudah pernah digunakan')
-    // }
-    setIsLoading(true);
     try {
       const response = await axios.post(`${API_HOST}/auth/user/register`, {
         name,
         username,
         password,
         konfirmasi_password,
+        job,
         role,
       });
       console.log('ini respons registrasi: ', response.data.data);
       if (response.data.code == '201') {
-        Alert.alert('Akun berhasil dibuat');
-        setTimeout(() => {
-          navigation.navigate('Login');
-        }, 5000);
+        Alert.alert('Akun berhasil dibuat', undefined, [
+          {text: 'OK', onPress: () => navigation.navigate('Login')},
+        ]);
         setName('');
         setUsername('');
         setPassword('');
@@ -92,12 +100,38 @@ const SignUp = ({navigation}: any) => {
       setIsLoading(false);
     } catch (error: any) {
       setIsLoading(false);
-      if (error.response.data.code === '409') {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.code === '409'
+      ) {
+        setIsLoading(false);
         Alert.alert('Username sudah pernah digunakan');
       }
-      console.log(error.response.data.code);
+      console.log(error);
     }
   };
+
+  const renderJob = (option: string) => (
+    <Pressable
+      style={[
+        styles.modalItems,
+        {backgroundColor: job === option ? MyColor.Primary : MyColor.Light},
+      ]}
+      onPress={() => {
+        setJob(option), setIsModalVisible(false);
+      }}>
+      <Text
+        style={[
+          styles.txtModal,
+          {
+            color: job === option ? MyColor.Light : MyColor.Primary,
+          },
+        ]}>
+        {option}
+      </Text>
+    </Pressable>
+  );
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -125,7 +159,57 @@ const SignUp = ({navigation}: any) => {
         onChangeText={setUsername}
         value={username}
       />
-      {/* <Gap height={30} /> */}
+      {/* <Input
+        style={styles.txtInput}
+        placeholder="Masukan profesi anda di RSUD"
+        placeholderTextColor="#787878"
+        onChangeText={setJob}
+        value={job}
+      /> */}
+      <Pressable
+        style={[
+          styles.InputContainer,
+          {
+            paddingHorizontal: 5,
+            paddingVertical: 12,
+            marginBottom: 20,
+          },
+        ]}
+        onPress={() => setIsModalVisible(true)}>
+        <Text
+          style={[
+            styles.txtInput,
+            {
+              width: '90%',
+              marginBottom: 'auto',
+              color: 'gray',
+              paddingStart: 5,
+            },
+          ]}>
+          {job ? job : 'Pilih peran tugas anda'}
+        </Text>
+        <IconDropDown fill={'black'} />
+      </Pressable>
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={isModalVisible}
+        onRequestClose={() => {
+          setIsModalVisible(false);
+        }}>
+        <View style={styles.modalBackground}>
+          <View style={styles.modal}>
+            <View style={styles.modalContent}>
+              {renderJob('Dokter')}
+              {renderJob('Perawat')}
+              {renderJob('Petugas IGD')}
+              {renderJob('Petugas Rawat Inap')}
+              {renderJob('Petugas Pendaftaran')}
+              {renderJob('Security')}
+            </View>
+          </View>
+        </View>
+      </Modal>
       <PasswordInput
         placeholder="Masukan password Anda"
         onChangeText={setPassword}
@@ -172,6 +256,38 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
+  modal: {
+    width: '90%',
+    maxWidth: 350,
+    marginHorizontal: 20,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: MyColor.Primary,
+    backgroundColor: MyColor.Light,
+    paddingHorizontal: 25,
+    paddingVertical: 20,
+    alignSelf: 'center',
+  },
+  modalContent: {},
+  modalItems: {
+    padding: 5,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: MyColor.Primary,
+    marginBottom: 10,
+  },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+  },
+  InputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 10,
+    backgroundColor: 'white',
+    width: '100%',
+  },
   logo: {
     width: 33,
     height: 43,
@@ -195,11 +311,15 @@ const styles = StyleSheet.create({
     fontSize: 19,
     color: MyColor.Primary,
   },
+  txtModal: {
+    fontFamily: MyFont.Primary,
+    fontSize: 18,
+    textAlign: 'center',
+    color: MyColor.Primary,
+  },
   txtInput: {
     fontSize: 14,
     fontFamily: MyFont.Primary,
-    borderWidth: 1,
-    borderColor: 'grey',
     backgroundColor: 'white',
     borderRadius: 10,
     paddingStart: 10,
@@ -215,15 +335,6 @@ const styles = StyleSheet.create({
     paddingStart: 10,
     width: '85%',
     color: 'black',
-  },
-  passwordInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'grey',
-    borderRadius: 10,
-    backgroundColor: 'white',
-    width: '100%',
   },
 });
 

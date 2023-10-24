@@ -9,6 +9,7 @@ import {
 import React, {useState, useEffect} from 'react';
 import {
   IconCentang,
+  IconKedaluwarsa,
   IconSedangDitindak,
   IconTolak,
   IconWaktu,
@@ -21,6 +22,7 @@ import {Ilustrasi, ImagePlaceHolder} from '../../assets/images';
 import axios from 'axios';
 import Title from '../../components/atoms/Title';
 import {useSelector} from 'react-redux';
+import {API_HOST} from '../../../config';
 
 const DetailLaporan = ({navigation, route}: any) => {
   const windowWidth = Dimensions.get('window').width;
@@ -40,7 +42,7 @@ const DetailLaporan = ({navigation, route}: any) => {
         Authorization: `Bearer ${token}`,
       };
       const response = await axios.get(
-        `https://backend-pelaporan-final.glitch.me/api/laporan/detail/${id_laporan}?status=${status}`,
+        `${API_HOST}/api/laporan/detail/${id_laporan}?status=${status}`,
         {headers},
       );
       setLaporanDetail(response.data.data);
@@ -60,6 +62,8 @@ const DetailLaporan = ({navigation, route}: any) => {
         return '#008656';
       case 'laporan ditolak':
         return '#8D0000';
+      case 'laporan kedaluwarsa':
+        return '#3A3A3A';
       default:
         return `transparent`;
     }
@@ -90,6 +94,8 @@ const DetailLaporan = ({navigation, route}: any) => {
         return 'Laporan Selesai';
       case 'laporan ditolak':
         return 'Laporan Ditolak';
+      case 'laporan kedaluwarsa':
+        return 'Laporan Kedaluwarsa';
       default:
         return ' ';
     }
@@ -105,27 +111,12 @@ const DetailLaporan = ({navigation, route}: any) => {
         return <IconCentang />;
       case 'laporan ditolak':
         return <IconTolak />;
+      case 'laporan kedaluwarsa':
+        return <IconKedaluwarsa />;
       default:
         return null;
     }
   };
-
-  // function formatHour(date: any) {
-  //   const localTime = new Date(date.getTime());
-
-  //   const hours = localTime.getHours().toString().padStart(2, '0');
-  //   const minutes = localTime.getMinutes().toString().padStart(2, '0');
-
-  //   return `${hours}:${minutes}`;
-  // }
-
-  // function formatDate(date: any) {
-  //   const year = date.getFullYear().toString();
-  //   const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  //   const day = date.getDate().toString().padStart(2, '0');
-
-  //   return `${day}/${month}/${year}`;
-  // }
 
   const formatDateTime = (date: Date) => {
     const day = String(date.getDate()).padStart(2, '0');
@@ -134,30 +125,6 @@ const DetailLaporan = ({navigation, route}: any) => {
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
     return `${day}/${month}/${year} - ${hours}:${minutes}`;
-  };
-
-  function getMonthName(monthIndex: number) {
-    const monthNames = [
-      'Januari',
-      'Februari',
-      'Maret',
-      'April',
-      'Mei',
-      'Juni',
-      'Juli',
-      'Agustus',
-      'September',
-      'Oktober',
-      'November',
-      'Desember',
-    ];
-    return monthNames[monthIndex];
-  }
-
-  const dataDummy = {
-    jenis_insiden: 'Kejadian Tidak Diharapkan / KTD (Adverse Event)',
-    grading_risiko_kejadian: 'kuning',
-    tanggal_laporan_diterima: '2023-09-18T05:08:52.000Z',
   };
 
   return (
@@ -175,7 +142,7 @@ const DetailLaporan = ({navigation, route}: any) => {
         <View>{getStatusIcon(laporanDetail?.status)}</View>
       </View>
 
-      {laporanDetail && (
+      {laporanDetail && laporanDetail.status === 'laporan selesai' && (
         <View style={styles.detailLaporan}>
           <Text style={styles.txtCard}>Jenis Insiden</Text>
           <Text style={[styles.txtCard, {fontFamily: 'Poppins-Bold'}]}>
@@ -406,7 +373,12 @@ const styles = StyleSheet.create({
     color: 'gray',
     padding: 10,
   },
-  txtGrading: {fontFamily: 'Poppins-Bold', fontSize: 17, color: MyColor.Light},
+  txtGrading: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: 17,
+    color: MyColor.Light,
+    textTransform: 'capitalize',
+  },
   txtCardStatus: {
     fontFamily: 'Poppins-Bold',
     fontSize: 17,

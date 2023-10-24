@@ -8,7 +8,8 @@ import IconSedangDitindak from './iconSedangDitindak.svg';
 import IconCentang from './iconCentang.svg';
 import IconTolak from './iconTolak.svg';
 import IconHome from './home.png';
-import IconRiwayat from './riwayat.png';
+import IconRiwayat from './iconRiwayat.png';
+import IconRiwayat2 from './iconRiwayat.png';
 import IconLaporan from './buatLaporan.png';
 import IconSetting from './settings.png';
 import IconSettings from './IconSetting.svg';
@@ -21,6 +22,8 @@ import IconLogOut from './open-door-svgrepo-com 1.svg';
 import IconAbout from './info-circle-svgrepo-com 1.svg';
 import IconPolicy from './security-free-material-svgrepo-com 1.svg';
 import IconKey from './key-svgrepo-com 1.svg';
+import IconKedaluwarsa from './iconKadaluarsa.svg';
+import IconPrint from './print-svgrepo-com (1) 1.svg';
 
 export {
   IconPanahKanan,
@@ -34,6 +37,7 @@ export {
   IconTolak,
   IconHome,
   IconRiwayat,
+  IconRiwayat2,
   IconLaporan,
   IconSetting,
   iconNews,
@@ -46,4 +50,6 @@ export {
   IconAbout,
   IconPolicy,
   IconKey,
+  IconKedaluwarsa,
+  IconPrint,
 };

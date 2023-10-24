@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {
   StyleSheet,
   Text,
@@ -22,17 +22,17 @@ import {
 import Button from '../../components/atoms/Button';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import PushNotification from 'react-native-push-notification';
-import {io} from 'socket.io-client';
 import {useDispatch} from 'react-redux';
 import {
   saveTokenAction,
   saveNameAction,
   saveRoleAction,
+  saveJobAction,
+  saveIdUserAction,
 } from '../../../redux/action';
 import {CommonActions} from '@react-navigation/native';
-
-const socket = io('https://backend-pelaporan-final.glitch.me.glitch.me');
+import {defineSocket} from '../../../socket';
+import {API_HOST} from '../../../config';
 
 const PasswordInput = ({placeholder, onChangeText, value}: any) => {
   const [secureTextEntry, setSecureTextEntry] = useState(true);
@@ -52,7 +52,11 @@ const PasswordInput = ({placeholder, onChangeText, value}: any) => {
         value={value}
       />
       <TouchableOpacity onPress={toggleSecureTextEntry}>
-        {secureTextEntry ? <IconMataTertutup /> : <IconMataTerbuka />}
+        {secureTextEntry ? (
+          <IconMataTertutup stroke={'black'} />
+        ) : (
+          <IconMataTerbuka stroke={'black'} />
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -72,13 +76,10 @@ const AdminLogin = ({navigation}: any) => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(
-        'https://backend-pelaporan-final.glitch.me/auth/user/login',
-        {
-          username,
-          password,
-        },
-      );
+      const response = await axios.post(`${API_HOST}/auth/user/login`, {
+        username,
+        password,
+      });
       console.log('ini response: ', response.data);
       const token = response.data.data.token;
       console.log('ini token: ', token);
@@ -86,20 +87,25 @@ const AdminLogin = ({navigation}: any) => {
       const id_user = response.data.data.id_user;
       const name = response.data.data.name;
       const role = response.data.data.role;
+      const job = response.data.data.job;
 
       await AsyncStorage.setItem('id_user', id_user);
       await AsyncStorage.setItem('name', name);
       await AsyncStorage.setItem('token', token);
       await AsyncStorage.setItem('role', role);
+      await AsyncStorage.setItem('job', job);
 
       const value = await AsyncStorage.getItem('token');
       console.log('ini adalah value: ', value);
       if (response.data.code == '200') {
         const dataUser = response.data.data;
         if (dataUser.role === 'admin') {
+          dispatch(saveIdUserAction(dataUser.id_user));
           dispatch(saveTokenAction(dataUser.token));
           dispatch(saveNameAction(dataUser.name));
           dispatch(saveRoleAction(dataUser.role));
+          dispatch(saveJobAction(dataUser.job));
+          defineSocket();
           console.log('ini di LOGIN: ', dataUser);
           console.log('ini di LOGIN id user: ', dataUser.id_user);
           // navigation.navigate('AdminHomepage');

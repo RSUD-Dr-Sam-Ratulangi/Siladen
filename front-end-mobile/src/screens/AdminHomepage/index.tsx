@@ -14,33 +14,32 @@ import Title from '../../components/atoms/Title';
 import {MyFont} from '../../components/atoms/MyFont';
 import {
   IconCentang,
+  IconKedaluwarsa,
   IconLaporan,
   IconRiwayat,
+  IconRiwayat2,
   IconSedangDitindak,
   IconSettings,
   IconTolak,
   IconWaktu,
 } from '../../assets/icons';
-import {Path, Svg} from 'react-native-svg';
 import Gap from '../../components/atoms/Gap';
-import {Ilustrasi, Ilustrasi1, ImagePlaceHolder} from '../../assets/images';
+import {ImagePlaceHolder} from '../../assets/images';
 import axios from 'axios';
 import {useSelector} from 'react-redux';
-import socket from '../../../socket';
+import {socket} from '../../../socket';
 import PushNotification from 'react-native-push-notification';
-// import {saveChannelIdAction} from '../../../redux/action';
+import {API_HOST} from '../../../config';
 
-interface Laporan {
+type Laporan = {
   id_laporan: string;
   status: string;
   tanggal_laporan_dikirim: Date;
   gambar: string;
-}
+};
 
 const AdminHomepage = ({navigation, route}: any) => {
   const channel_ids = useSelector((data: any) => data.channelId);
-  // console.log('in homepage admin: ', route.params);
-  // const dataUser = route.params;
   const tokenSelector = useSelector((data: any) => data.token);
   const nameSelector = useSelector((data: any) => data.name);
   const roleSelector = useSelector((data: any) => data.role);
@@ -59,19 +58,17 @@ const AdminHomepage = ({navigation, route}: any) => {
     useCallback(() => {
       getTodayReports();
       getCurrentMonthReports();
-      console.log('ini di admin homepage', dataUser);
     }, []),
   );
 
   useEffect(() => {
     socket.emit('join admin', 'admin');
-    socket.on('admin received', message => {
+    socket.on('admin received', (data: any) => {
       PushNotification.localNotification({
         channelId: `${channel_ids}`,
-        title: 'Ada Laporan Baru!',
-        message: 'Segera Periksa laporan ini',
+        title: data.title,
+        message: data.message,
       });
-      console.log('ini pesan dari user', message);
     });
     console.log('ini channel idlkl: ', channel_ids);
   }, []);
@@ -82,12 +79,11 @@ const AdminHomepage = ({navigation, route}: any) => {
         Authorization: `Bearer ${dataUser.token}`, // Tambahkan token ke header dengan format Bearer
       };
 
-      const response = await axios.get(
-        `https://backend-pelaporan-final.glitch.me/api/laporan/current/day`,
-        {headers},
-      );
+      const response = await axios.get(`${API_HOST}/api/laporan/current/day`, {
+        headers,
+      });
       setLaporanHariIni(response.data.data);
-      console.log('laporan hari ini: ', response.data.data);
+      console.log('laporan hari ini: ', response.data);
     } catch (error) {
       console.log(error);
     }
@@ -100,7 +96,7 @@ const AdminHomepage = ({navigation, route}: any) => {
       };
 
       const response = await axios.get(
-        `https://backend-pelaporan-final.glitch.me/api/laporan/current/month`,
+        `${API_HOST}/api/laporan/current/month`,
         {headers},
       );
       setLaporanBulanIni(response.data.data);
@@ -120,6 +116,8 @@ const AdminHomepage = ({navigation, route}: any) => {
         return '#008656';
       case 'laporan ditolak':
         return '#8D0000';
+      case 'laporan kedaluwarsa':
+        return '#3A3A3A';
       default:
         return 'transparent';
     }
@@ -135,6 +133,8 @@ const AdminHomepage = ({navigation, route}: any) => {
         return <IconCentang />;
       case 'laporan ditolak':
         return <IconTolak />;
+      case 'laporan kedaluwarsa':
+        return <IconKedaluwarsa />;
       default:
         return '';
     }
@@ -150,6 +150,8 @@ const AdminHomepage = ({navigation, route}: any) => {
         return 'Laporan Selesai';
       case 'laporan ditolak':
         return 'Laporan Ditolak';
+      case 'laporan kedaluwarsa':
+        return 'Laporan Kedaluwarsa';
       default:
         return null;
     }
@@ -170,20 +172,16 @@ const AdminHomepage = ({navigation, route}: any) => {
   }
 
   function formatHour(date: any) {
-    const localTime = new Date(date.getTime());
-
-    const hours = localTime.getHours().toString().padStart(2, '0');
-    const minutes = localTime.getMinutes().toString().padStart(2, '0');
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
 
     return `${hours}:${minutes}`;
   }
 
   function formatDate(date: any) {
-    const localTime = new Date(date.getTime());
-
-    const year = localTime.getFullYear().toString();
-    const month = getMonthName(localTime.getMonth());
-    const day = localTime.getDate().toString();
+    const year = date.getFullYear().toString();
+    const month = getMonthName(date.getMonth());
+    const day = date.getDate().toString();
 
     return `${day} ${month} ${year}`;
   }
@@ -361,13 +359,19 @@ const AdminHomepage = ({navigation, route}: any) => {
             onPress={() => {
               navigation.navigate('AdminHistoryItems', dataUser);
             }}>
-            <Image source={IconRiwayat} tintColor="black" />
+            <Image
+              source={IconRiwayat}
+              resizeMode="contain"
+              tintColor={'black'}
+              style={{height: 30, width: 30}}
+            />
+            {/* <IconRiwayat2 fill={'black'} /> */}
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
               navigation.navigate('Settings', dataUser);
             }}>
-            <IconSettings />
+            <IconSettings fill={'black'} />
           </TouchableOpacity>
         </View>
       </View>
@@ -387,7 +391,12 @@ const AdminHomepage = ({navigation, route}: any) => {
             )
           }>
           <Text style={styles.txtCardStatus}>Daftar Semua Laporan</Text>
-          <Image source={IconRiwayat} tintColor={MyColor.Light} />
+          <Image
+            source={IconRiwayat}
+            resizeMode="contain"
+            style={{height: 35}}
+            tintColor={MyColor.Light}
+          />
         </TouchableOpacity>
       </View>
     </ScrollView>

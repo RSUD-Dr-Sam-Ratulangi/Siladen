@@ -43,13 +43,15 @@ import {
   saveDeskripsiPernahTerjadiAction,
   savePernahTerjadiAction,
   saveImageCameraAction,
+  saveInsidenTerjadiPadaPasienOptionAction,
+  saveInputPelaporPertamaAction,
+  saveInputTindakLanjutOlehAction,
 } from '../../../redux/action';
-import socket from '../../../socket';
+import {socket} from '../../../socket';
+import {saveInputPelaporPertama} from '../../../redux/tipe';
 
 const DataKarakteristikPasien = ({navigation, route}: any) => {
   const dispatch = useDispatch();
-  // const dataUser = useSelector((data: any) => data);
-  // const dataUser = route.params;
   const idUser = useSelector((data: any) => data.id_user);
   const namePasienSelector = useSelector((data: any) => data.namePasien);
   const noMRSelector = useSelector((data: any) => data.noMR);
@@ -103,6 +105,20 @@ const DataKarakteristikPasien = ({navigation, route}: any) => {
   useEffect(() => {
     setAge(`${ageNo} ${selectedAgeType}`);
   }, [ageNo, selectedAgeType]);
+
+  function validateForm() {
+    return (
+      name !== '' &&
+      nomorMR !== '' &&
+      ruangan !== '' &&
+      age.length > 5 &&
+      ageNo !== '' &&
+      selectedAgeType !== '' &&
+      insurance !== '' &&
+      gender !== '' &&
+      waktuMendapatPelayanan !== null
+    );
+  }
 
   const btnUmur = () => {
     const handleAge = (option: string) => {
@@ -334,7 +350,6 @@ const DataKarakteristikPasien = ({navigation, route}: any) => {
     const handleDateConfirm = (date: Date) => {
       setWaktuMendapatPelayanan(date);
       hideDateTimePicker();
-      console.log(date);
     };
 
     const formatDateTime = (date: Date) => {
@@ -357,12 +372,42 @@ const DataKarakteristikPasien = ({navigation, route}: any) => {
         <DateTimePickerModal
           isVisible={isDateTimePickerVisible}
           mode="datetime"
-          timeZoneName="Asia/Makassar"
           onConfirm={handleDateConfirm}
           onCancel={hideDateTimePicker}
         />
       </View>
     );
+  };
+
+  const resetForm = () => {
+    dispatch(saveNamePasienAction(''));
+    dispatch(saveNoMRAction(''));
+    dispatch(saveRuanganAction(''));
+    dispatch(saveAgeAction(''));
+    dispatch(saveAgeNoAction(''));
+    dispatch(saveSelectedAgeTypeAction(''));
+    dispatch(saveAsuransiAction(''));
+    dispatch(saveJenisKelaminAction(''));
+    dispatch(saveWaktuMendapatPelayananAction(new Date().toString()));
+    dispatch(saveWaktuInsidenAction(new Date().toString()));
+    dispatch(saveInsidenAction(''));
+    dispatch(saveKronologiInsidenAction(''));
+    dispatch(saveInsidenTerjadiPadaPasienAction(''));
+    dispatch(saveInsidenTerjadiPadaPasienOptionAction(''));
+    dispatch(savePelaporPertamaAction(''));
+    dispatch(saveInputPelaporPertamaAction(''));
+    dispatch(savePasienTerkaitAction(0));
+    dispatch(saveDampakInsidenAction(''));
+    dispatch(saveLokasiInsidenAction(''));
+    dispatch(saveProbabilitasAction(''));
+    dispatch(saveUnitTerkaitAction(''));
+    dispatch(saveTindakLanjutAction(''));
+    dispatch(saveTindakLanjutOlehAction(''));
+    dispatch(saveInputTindakLanjutOlehAction(''));
+    dispatch(saveIsPernahTerjadiAction(false));
+    dispatch(saveDeskripsiPernahTerjadiAction(''));
+    dispatch(savePernahTerjadiAction(''));
+    dispatch(saveImageCameraAction(null));
   };
 
   useFocusEffect(
@@ -382,63 +427,11 @@ const DataKarakteristikPasien = ({navigation, route}: any) => {
               onPress: () => {
                 if (!idUser) {
                   socket.off('message received');
-                  dispatch(saveNamePasienAction(''));
-                  dispatch(saveNoMRAction(''));
-                  dispatch(saveRuanganAction(''));
-                  dispatch(saveAgeAction(''));
-                  dispatch(saveAgeNoAction(''));
-                  dispatch(saveSelectedAgeTypeAction(''));
-                  dispatch(saveAsuransiAction(''));
-                  dispatch(saveJenisKelaminAction(''));
-                  dispatch(saveWaktuMendapatPelayananAction(new Date()));
-
-                  dispatch(saveWaktuInsidenAction(new Date()));
-                  dispatch(saveInsidenAction(''));
-                  dispatch(saveKronologiInsidenAction(''));
-                  dispatch(saveInsidenTerjadiPadaPasienAction(''));
-                  dispatch(savePelaporPertamaAction(''));
-                  dispatch(savePasienTerkaitAction(0));
-                  dispatch(saveDampakInsidenAction(''));
-                  dispatch(saveLokasiInsidenAction(''));
-                  dispatch(saveProbabilitasAction(''));
-                  dispatch(saveUnitTerkaitAction(''));
-                  dispatch(saveTindakLanjutAction(''));
-                  dispatch(saveTindakLanjutOlehAction(''));
-                  dispatch(saveIsPernahTerjadiAction(false));
-                  dispatch(saveDeskripsiPernahTerjadiAction(''));
-                  dispatch(savePernahTerjadiAction(''));
-
-                  dispatch(saveImageCameraAction(null));
+                  resetForm();
                   navigation.navigate('WelcomePage');
                 } else {
                   socket.off('message received');
-                  dispatch(saveNamePasienAction(''));
-                  dispatch(saveNoMRAction(''));
-                  dispatch(saveRuanganAction(''));
-                  dispatch(saveAgeAction(''));
-                  dispatch(saveAgeNoAction(''));
-                  dispatch(saveSelectedAgeTypeAction(''));
-                  dispatch(saveAsuransiAction(''));
-                  dispatch(saveJenisKelaminAction(''));
-                  dispatch(saveWaktuMendapatPelayananAction(new Date()));
-
-                  dispatch(saveWaktuInsidenAction(new Date()));
-                  dispatch(saveInsidenAction(''));
-                  dispatch(saveKronologiInsidenAction(''));
-                  dispatch(saveInsidenTerjadiPadaPasienAction(''));
-                  dispatch(savePelaporPertamaAction(''));
-                  dispatch(savePasienTerkaitAction(0));
-                  dispatch(saveDampakInsidenAction(''));
-                  dispatch(saveLokasiInsidenAction(''));
-                  dispatch(saveProbabilitasAction(''));
-                  dispatch(saveUnitTerkaitAction(''));
-                  dispatch(saveTindakLanjutAction(''));
-                  dispatch(saveTindakLanjutOlehAction(''));
-                  dispatch(saveIsPernahTerjadiAction(false));
-                  dispatch(saveDeskripsiPernahTerjadiAction(''));
-                  dispatch(savePernahTerjadiAction(''));
-
-                  dispatch(saveImageCameraAction(null));
+                  resetForm();
                   navigation.dispatch(
                     CommonActions.reset({
                       index: 0,
@@ -461,6 +454,17 @@ const DataKarakteristikPasien = ({navigation, route}: any) => {
       return () => backHandler.remove();
     }, []),
   );
+
+  useEffect(() => {
+    validateDate();
+  }, [waktuMendapatPelayanan]);
+
+  const validateDate = () => {
+    if (waktuMendapatPelayanan > new Date()) {
+      Alert.alert('Waktu yang anda masukan tidak valid');
+      setWaktuMendapatPelayanan(new Date());
+    }
+  };
 
   return (
     <ScrollView contentContainerStyle={{flexGrow: 1}}>
@@ -537,33 +541,7 @@ const DataKarakteristikPasien = ({navigation, route}: any) => {
                     text: 'OK',
                     onPress: () => {
                       socket.off('message received');
-                      dispatch(saveNamePasienAction(''));
-                      dispatch(saveNoMRAction(''));
-                      dispatch(saveRuanganAction(''));
-                      dispatch(saveAgeAction(''));
-                      dispatch(saveAgeNoAction(''));
-                      dispatch(saveSelectedAgeTypeAction(''));
-                      dispatch(saveAsuransiAction(''));
-                      dispatch(saveJenisKelaminAction(''));
-                      dispatch(saveWaktuMendapatPelayananAction(new Date()));
-
-                      dispatch(saveWaktuInsidenAction(new Date()));
-                      dispatch(saveInsidenAction(''));
-                      dispatch(saveKronologiInsidenAction(''));
-                      dispatch(saveInsidenTerjadiPadaPasienAction(''));
-                      dispatch(savePelaporPertamaAction(''));
-                      dispatch(savePasienTerkaitAction(0));
-                      dispatch(saveDampakInsidenAction(''));
-                      dispatch(saveLokasiInsidenAction(''));
-                      dispatch(saveProbabilitasAction(''));
-                      dispatch(saveUnitTerkaitAction(''));
-                      dispatch(saveTindakLanjutAction(''));
-                      dispatch(saveTindakLanjutOlehAction(''));
-                      dispatch(saveIsPernahTerjadiAction(false));
-                      dispatch(saveDeskripsiPernahTerjadiAction(''));
-                      dispatch(savePernahTerjadiAction(''));
-
-                      dispatch(saveImageCameraAction(null));
+                      resetForm();
                       navigation.navigate('WelcomePage');
                     },
                   },
@@ -591,32 +569,7 @@ const DataKarakteristikPasien = ({navigation, route}: any) => {
                     text: 'OK',
                     onPress: () => {
                       socket.off('message received');
-                      dispatch(saveNamePasienAction(''));
-                      dispatch(saveNoMRAction(''));
-                      dispatch(saveRuanganAction(''));
-                      dispatch(saveAgeAction(''));
-                      dispatch(saveAgeNoAction(''));
-                      dispatch(saveSelectedAgeTypeAction(''));
-                      dispatch(saveAsuransiAction(''));
-                      dispatch(saveJenisKelaminAction(''));
-                      dispatch(saveWaktuMendapatPelayananAction(new Date()));
-                      dispatch(saveWaktuInsidenAction(new Date()));
-                      dispatch(saveInsidenAction(''));
-                      dispatch(saveKronologiInsidenAction(''));
-                      dispatch(saveInsidenTerjadiPadaPasienAction(''));
-                      dispatch(savePelaporPertamaAction(''));
-                      dispatch(savePasienTerkaitAction(0));
-                      dispatch(saveDampakInsidenAction(''));
-                      dispatch(saveLokasiInsidenAction(''));
-                      dispatch(saveProbabilitasAction(''));
-                      dispatch(saveUnitTerkaitAction(''));
-                      dispatch(saveTindakLanjutAction(''));
-                      dispatch(saveTindakLanjutOlehAction(''));
-                      dispatch(saveIsPernahTerjadiAction(false));
-                      dispatch(saveDeskripsiPernahTerjadiAction(''));
-                      dispatch(savePernahTerjadiAction(''));
-
-                      dispatch(saveImageCameraAction(null));
+                      resetForm();
                       navigation.dispatch(
                         CommonActions.reset({
                           index: 0,
@@ -636,40 +589,27 @@ const DataKarakteristikPasien = ({navigation, route}: any) => {
           textColor={MyColor.Light}
           width={173}
           onClick={() => {
-            dispatch(saveNamePasienAction(name));
-            dispatch(saveNoMRAction(nomorMR));
-            dispatch(saveRuanganAction(ruangan));
-            dispatch(saveAgeAction(age));
-            dispatch(saveAgeNoAction(ageNo));
-            dispatch(saveSelectedAgeTypeAction(selectedAgeType));
-            dispatch(saveAsuransiAction(insurance));
-            dispatch(saveJenisKelaminAction(gender));
-            dispatch(saveWaktuMendapatPelayananAction(waktuMendapatPelayanan));
-
-            navigation.navigate(
-              'RincianKejadian',
-              // {
-              //   dataUser,
-              //   name,
-              //   nomorMR,
-              //   ruangan,
-              //   age,
-              //   insurance,
-              //   gender,
-              //   waktuMendapatPelayanan: waktuMendapatPelayanan.toISOString(),
-              // },
-              // console.log(
-              //   'ini data karakteristik pasien: ',
-              //   dataUser,
-              //   name,
-              //   nomorMR,
-              //   ruangan,
-              //   age,
-              //   insurance,
-              //   gender,
-              //   waktuMendapatPelayanan,
-              // ),
-            );
+            if (validateForm()) {
+              dispatch(saveNamePasienAction(name));
+              dispatch(saveNoMRAction(nomorMR));
+              dispatch(saveRuanganAction(ruangan));
+              dispatch(saveAgeAction(age));
+              dispatch(saveAgeNoAction(ageNo));
+              dispatch(saveSelectedAgeTypeAction(selectedAgeType));
+              dispatch(saveAsuransiAction(insurance));
+              dispatch(saveJenisKelaminAction(gender));
+              dispatch(
+                saveWaktuMendapatPelayananAction(
+                  String(waktuMendapatPelayanan),
+                ),
+              );
+              navigation.navigate('RincianKejadian');
+            } else {
+              Alert.alert(
+                'Data Tidak Lengkap',
+                'Harap isi semua field dengan data yang benar sebelum melanjutkan ke langkah berikutnya',
+              );
+            }
           }}
         />
       </View>

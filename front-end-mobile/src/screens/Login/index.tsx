@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {
   StyleSheet,
   Text,
@@ -22,8 +22,6 @@ import {
 import Button from '../../components/atoms/Button';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import PushNotification from 'react-native-push-notification';
-import {io} from 'socket.io-client';
 import {API_HOST} from '../../../config';
 import {useDispatch} from 'react-redux';
 import {
@@ -32,8 +30,10 @@ import {
   saveRoleAction,
   saveTokenAction,
   saveUsernameAction,
+  saveJobAction,
 } from '../../../redux/action';
 import {CommonActions} from '@react-navigation/native';
+import {defineSocket} from '../../../socket';
 
 // const socket = io(API_HOST);
 
@@ -55,7 +55,11 @@ const PasswordInput = ({placeholder, onChangeText, value}: any) => {
         value={value}
       />
       <TouchableOpacity onPress={toggleSecureTextEntry}>
-        {secureTextEntry ? <IconMataTertutup /> : <IconMataTerbuka />}
+        {secureTextEntry ? (
+          <IconMataTertutup stroke={'black'} />
+        ) : (
+          <IconMataTerbuka stroke={'black'} />
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -63,42 +67,9 @@ const PasswordInput = ({placeholder, onChangeText, value}: any) => {
 
 const Login = ({navigation}: any) => {
   const dispatch = useDispatch();
-  // let dataAwal = useSelector((data: any) => data.value);
-  // const [valueRedux, setValueRedux] = useState(dataAwal);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    // socket.on('pesan', data => {
-    //   console.log('Pesan diterima dari server:', data);
-    //   // Tampilkan notifikasi push
-    //   PushNotification.localNotification({
-    //     channelId: 'tes-channel1',
-    //     title: 'test title server',
-    //     message: 'test body',
-    //   });
-    // });
-    console.log('ini api host: ', API_HOST);
-
-    // console.log('ini nilai awal: ', valueRedux);
-  }, []);
-
-  // useEffect(() => {
-  //   setValueRedux(dataAwal);
-  //   console.log('setelah ubah usestae: ', valueRedux);
-  // }, [dataAwal]);
-
-  const triggerNotification = () => {
-    // const dataAwal = useSelector((data: any) => data.value);
-    // setValueRedux(dataAwal);
-    // dispatch(printAction('jerico'));
-    PushNotification.localNotification({
-      channelId: 'tes-channel1',
-      title: 'Notifikasi Test',
-      message: 'Ini adalah notifikasi test.',
-    });
-  };
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -119,21 +90,25 @@ const Login = ({navigation}: any) => {
       const id_user = response.data.data.id_user;
       const name = response.data.data.name;
       const role = response.data.data.role;
+      const job = response.data.data.job ? response.data.data.job : '';
 
       await AsyncStorage.setItem('id_user', id_user);
       await AsyncStorage.setItem('name', name);
       await AsyncStorage.setItem('token', token);
       await AsyncStorage.setItem('role', role);
+      await AsyncStorage.setItem('job', job);
 
       const tokenAsync = await AsyncStorage.getItem('token');
       const nameAsync = await AsyncStorage.getItem('name');
       const idUserAsync = await AsyncStorage.getItem('id_user');
       const roleAsync = await AsyncStorage.getItem('role');
+      const jobAsync = await AsyncStorage.getItem('job');
 
       console.log('ini adalah token: ', tokenAsync);
       console.log('ini name dari asyn storage: ', nameAsync);
       console.log('ini id user dari asyn: ', idUserAsync);
       console.log('ini role dari asyn: ', roleAsync);
+      console.log('ini job dari async', jobAsync);
 
       if (response.data.code == '200') {
         const dataUser = response.data.data;
@@ -143,7 +118,8 @@ const Login = ({navigation}: any) => {
           dispatch(saveRoleAction(dataUser.role));
           dispatch(saveTokenAction(dataUser.token));
           dispatch(saveUsernameAction(dataUser.username));
-
+          dispatch(saveJobAction(dataUser.job));
+          defineSocket();
           console.log('ini di LOGIN: ', dataUser);
           console.log('ini di LOGIN id user: ', dataUser.id_user);
           navigation.dispatch(
@@ -235,13 +211,6 @@ const Login = ({navigation}: any) => {
           navigation.navigate('SignUp');
         }}
       />
-      {/* <TouchableOpacity
-        style={{width: 100, height: 30, backgroundColor: 'pink'}}
-        onPress={() => {
-          triggerNotification();
-        }}>
-        <Text style={{color: 'black'}}>Trigger Notifikasi</Text>
-      </TouchableOpacity> */}
     </ScrollView>
   );
 };
@@ -278,8 +247,8 @@ const styles = StyleSheet.create({
   txtInput: {
     fontSize: 14,
     fontFamily: MyFont.Primary,
-    borderWidth: 1,
-    borderColor: 'grey',
+    // borderWidth: 1,
+    // borderColor: 'grey',
     backgroundColor: 'white',
     borderRadius: 10,
     paddingStart: 10,
@@ -305,8 +274,8 @@ const styles = StyleSheet.create({
   passwordInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'grey',
+    // borderWidth: 1,
+    // borderColor: 'grey',
     borderRadius: 10,
     backgroundColor: 'white',
     width: '100%',

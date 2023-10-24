@@ -1,20 +1,13 @@
-import {
-  check,
-  request,
-  PERMISSIONS,
-  PermissionStatus,
-  RESULTS,
-} from 'react-native-permissions';
+import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 import {Platform} from 'react-native';
 
-type PlatformPermissionType = {
-  web?: string;
-  android?: string;
-  ios?: string;
-  macos?: string;
-  windows?: string;
-  // Add more platforms if necessary
-};
+// type PlatformPermissionType = {
+//   web?: string;
+//   android?: string;
+//   ios?: string;
+//   macos?: string;
+//   windows?: string;
+// };
 
 const PLATFORM_NOTIFICATIONS_PERMISSIONS = {
   web: undefined,
@@ -41,7 +34,7 @@ class AppPermission {
       return true;
     }
     try {
-      const result = await check(permissions); // Pass 'permissions' directly here
+      const result = await check(permissions);
       if (result === RESULTS.GRANTED) return true;
       return this.requestPermission(permissions);
     } catch (error) {
@@ -51,7 +44,7 @@ class AppPermission {
 
   requestPermission = async (permissions: any): Promise<boolean> => {
     try {
-      const result = await request(permissions); // Pass 'permissions' directly here
+      const result = await request(permissions);
       return result === RESULTS.GRANTED;
     } catch (error) {
       return false;

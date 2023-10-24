@@ -5,6 +5,9 @@ import {
   TouchableOpacity,
   View,
   TextInput as Input,
+  Pressable,
+  Modal,
+  Alert,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import Title from '../../components/atoms/Title';
@@ -13,7 +16,7 @@ import {MyColor} from '../../components/atoms/MyColor';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import Gap from '../../components/atoms/Gap';
 import Button from '../../components/atoms/Button';
-import {IconPanahKanan} from '../../assets/icons';
+import {IconDropDown, IconPanahKanan} from '../../assets/icons';
 import axios from 'axios';
 import {useSelector, useDispatch} from 'react-redux';
 import {
@@ -21,7 +24,9 @@ import {
   saveInsidenAction,
   saveKronologiInsidenAction,
   saveInsidenTerjadiPadaPasienAction,
+  saveInsidenTerjadiPadaPasienOptionAction,
   savePelaporPertamaAction,
+  saveInputPelaporPertamaAction,
   savePasienTerkaitAction,
   saveDampakInsidenAction,
   saveLokasiInsidenAction,
@@ -29,15 +34,17 @@ import {
   saveUnitTerkaitAction,
   saveTindakLanjutAction,
   saveTindakLanjutOlehAction,
+  saveInputTindakLanjutOlehAction,
   saveIsPernahTerjadiAction,
   saveDeskripsiPernahTerjadiAction,
   savePernahTerjadiAction,
 } from '../../../redux/action';
+import {API_HOST} from '../../../config';
 
-interface JenisPasien {
+type JenisPasien = {
   id_jenis_pasien: number;
   nama_jenis_pasien: string;
-}
+};
 
 const RincianKejadian = ({navigation, route}: any) => {
   const dispatch = useDispatch();
@@ -53,8 +60,14 @@ const RincianKejadian = ({navigation, route}: any) => {
   const insidenTerjadiPadaPasienSelector = useSelector(
     (data: any) => data.insidenTerjadiPadaPasien,
   );
+  const insidenTerjadiPadaPasienOptionSelector = useSelector(
+    (data: any) => data.insidenTerjadiPadaPasienOption,
+  );
   const pelaporPertamaSelector = useSelector(
     (data: any) => data.pelaporPertama,
+  );
+  const inputPelaporPertamaSelector = useSelector(
+    (data: any) => data.inputPelaporPertama,
   );
   const pasienTerkaitSelector = useSelector((data: any) => data.pasienTerkait);
   const dampakInsidenSelector = useSelector((data: any) => data.dampakInsiden);
@@ -65,6 +78,9 @@ const RincianKejadian = ({navigation, route}: any) => {
   const tindakLanjutOlehSelector = useSelector(
     (data: any) => data.tindakLanjutOleh,
   );
+  const inputTindakLanjutOlehSelector = useSelector(
+    (data: any) => data.inputTindakLanjutOleh,
+  );
   const isPernahTerjadiSelector = useSelector(
     (data: any) => data.isPernahTerjadi,
   );
@@ -72,7 +88,6 @@ const RincianKejadian = ({navigation, route}: any) => {
     (data: any) => data.deskripsiPernahTerjadi,
   );
   const pernahTerjadiSelector = useSelector((data: any) => data.pernahTerjadi);
-
   const namePasienSelector = useSelector((data: any) => data.namePasien);
   const noMRSelector = useSelector((data: any) => data.noMR);
   const ruanganSelector = useSelector((data: any) => data.ruangan);
@@ -105,7 +120,9 @@ const RincianKejadian = ({navigation, route}: any) => {
     insiden: insidenSelector,
     kronologiInsiden: kronologiInsidenSelector,
     insidenTerjadiPadaPasien: insidenTerjadiPadaPasienSelector,
+    insidenTerjadiPadaPasienOption: insidenTerjadiPadaPasienOptionSelector,
     pelaporPertama: pelaporPertamaSelector,
+    inputPelaporPertama: inputPelaporPertamaSelector,
     pasienTerkait: pasienTerkaitSelector,
     dampakInsiden: dampakInsidenSelector,
     lokasiInsiden: lokasiInsidenSelector,
@@ -113,6 +130,7 @@ const RincianKejadian = ({navigation, route}: any) => {
     unitTerkait: unitTerkaitSelector,
     tindakLanjut: tindakLanjutSelector,
     tindakLanjutOleh: tindakLanjutOlehSelector,
+    inputTindakLanjutOleh: inputTindakLanjutOlehSelector,
     isPernahTerjadi: isPernahTerjadiSelector,
     deskripsiPernahTerjadi: deskripsiPernahTerjadiSelector,
     pernahTerjadi: pernahTerjadiSelector,
@@ -126,10 +144,15 @@ const RincianKejadian = ({navigation, route}: any) => {
   const [kronologiInsiden, setKronologiInsiden] = useState(
     dataUser.kronologiInsiden,
   );
+  const [insidenTerjadiPadaPasienOption, setInsidenTerjadiPadaPasienOption] =
+    useState(dataUser.insidenTerjadiPadaPasienOption);
   const [insidenTerjadiPadaPasien, setInsidenTerjadiPadaPasien] = useState(
     dataUser.insidenTerjadiPadaPasien,
   );
   const [pelaporPertama, setPelaporPertama] = useState(dataUser.pelaporPertama);
+  const [inputPelaporPertama, setInputPelaporPertama] = useState(
+    dataUser.inputPelaporPertama,
+  );
   const [jenisPasien, setJenisPasien] = useState<JenisPasien[]>([]);
   const [pasienTerkait, setPasienTerkait] = useState(dataUser.pasienTerkait);
   const [dampakInsiden, setDampakInsiden] = useState(dataUser.dampakInsiden);
@@ -140,6 +163,9 @@ const RincianKejadian = ({navigation, route}: any) => {
   const [tindakLanjutOleh, setTindakLanjutOleh] = useState(
     dataUser.tindakLanjutOleh,
   );
+  const [inputTindakLanjutOleh, setInputTindakLanjutOleh] = useState(
+    dataUser.inputTindakLanjutOleh,
+  );
   const [isPernahTerjadi, setIsPernahTerjadi]: any = useState(
     dataUser.isPernahTerjadi,
   );
@@ -148,29 +174,67 @@ const RincianKejadian = ({navigation, route}: any) => {
   );
   // let pernahTerjadi = '';
   const [pernahTerjadi, setPernahTerjadi] = useState(dataUser.pernahTerjadi);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
-  useEffect(() => {}, [pasienTerkait]);
+  function validateForm() {
+    return (
+      waktuInsiden !== null &&
+      insiden !== '' &&
+      kronologiInsiden !== '' &&
+      insidenTerjadiPadaPasien !== '' &&
+      pelaporPertama !== '' &&
+      pasienTerkait !== 0 &&
+      dampakInsiden !== '' &&
+      lokasiInsiden !== '' &&
+      probabilitas !== '' &&
+      unitTerkait !== '' &&
+      tindakLanjut !== '' &&
+      tindakLanjutOleh !== '' &&
+      pernahTerjadi.length > 4
+    );
+  }
+
+  const saveForm = () => {
+    dispatch(saveWaktuInsidenAction(waktuInsiden.toString()));
+    dispatch(saveInsidenAction(insiden));
+    dispatch(saveKronologiInsidenAction(kronologiInsiden));
+    dispatch(saveInsidenTerjadiPadaPasienAction(insidenTerjadiPadaPasien));
+    dispatch(
+      saveInsidenTerjadiPadaPasienOptionAction(insidenTerjadiPadaPasienOption),
+    );
+    dispatch(savePelaporPertamaAction(pelaporPertama));
+    dispatch(saveInputPelaporPertamaAction(inputPelaporPertama));
+    dispatch(savePasienTerkaitAction(pasienTerkait));
+    dispatch(saveDampakInsidenAction(dampakInsiden));
+    dispatch(saveLokasiInsidenAction(lokasiInsiden));
+    dispatch(saveProbabilitasAction(probabilitas));
+    dispatch(saveUnitTerkaitAction(unitTerkait));
+    dispatch(saveTindakLanjutAction(tindakLanjut));
+    dispatch(saveTindakLanjutOlehAction(tindakLanjutOleh));
+    dispatch(saveInputTindakLanjutOlehAction(inputTindakLanjutOleh));
+    dispatch(saveIsPernahTerjadiAction(isPernahTerjadi));
+    dispatch(saveDeskripsiPernahTerjadiAction(deskripsiPernahTerjadi));
+    dispatch(savePernahTerjadiAction(pernahTerjadi));
+  };
 
   useEffect(() => {
     if (isPernahTerjadi === true) {
-      console.log('true masuk sini');
-      setPernahTerjadi(`Ya , ${deskripsiPernahTerjadi}`);
-      console.log('true pernah terjadi: ', pernahTerjadi);
+      setPernahTerjadi(`Ya, ${deskripsiPernahTerjadi}`);
     } else {
       setPernahTerjadi(`Tidak`);
-      console.log('false pernah terjad: ', pernahTerjadi);
     }
   }, [isPernahTerjadi, deskripsiPernahTerjadi]);
 
   useEffect(() => {
     getJenisPasien();
-
-    console.log('ini data user di rincian kejadian oi: ', dataUser);
-    console.log(
-      'ini data user di rincian kejadian oi di coba : ',
-      dataUserCoba,
-    );
   }, []);
+
+  useEffect(() => {
+    if (waktuInsiden > new Date()) {
+      Alert.alert('Waktu yang anda masukan tidak valid');
+      setWaktuInsiden(new Date());
+    }
+  }, [waktuInsiden]);
 
   const datePick = () => {
     const showDateTimePicker = () => {
@@ -207,7 +271,6 @@ const RincianKejadian = ({navigation, route}: any) => {
         <DateTimePickerModal
           isVisible={isDateTimePickerVisible}
           mode="datetime"
-          timeZoneName="Asia/Makassar"
           onConfirm={handleDateConfirm}
           onCancel={hideDateTimePicker}
         />
@@ -217,7 +280,11 @@ const RincianKejadian = ({navigation, route}: any) => {
 
   const btnPelaporPertama = () => {
     const handlePelaporPertama = (option: string) => {
-      setPelaporPertama(option);
+      if (option !== 'Lain-lain') {
+        setPelaporPertama(option);
+      } else {
+        setPelaporPertama('');
+      }
     };
     return (
       <View style={styles.containerBtn}>
@@ -308,17 +375,60 @@ const RincianKejadian = ({navigation, route}: any) => {
         <TouchableOpacity
           style={[
             styles.button,
-            pelaporPertama === 'Lain-lain' && styles.selectedButton,
+            ![
+              'Dokter',
+              'Perawat',
+              'Petugas lainnya',
+              'Pasien',
+              'Keluarga / Pendamping',
+              'Pengunjung',
+            ].includes(pelaporPertama) && styles.selectedButton,
           ]}
           onPress={() => handlePelaporPertama('Lain-lain')}>
           <Text
             style={[
               styles.txtButton,
-              pelaporPertama === 'Lain-lain' && styles.txtBtnActive,
+              ![
+                'Dokter',
+                'Perawat',
+                'Petugas lainnya',
+                'Pasien',
+                'Keluarga / Pendamping',
+                'Pengunjung',
+              ].includes(pelaporPertama) && styles.txtBtnActive,
             ]}>
             Lain-lain
           </Text>
         </TouchableOpacity>
+        {![
+          'Dokter',
+          'Perawat',
+          'Petugas lainnya',
+          'Pasien',
+          'Keluarga / Pendamping',
+          'Pengunjung',
+        ].includes(pelaporPertama) && (
+          <Input
+            style={{
+              flex: 1,
+              backgroundColor: MyColor.Primary,
+              borderRadius: 10,
+              color: MyColor.Light,
+              paddingStart: 10,
+            }}
+            placeholder="(masukan disini...)"
+            placeholderTextColor={MyColor.Light}
+            onChangeText={setInputPelaporPertama}
+            value={inputPelaporPertama}
+            onEndEditing={() => {
+              if (inputPelaporPertama !== '') {
+                setPelaporPertama(inputPelaporPertama);
+              } else {
+                Alert.alert('Mohon mengisi keterangan untuk opsi Lain-lain');
+              }
+            }}
+          />
+        )}
       </View>
     );
   };
@@ -329,10 +439,9 @@ const RincianKejadian = ({navigation, route}: any) => {
         Authorization: `Bearer ${dataUser.token}`, // Tambahkan token ke header dengan format Bearer
       };
       console.log('ini headers: ', dataUser.token);
-      const response = await axios.get(
-        `https://backend-pelaporan-final.glitch.me/api/jenis_pasien`,
-        {headers},
-      );
+      const response = await axios.get(`${API_HOST}/api/jenis_pasien`, {
+        headers,
+      });
       console.log('ini response data: ', response.data.data);
       setJenisPasien(response.data.data);
     } catch (error) {
@@ -369,6 +478,59 @@ const RincianKejadian = ({navigation, route}: any) => {
         ))}
       </View>
     );
+  };
+
+  const renderInsidenTerjadiPadaPasienOption = (option: string) => (
+    <Pressable
+      style={[
+        styles.modalItems,
+        {
+          width:
+            option === 'Lain-lain' &&
+            insidenTerjadiPadaPasienOption !== 'Lain-lain'
+              ? 'auto'
+              : option == 'Lain-lain'
+              ? 98
+              : 128,
+          backgroundColor:
+            insidenTerjadiPadaPasienOption === option
+              ? MyColor.Primary
+              : MyColor.Light,
+        },
+      ]}
+      onPress={() => {
+        setInsidenTerjadiPadaPasienOption(option);
+        if (option === 'Lain-lain') {
+          setInsidenTerjadiPadaPasien('');
+        }
+      }}>
+      <Text
+        style={[
+          styles.txtModal,
+          {
+            color:
+              insidenTerjadiPadaPasienOption === option
+                ? MyColor.Light
+                : MyColor.Primary,
+          },
+        ]}>
+        {option}
+      </Text>
+    </Pressable>
+  );
+
+  const handleInsidenTerjadiPadaPasien = () => {
+    if (insidenTerjadiPadaPasienOption !== 'Lain-lain') {
+      setIsModalVisible(false);
+      setInsidenTerjadiPadaPasien(insidenTerjadiPadaPasienOption);
+    } else {
+      if (insidenTerjadiPadaPasien === '') {
+        Alert.alert('Mohon isi keterangan untuk opsi Lain-lain!');
+        setIsModalVisible(true);
+      } else {
+        setIsModalVisible(false);
+      }
+    }
   };
 
   const btnDampakInsiden = () => {
@@ -555,8 +717,11 @@ const RincianKejadian = ({navigation, route}: any) => {
 
   const btnTindakLanjutOleh = () => {
     const handleTindakLanjutOleh = (option: string) => {
-      setTindakLanjutOleh(option);
-      console.log('follow-up by: ', option);
+      if (option !== 'Lain-lain') {
+        setTindakLanjutOleh(option);
+      } else {
+        setTindakLanjutOleh('');
+      }
     };
 
     return (
@@ -603,6 +768,44 @@ const RincianKejadian = ({navigation, route}: any) => {
             Perawat
           </Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.button,
+            !['Tim', 'Dokter', 'Perawat'].includes(tindakLanjutOleh) &&
+              styles.selectedButton,
+          ]}
+          onPress={() => handleTindakLanjutOleh('Lain-lain')}>
+          <Text
+            style={[
+              styles.txtButton,
+              !['Tim', 'Dokter', 'Perawat'].includes(tindakLanjutOleh) &&
+                styles.txtBtnActive,
+            ]}>
+            Lain-lain
+          </Text>
+        </TouchableOpacity>
+        {!['Tim', 'Dokter', 'Perawat'].includes(tindakLanjutOleh) && (
+          <Input
+            style={{
+              flex: 1,
+              backgroundColor: MyColor.Primary,
+              borderRadius: 10,
+              color: MyColor.Light,
+              paddingStart: 10,
+            }}
+            placeholder="(masukan disini...)"
+            placeholderTextColor={MyColor.Light}
+            onChangeText={setInputTindakLanjutOleh}
+            value={inputTindakLanjutOleh}
+            onEndEditing={() => {
+              if (inputTindakLanjutOleh !== '') {
+                setTindakLanjutOleh(inputTindakLanjutOleh);
+              } else {
+                Alert.alert('Mohon mengisi keterangan untuk opsi Lain-lain');
+              }
+            }}
+          />
+        )}
       </View>
     );
   };
@@ -698,15 +901,168 @@ const RincianKejadian = ({navigation, route}: any) => {
           value={kronologiInsiden}
           multiline={true}
         />
-        <Text style={styles.txtSection}>Insiden yang terjadi pada pasien</Text>
-        <Input
+        <Text style={styles.txtSection}>
+          Insiden yang terjadi pada pasien{'\n'}
+          <Text style={styles.txtInfo}>
+            (sesuai kasus penyakit/spesialisasi)
+          </Text>
+        </Text>
+        {/* <Input
           style={styles.inputBox}
           // placeholder="Penyakit dalam dan Subspesialisasinya"
           placeholderTextColor="#787878"
-          onChangeText={setInsidenTerjadiPadaPasien}
-          value={insidenTerjadiPadaPasien}
+          onChangeText={setInsidenTerjadiPadaPasienOption}
+          value={insidenTerjadiPadaPasienOption}
           multiline={true}
-        />
+        /> */}
+        {/* <Pressable>
+          <Text>(Silahkan pilih yang sesuai)</Text>
+        </Pressable> */}
+        <Pressable
+          style={[
+            styles.InputContainer,
+            {
+              paddingHorizontal: 5,
+              paddingVertical: 12,
+              marginBottom: 20,
+            },
+          ]}
+          onPress={() => setIsModalVisible(true)}>
+          <Text
+            style={{
+              fontFamily: 'Poppins-Medium',
+              fontSize: 16,
+              width: '90%',
+              marginBottom: 'auto',
+              color: 'gray',
+              paddingStart: 5,
+            }}>
+            {insidenTerjadiPadaPasienOption !== ''
+              ? insidenTerjadiPadaPasien
+              : '(Silahkan pilih yang sesuai...)'}
+          </Text>
+          <IconDropDown fill={'black'} />
+        </Pressable>
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={isModalVisible}
+          onRequestClose={() => {
+            setIsModalVisible(false);
+          }}>
+          <View style={styles.modalBackground}>
+            <View style={styles.modal}>
+              <View style={styles.modalContent}>
+                <Text
+                  style={{
+                    fontFamily: 'Poppins-Bold',
+                    fontSize: 18,
+                    color: MyColor.Primary,
+                    marginBottom: 10,
+                  }}>
+                  Insiden terjadi pada pasien{'\n'}
+                  <Text
+                    style={{
+                      fontFamily: MyFont.Primary,
+                      fontSize: 15,
+                      color: 'gray',
+                    }}>
+                    dan Subspesialisasinya
+                  </Text>
+                </Text>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    justifyContent: 'space-between',
+                  }}>
+                  {renderInsidenTerjadiPadaPasienOption('Penyakit dalam')}
+                  {renderInsidenTerjadiPadaPasienOption('Anak')}
+                  {renderInsidenTerjadiPadaPasienOption('Bedah')}
+                  {renderInsidenTerjadiPadaPasienOption('Obgyn')}
+                  {renderInsidenTerjadiPadaPasienOption('THT')}
+                  {renderInsidenTerjadiPadaPasienOption('Mata')}
+                  {renderInsidenTerjadiPadaPasienOption('Saraf')}
+                  {renderInsidenTerjadiPadaPasienOption('Anastesi')}
+                  {renderInsidenTerjadiPadaPasienOption('Kulit & Kelamin')}
+                  {renderInsidenTerjadiPadaPasienOption('Jantung')}
+                  {renderInsidenTerjadiPadaPasienOption('Paru-paru')}
+                  {renderInsidenTerjadiPadaPasienOption('Jiwa')}
+                </View>
+                <View
+                  style={{
+                    flexDirection:
+                      insidenTerjadiPadaPasienOption === 'Lain-lain'
+                        ? 'row'
+                        : 'column',
+                    justifyContent: 'space-between',
+                  }}>
+                  {renderInsidenTerjadiPadaPasienOption('Lain-lain')}
+                  {insidenTerjadiPadaPasienOption === 'Lain-lain' && (
+                    <View>
+                      <Input
+                        style={{
+                          backgroundColor: MyColor.Primary,
+                          borderRadius: 10,
+                          color: MyColor.Light,
+                          width: 160,
+                          height: 35,
+                        }}
+                        placeholder="(masukan disini...)"
+                        placeholderTextColor={MyColor.Light}
+                        onChangeText={setInsidenTerjadiPadaPasien}
+                        value={insidenTerjadiPadaPasien}
+                      />
+                    </View>
+                  )}
+                </View>
+                <View style={{flexDirection: 'row', gap: 10}}>
+                  <Pressable
+                    style={styles.modalItems}
+                    onPress={() => {
+                      setIsModalVisible(false);
+                      if (
+                        insidenTerjadiPadaPasienOption !== 'Lain-lain' &&
+                        insidenTerjadiPadaPasien !==
+                          insidenTerjadiPadaPasienOption
+                      ) {
+                        if (
+                          insidenTerjadiPadaPasienOption !== 'Lain-lain' &&
+                          ![
+                            'Penyakit dalam',
+                            'Anak',
+                            'Bedah',
+                            'Obgyn',
+                            'THT',
+                            'Mata',
+                            'Saraf',
+                            'Anastesi',
+                            'Kulit & Kelamin',
+                            'Jantung',
+                            'Paru-paru',
+                            'Jiwa',
+                          ].includes(insidenTerjadiPadaPasien)
+                        ) {
+                          setInsidenTerjadiPadaPasienOption('Lain-lain');
+                        } else {
+                          setInsidenTerjadiPadaPasienOption(
+                            insidenTerjadiPadaPasien,
+                          );
+                        }
+                      }
+                    }}>
+                    <Text style={[styles.txtModal, {fontSize: 18}]}>Batal</Text>
+                  </Pressable>
+                  <Pressable
+                    style={[styles.modalItems, {flex: 1}]}
+                    onPress={handleInsidenTerjadiPadaPasien}>
+                    <Text style={[styles.txtModal, {fontSize: 18}]}>OK</Text>
+                  </Pressable>
+                </View>
+              </View>
+            </View>
+          </View>
+        </Modal>
         <Text style={styles.txtSection}>Dampak Insiden Terhadap Pasien</Text>
         {btnDampakInsiden()}
         <Text style={styles.txtSection}>Probabilitas</Text>
@@ -717,7 +1073,10 @@ const RincianKejadian = ({navigation, route}: any) => {
         {btnPelaporPertama()}
         <Text style={styles.txtSection}>Insiden Menyangkut Pasien</Text>
         {btnPasienTerkait()}
-        <Text style={styles.txtSection}>Tempat Insiden</Text>
+        <Text style={styles.txtSection}>
+          Tempat Insiden{' '}
+          <Text style={styles.txtInfo}>(tempat pasien berada)</Text>
+        </Text>
         <Input
           style={styles.inputBox}
           // placeholder="Nama anda"
@@ -727,7 +1086,8 @@ const RincianKejadian = ({navigation, route}: any) => {
           multiline={true}
         />
         <Text style={styles.txtSection}>
-          Unit / Departemen terkait yang menyebabkan insiden
+          Unit / Departemen terkait yang menyebabkan insiden{' '}
+          <Text style={styles.txtInfo}>(contoh: UGD)</Text>
         </Text>
         <Input
           style={styles.inputBox}
@@ -766,23 +1126,7 @@ const RincianKejadian = ({navigation, route}: any) => {
           textColor={MyColor.Primary}
           width={126}
           onClick={() => {
-            dispatch(saveWaktuInsidenAction(waktuInsiden));
-            dispatch(saveInsidenAction(insiden));
-            dispatch(saveKronologiInsidenAction(kronologiInsiden));
-            dispatch(
-              saveInsidenTerjadiPadaPasienAction(insidenTerjadiPadaPasien),
-            );
-            dispatch(savePelaporPertamaAction(pelaporPertama));
-            dispatch(savePasienTerkaitAction(pasienTerkait));
-            dispatch(saveDampakInsidenAction(dampakInsiden));
-            dispatch(saveLokasiInsidenAction(lokasiInsiden));
-            dispatch(saveProbabilitasAction(probabilitas));
-            dispatch(saveUnitTerkaitAction(unitTerkait));
-            dispatch(saveTindakLanjutAction(tindakLanjut));
-            dispatch(saveTindakLanjutOlehAction(tindakLanjutOleh));
-            dispatch(saveIsPernahTerjadiAction(isPernahTerjadi));
-            dispatch(saveDeskripsiPernahTerjadiAction(deskripsiPernahTerjadi));
-            dispatch(savePernahTerjadiAction(pernahTerjadi));
+            saveForm();
             navigation.navigate('DataKarakteristikPasien');
           }}
         />
@@ -793,42 +1137,15 @@ const RincianKejadian = ({navigation, route}: any) => {
           width={173}
           icons={<IconPanahKanan />}
           onClick={() => {
-            dispatch(saveWaktuInsidenAction(waktuInsiden));
-            dispatch(saveInsidenAction(insiden));
-            dispatch(saveKronologiInsidenAction(kronologiInsiden));
-            dispatch(
-              saveInsidenTerjadiPadaPasienAction(insidenTerjadiPadaPasien),
-            );
-            dispatch(savePelaporPertamaAction(pelaporPertama));
-            dispatch(savePasienTerkaitAction(pasienTerkait));
-            dispatch(saveDampakInsidenAction(dampakInsiden));
-            dispatch(saveLokasiInsidenAction(lokasiInsiden));
-            dispatch(saveProbabilitasAction(probabilitas));
-            dispatch(saveUnitTerkaitAction(unitTerkait));
-            dispatch(saveTindakLanjutAction(tindakLanjut));
-            dispatch(saveTindakLanjutOlehAction(tindakLanjutOleh));
-            dispatch(saveIsPernahTerjadiAction(isPernahTerjadi));
-            dispatch(saveDeskripsiPernahTerjadiAction(deskripsiPernahTerjadi));
-            dispatch(savePernahTerjadiAction(pernahTerjadi));
-            navigation.navigate(
-              'FotoPendukung',
-              // {
-              //   ...dataUser,
-              //   waktuInsiden: waktuInsiden.toISOString(),
-              //   insiden,
-              //   kronologiInsiden,
-              //   insidenTerjadiPadaPasien,
-              //   pelaporPertama,
-              //   pasienTerkait,
-              //   lokasiInsiden,
-              //   unitTerkait,
-              //   tindakLanjut,
-              //   tindakLanjutOleh,
-              //   pernahTerjadi,
-              //   dampakInsiden,
-              //   probabilitas,
-              // }
-            );
+            if (validateForm()) {
+              saveForm();
+              navigation.navigate('FotoPendukung');
+            } else {
+              Alert.alert(
+                'Data Tidak Lengkap',
+                'Harap isi semua field dengan data yang benar sebelum melanjutkan ke langkah berikutnya',
+              );
+            }
           }}
         />
       </View>
@@ -863,6 +1180,16 @@ const styles = StyleSheet.create({
   },
   txtBtnActive: {
     color: MyColor.Light,
+  },
+  txtModal: {
+    fontFamily: MyFont.Primary,
+    fontSize: 13,
+    textAlign: 'center',
+    color: MyColor.Primary,
+  },
+  txtInfo: {
+    color: 'gray',
+    fontSize: 15,
   },
   inputBox: {
     paddingVertical: 0,
@@ -904,6 +1231,43 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 10,
     backgroundColor: MyColor.Light,
+  },
+  InputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 10,
+    backgroundColor: 'white',
+    width: '100%',
+  },
+  modal: {
+    width: '90%',
+    maxWidth: 350,
+    marginHorizontal: 20,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: MyColor.Primary,
+    backgroundColor: MyColor.Light,
+    paddingHorizontal: 25,
+    paddingVertical: 20,
+    alignSelf: 'center',
+  },
+  modalContent: {
+    maxWidth: 272,
+    // backgroundColor: 'violet',
+    alignSelf: 'center',
+  },
+  modalItems: {
+    width: 128,
+    padding: 5,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: MyColor.Primary,
+    marginBottom: 10,
+  },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
   },
   timePicker: {
     width: '100%',

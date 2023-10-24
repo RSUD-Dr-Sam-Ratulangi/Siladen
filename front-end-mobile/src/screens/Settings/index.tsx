@@ -8,9 +8,9 @@ import {
   Image,
   Linking,
   Modal,
+  Dimensions,
 } from 'react-native';
-import React, {useState} from 'react';
-import Button from '../../components/atoms/Button';
+import React, {useState, useCallback} from 'react';
 import {MyColor} from '../../components/atoms/MyColor';
 import Header from '../../components/molecules/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -21,23 +21,53 @@ import {
   saveRoleAction,
   saveTokenAction,
   saveUsernameAction,
+  saveJobAction,
 } from '../../../redux/action';
 import axios from 'axios';
-import {CommonActions} from '@react-navigation/native';
+import {CommonActions, useFocusEffect} from '@react-navigation/native';
 import {IconAbout, IconKey, IconLogOut, IconPolicy} from '../../assets/icons';
 import Gap from '../../components/atoms/Gap';
-import Title from '../../components/atoms/Title';
 import {ProfilePlaceHolder} from '../../assets/images';
 import {MyFont} from '../../components/atoms/MyFont';
-import socket from '../../../socket';
+import {socket} from '../../../socket';
+import {API_HOST} from '../../../config';
+
+const screenW = Dimensions.get('screen').width;
+const w = screenW * 0.5;
 
 const Settings = ({navigation}: any) => {
   const name = useSelector((data: any) => data.name);
-  // const role = useSelector((data:any)=> data.)
+  const job = useSelector((data: any) => data.job);
+  const role = useSelector((data: any) => data.role);
+  const id_user = useSelector((data: any) => data.id_user);
   const dispatch = useDispatch();
   const token = useSelector((data: any) => data.token);
+  const [totalLaporan, setTotalLaporan] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      getJumlahLaporan();
+    }, []),
+  );
+
+  const getJumlahLaporan = async () => {
+    try {
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+
+      const response = await axios.get(
+        `${API_HOST}/api/laporan/amount/user/${id_user}`,
+        {headers},
+      );
+      setTotalLaporan(response.data.data);
+      console.log('total laporan', response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const logout = async () => {
     setIsModalVisible(false);
@@ -46,24 +76,26 @@ const Settings = ({navigation}: any) => {
       const headers = {
         Authorization: `Bearer ${token}`,
       };
-      const response = await axios.delete(
-        `https://backend-pelaporan-final.glitch.me/auth/user/logout`,
-        {headers},
-      );
+      const response = await axios.delete(`${API_HOST}/auth/user/logout`, {
+        headers,
+      });
 
       await AsyncStorage.setItem('id_user', '');
       await AsyncStorage.setItem('name', '');
       await AsyncStorage.setItem('token', '');
       await AsyncStorage.setItem('role', '');
+      await AsyncStorage.setItem('job', '');
       dispatch(saveIdUserAction(''));
       dispatch(saveNameAction(''));
+      dispatch(saveUsernameAction(''));
       dispatch(saveTokenAction(''));
       dispatch(saveRoleAction(''));
+      dispatch(saveJobAction(''));
 
       if (response.data.code === '200') {
-        // navigation.navigate('WelcomePage');
         socket.off('message received');
         socket.off('admin received');
+        socket.disconnect();
 
         navigation.dispatch(
           CommonActions.reset({
@@ -82,6 +114,7 @@ const Settings = ({navigation}: any) => {
       console.log('ini error login: ', error);
     }
   };
+
   return (
     <View style={styles.container}>
       <Header backgroundTransparent />
@@ -89,22 +122,18 @@ const Settings = ({navigation}: any) => {
         <Gap height={20} />
         <Text style={styles.txtTitle}>Pengaturan</Text>
         <Gap height={10} />
-        <View
-          style={{
-            backgroundColor: MyColor.Primary,
-            height: 120,
-            borderRadius: 20,
-            width: '100%',
-            maxWidth: 350,
-            alignItems: 'center',
-            flexDirection: 'row',
-            paddingHorizontal: 20,
-            columnGap: 20,
-          }}>
+        <View style={styles.cardProfile}>
           <Image source={ProfilePlaceHolder} style={styles.img} />
           <View>
             <Text style={styles.txtBold}>{name}</Text>
-            <Text style={styles.txt}>Role disini</Text>
+            {role === 'user' ? (
+              <Text style={styles.txt}>
+                Total laporan dari akun:{'\n'}
+                {totalLaporan} laporan yang telah dibuat
+              </Text>
+            ) : (
+              <Text style={styles.txt}>{job || '-'}</Text>
+            )}
           </View>
         </View>
         <Gap height={10} />
@@ -135,7 +164,7 @@ const Settings = ({navigation}: any) => {
               })
           }>
           <Text style={styles.txtBtn}>Tentang Aplikasi</Text>
-          <IconAbout />
+          <IconAbout fill={'black'} />
         </TouchableOpacity>
         <Gap height={10} />
         <TouchableOpacity
@@ -156,7 +185,7 @@ const Settings = ({navigation}: any) => {
               })
           }>
           <Text style={styles.txtBtn}>Privasi & Keamanan</Text>
-          <IconPolicy />
+          <IconPolicy fill={'black'} />
         </TouchableOpacity>
         <Gap height={30} />
         {isLoading ? (
@@ -246,6 +275,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     justifyContent: 'space-between',
     alignItems: 'center',
+    alignSelf: 'center',
   },
   btnModal: {
     width: '40%',
@@ -255,6 +285,18 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
   },
+  cardProfile: {
+    backgroundColor: MyColor.Primary,
+    height: 120,
+    borderRadius: 20,
+    width: '100%',
+    maxWidth: 350,
+    alignItems: 'center',
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    columnGap: 20,
+    alignSelf: 'center',
+  },
   img: {
     height: 70,
     width: 70,
@@ -262,7 +304,8 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
   modal: {
-    maxHeight: 200,
+    height: 200,
+    width: '100%',
     maxWidth: 350,
     marginHorizontal: 20,
     borderRadius: 20,
@@ -271,6 +314,7 @@ const styles = StyleSheet.create({
     backgroundColor: MyColor.Light,
     paddingHorizontal: 20,
     paddingVertical: 10,
+    alignSelf: 'center',
   },
   modalBackground: {
     flex: 1,
@@ -280,6 +324,7 @@ const styles = StyleSheet.create({
   txt: {
     color: MyColor.Light,
     fontFamily: MyFont.Primary,
+    fontSize: 13,
   },
   txtBtn: {
     fontFamily: 'Poppins-Medium',

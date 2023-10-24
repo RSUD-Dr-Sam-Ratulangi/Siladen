@@ -4,7 +4,6 @@ import {
   View,
   ScrollView,
   Image,
-  Dimensions,
   TouchableOpacity,
   LayoutAnimation,
   ActivityIndicator,
@@ -14,6 +13,7 @@ import React, {useState, useEffect} from 'react';
 import {
   IconCentang,
   IconDropDown,
+  IconKedaluwarsa,
   IconSedangDitindak,
   IconTolak,
   IconWaktu,
@@ -22,25 +22,24 @@ import {MyColor} from '../../components/atoms/MyColor';
 import Header from '../../components/molecules/Header';
 import {MyFont} from '../../components/atoms/MyFont';
 import Gap from '../../components/atoms/Gap';
-import {Ilustrasi, ImagePlaceHolder} from '../../assets/images';
+import {ImagePlaceHolder} from '../../assets/images';
 import axios from 'axios';
 import Title from '../../components/atoms/Title';
 import {API_HOST} from '../../../config';
-import Line from '../../components/atoms/Line';
-import Button from '../../components/atoms/Button';
 import {useSelector} from 'react-redux';
-import socket from '../../../socket';
+import {socket} from '../../../socket';
 
 const AdminHistoryDetail = ({navigation, route}: any) => {
-  const windowWidth = Dimensions.get('window').width;
-
-  // const {id_laporan, dataUser} = route.params;
   const {id_laporan} = route.params;
+  const idSelector = useSelector((data: any) => data.id_user);
+  const nameSelector = useSelector((data: any) => data.name);
 
   const tokenSelector = useSelector((data: any) => data.token);
 
   const dataUser = {
     token: tokenSelector,
+    id_investigator: idSelector,
+    name: nameSelector,
   };
 
   const [status, setStatus] = useState(route.params.status);
@@ -51,17 +50,6 @@ const AdminHistoryDetail = ({navigation, route}: any) => {
   );
   const [selectedGrading, setSelectedGrading] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    getLaporan();
-    console.log(
-      'ini di admin detail laporan: ',
-      dataUser,
-      id_laporan,
-      status,
-      laporanDetail,
-    );
-  }, []);
 
   const getLaporan = async () => {
     try {
@@ -89,14 +77,15 @@ const AdminHistoryDetail = ({navigation, route}: any) => {
       };
       const response = await axios.patch(
         `${API_HOST}/api/laporan/status/investigasi/${id_laporan}`,
-        null,
+        {diinvestigasi_oleh: dataUser.id_investigator},
         {headers},
       );
       getLaporan();
       console.log('ini updated status: ', response.data);
       const data = {
         id_user,
-        message: 'laporan ini sedang diinvestigasi',
+        title: 'Respon dari petugas!',
+        message: `laporan ini sedang diinvestigasi oleh ${dataUser.name}`,
       };
       socket.emit('new message', data);
       navigation.navigate('AdminHistoryItems', dataUser);
@@ -109,47 +98,14 @@ const AdminHistoryDetail = ({navigation, route}: any) => {
 
   useEffect(() => {
     getLaporan();
-    console.log('status: ', status);
   }, [status]);
 
-  const handleTolak = async (id_user: string) => {
-    if (!selectedGrading) {
-      Alert.alert('Harap pilih jenis insiden dan grading');
-    }
-    setIsLoading(true);
-    try {
-      const headers = {
-        Authorization: `Bearer ${dataUser.token}`,
-      };
-      const response = await axios.patch(
-        `${API_HOST}/api/laporan/status/tolak/${id_laporan}`,
-        {
-          jenis_insiden: selectedJenisInsiden,
-          grading_risiko_kejadian: selectedGrading,
-        },
-        {headers},
-      );
-      if (response.data.success === true) {
-        const data = {
-          id_user,
-          message: 'laporan ini ditolak',
-        };
-        socket.emit('new message', data);
-        setStatus('laporan ditolak');
-      }
-      console.log('ini updated status: ', response.data);
-      setIsLoading(false);
-    } catch (error) {
-      setIsLoading(false);
-      console.log(error);
-    }
-  };
-
   const handleSelesai = async (id_user: string) => {
+    setIsLoading(true);
     if (!selectedGrading) {
+      setIsLoading(false);
       Alert.alert('Harap pilih jenis insiden dan grading');
     }
-    setIsLoading(true);
     try {
       const headers = {
         Authorization: `Bearer ${dataUser.token}`,
@@ -168,20 +124,16 @@ const AdminHistoryDetail = ({navigation, route}: any) => {
           message: 'laporan ini selesai',
         };
         socket.emit('new message', data);
-        setStatus('laporan ditolak');
         setStatus('laporan selesai');
       }
       console.log('ini updated status: ', response.data);
+      navigation.navigate('AdminHistoryItems', dataUser);
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
       console.log(error);
     }
   };
-
-  useEffect(() => {
-    console.log(selectedGrading, selectedJenisInsiden);
-  }, [selectedGrading]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -193,6 +145,8 @@ const AdminHistoryDetail = ({navigation, route}: any) => {
         return '#008656';
       case 'laporan ditolak':
         return '#8D0000';
+      case 'laporan kedaluwarsa':
+        return '#3A3A3A';
       default:
         return `transparent`;
     }
@@ -223,6 +177,8 @@ const AdminHistoryDetail = ({navigation, route}: any) => {
         return 'Laporan Selesai';
       case 'laporan ditolak':
         return 'Laporan Ditolak';
+      case 'laporan kedaluwarsa':
+        return 'Laporan Kedaluwarsa';
       default:
         return ' ';
     }
@@ -238,6 +194,8 @@ const AdminHistoryDetail = ({navigation, route}: any) => {
         return <IconCentang />;
       case 'laporan ditolak':
         return <IconTolak />;
+      case 'laporan kedaluwarsa':
+        return <IconKedaluwarsa />;
       default:
         return null;
     }
@@ -257,30 +215,6 @@ const AdminHistoryDetail = ({navigation, route}: any) => {
     return `${day}/${month}/${year} - ${hours}:${minutes}`;
   };
 
-  function getMonthName(monthIndex: number) {
-    const monthNames = [
-      'Januari',
-      'Februari',
-      'Maret',
-      'April',
-      'Mei',
-      'Juni',
-      'Juli',
-      'Agustus',
-      'September',
-      'Oktober',
-      'November',
-      'Desember',
-    ];
-    return monthNames[monthIndex];
-  }
-
-  const dataDummy = {
-    jenis_insiden: 'Kejadian Tidak Diharapkan / KTD (Adverse Event)',
-    grading_risiko_kejadian: 'kuning',
-    tanggal_laporan_diterima: '2023-09-18T05:08:52.000Z',
-  };
-
   const renderJenisInsiden = (option: string) => (
     <TouchableOpacity
       style={{marginTop: 10}}
@@ -294,11 +228,6 @@ const AdminHistoryDetail = ({navigation, route}: any) => {
       </View>
     </TouchableOpacity>
   );
-
-  useEffect(() => {
-    console.log('Ini jenis insiden: ', selectedJenisInsiden);
-    console.log('ini grading: ', selectedGrading);
-  }, [selectedGrading, selectedJenisInsiden]);
 
   const renderGradingButton = (option: string) => (
     <TouchableOpacity
@@ -349,7 +278,7 @@ const AdminHistoryDetail = ({navigation, route}: any) => {
         <View>{getStatusIcon(laporanDetail?.status)}</View>
       </View>
 
-      {laporanDetail && (
+      {laporanDetail && laporanDetail.status === 'laporan selesai' && (
         <View style={styles.detailLaporan}>
           <Text style={styles.txtCard}>Jenis Insiden</Text>
           <Text style={[styles.txtCard, {fontFamily: 'Poppins-Bold'}]}>
@@ -531,75 +460,75 @@ const AdminHistoryDetail = ({navigation, route}: any) => {
             <View>{getStatusIcon('investigasi')}</View>
           </TouchableOpacity>
         )
-      ) : laporanDetail?.status === 'investigasi' ? (
+      ) : laporanDetail?.status === 'investigasi' &&
+        laporanDetail?.investigator_id_user === dataUser.id_investigator ? (
         // Tampilan untuk kondisi 'investigasi'
         isLoading ? (
           <View style={{alignSelf: 'center', padding: 30}}>
             <ActivityIndicator size="large" color={MyColor.Primary} />
           </View>
         ) : (
-          <View style={{backgroundColor: '#A37F00', padding: 30}}>
-            <Text style={[styles.txtCard, {color: MyColor.Light}]}>
-              Jenis Insiden
-            </Text>
-            <View style={styles.jenisLaporanContainer}>
-              <TouchableOpacity
-                onPress={handleExpand}
+          <View>
+            <View style={{backgroundColor: '#A37F00', padding: 30}}>
+              <Text style={[styles.txtCard, {color: MyColor.Light}]}>
+                Jenis Insiden
+              </Text>
+              <View style={styles.jenisLaporanContainer}>
+                <TouchableOpacity
+                  onPress={handleExpand}
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}>
+                  <Text style={styles.txtCard}>{selectedJenisInsiden}</Text>
+                  <IconDropDown />
+                </TouchableOpacity>
+                {isExpanded && (
+                  <View style={{backgroundColor: MyColor.Light}}>
+                    {renderJenisInsiden(
+                      'Kejadian Nyaris Cedera / KNC (Near miss)',
+                    )}
+                    {renderJenisInsiden(
+                      'Kejadian Tidak diharapkan / KTD (Adverse Event)',
+                    )}
+                    {renderJenisInsiden('Kejadian Sentinel (Sentinel Event)')}
+                    {renderJenisInsiden('Kejadian Tidak Cedera / KTC')}
+                    {renderJenisInsiden(
+                      'Kondisi Potensi cedera serius (significant) (KPC)',
+                    )}
+                  </View>
+                )}
+              </View>
+              <Gap height={20} />
+              <Text style={[styles.txtCard, {color: MyColor.Light}]}>
+                Grading Laporan
+              </Text>
+              <View
                 style={{
+                  padding: 10,
                   flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
+                  justifyContent: 'space-evenly',
+                  backgroundColor: MyColor.Light,
+                  borderRadius: 10,
                 }}>
-                <Text style={styles.txtCard}>{selectedJenisInsiden}</Text>
-                <IconDropDown />
-              </TouchableOpacity>
-              {isExpanded && (
-                <View style={{backgroundColor: MyColor.Light}}>
-                  {renderJenisInsiden(
-                    'Kejadian Nyaris Cedera / KNC (Near miss)',
-                  )}
-                  {renderJenisInsiden(
-                    'Kejadian Tidak diharapkan / KTD (Adverse Event)',
-                  )}
-                  {renderJenisInsiden('Kejadian Sentinel (Sentinel Event)')}
-                  {renderJenisInsiden('Kejadian Tidak Cedera / KTC')}
-                  {renderJenisInsiden(
-                    'Kondisi Potensi cedera serius (significant) (KPC)',
-                  )}
-                </View>
-              )}
+                {renderGradingButton('biru')}
+                {renderGradingButton('hijau')}
+                {renderGradingButton('kuning')}
+                {renderGradingButton('merah')}
+              </View>
+              <Gap height={30} />
             </View>
-            <Gap height={20} />
-            <Text style={[styles.txtCard, {color: MyColor.Light}]}>
-              Grading Laporan
-            </Text>
-            <View
-              style={{
-                padding: 10,
-                flexDirection: 'row',
-                justifyContent: 'space-evenly',
-                backgroundColor: MyColor.Light,
-                borderRadius: 10,
-              }}>
-              {renderGradingButton('biru')}
-              {renderGradingButton('hijau')}
-              {renderGradingButton('kuning')}
-              {renderGradingButton('merah')}
-            </View>
-            <Gap height={30} />
-            <View
-              style={{flexDirection: 'row', justifyContent: 'space-evenly'}}>
-              <TouchableOpacity
-                style={styles.btn}
-                onPress={() => handleTolak(laporanDetail?.id_user)}>
-                <Text style={styles.txtCardStatus}>Tolak</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.btn, {backgroundColor: '#008656'}]}
-                onPress={() => handleSelesai(laporanDetail?.id_user)}>
-                <Text style={styles.txtCardStatus}>Selesai</Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity
+              style={[
+                styles.gradingBtn,
+                {backgroundColor: '#008656', width: 'auto', margin: 20},
+              ]}
+              onPress={() => handleSelesai(laporanDetail?.id_user)}>
+              <Text style={[styles.txtCard, {color: MyColor.Light}]}>
+                Selesaikan laporan
+              </Text>
+            </TouchableOpacity>
           </View>
         )
       ) : null}
@@ -698,7 +627,12 @@ const styles = StyleSheet.create({
     color: 'gray',
     padding: 10,
   },
-  txtGrading: {fontFamily: 'Poppins-Bold', fontSize: 17, color: MyColor.Light},
+  txtGrading: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: 17,
+    color: MyColor.Light,
+    textTransform: 'capitalize',
+  },
   txtCardStatus: {
     fontFamily: 'Poppins-Bold',
     fontSize: 17,

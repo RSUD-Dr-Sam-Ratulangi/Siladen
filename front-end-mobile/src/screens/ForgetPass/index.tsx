@@ -1,18 +1,9 @@
-import React, {useState} from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  TextInput as Input,
-  ScrollView,
-  Linking,
-} from 'react-native';
+import React from 'react';
+import {StyleSheet, Text, View, Image, ScrollView, Linking} from 'react-native';
 import Gap from '../../components/atoms/Gap';
 import {Logo} from '../../assets/images';
 import {MyFont} from '../../components/atoms/MyFont';
 import {MyColor} from '../../components/atoms/MyColor';
-import {IconPanahKanan} from '../../assets/icons';
 import Button from '../../components/atoms/Button';
 
 const ForgetPass = ({navigation}: any) => {
