@@ -189,7 +189,7 @@ const getLaporanByIdLaporan = async (req, res) => {
         investigator_username: laporan.investigator ? laporan.investigator.username : null,
         investigator_name: laporan.investigator ? laporan.investigator.name : null,
         investigator_job: laporan.investigator ? laporan.investigator.job : null,
-        investigator_role: laporan.investigator ? laporan.pelapor.role : null,
+        investigator_role: laporan.pelapor ? laporan.pelapor.role : null,
 
         id_kajian_laporan: null,
         jenis_insiden: null,
