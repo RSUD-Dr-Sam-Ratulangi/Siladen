@@ -620,7 +620,7 @@ const postLaporanByUser = async (req, res) => {
     const fileSize = req.file.size;
     const ext = path.extname(req.file.originalname);
 
-    url_gambar = `${req.protocol}://${req.get("host")}/images/${fileName}`;
+    url_gambar = `https://${req.get("host")}/images/${fileName}`;
     const allowedType = [".png", ".jpeg", ".jpg"];
 
     if (!allowedType.includes(ext.toLowerCase())) {
@@ -758,7 +758,7 @@ const postLaporanByAnonim = async (req, res) => {
     const fileSize = req.file.size;
     const ext = path.extname(req.file.originalname);
 
-    url_gambar = `${req.protocol}://${req.get("host")}/images/${fileName}`;
+    url_gambar = `https://${req.get("host")}/images/${fileName}`;
     console.log("url gambar: ", url_gambar);
     const allowedType = [".png", ".jpeg", ".jpg"];
 
