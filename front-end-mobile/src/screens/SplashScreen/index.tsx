@@ -8,7 +8,7 @@ import {
   BackHandler,
 } from 'react-native';
 import React, {useEffect} from 'react';
-import {BackgroundRS, Logo} from '../../assets/images';
+import {BackgroundRS1, Logo} from '../../assets/images';
 import Gap from '../../components/atoms/Gap';
 import {MyColor} from '../../components/atoms/MyColor';
 import {MyFont} from '../../components/atoms/MyFont';
@@ -156,7 +156,7 @@ const SplashScreen = ({navigation}: any) => {
   return (
     <View style={styles.container}>
       <ImageBackground
-        source={BackgroundRS}
+        source={BackgroundRS1}
         resizeMode="cover"
         style={styles.bgRS}>
         <View style={styles.overlay}></View>

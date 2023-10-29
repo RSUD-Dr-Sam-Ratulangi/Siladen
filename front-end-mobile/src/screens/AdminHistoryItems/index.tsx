@@ -235,7 +235,7 @@ const AdminHistoryItems = ({navigation, route}: any) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Header />
+      <Header backgroundTransparent />
       <View style={styles.content}>
         <View
           style={{

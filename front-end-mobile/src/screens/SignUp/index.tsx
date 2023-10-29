@@ -77,38 +77,45 @@ const SignUp = ({navigation}: any) => {
         'Password Tidak Cocok',
         'Password dan konfirmasi password harus sama.',
       );
-    }
-    try {
-      const response = await axios.post(`${API_HOST}/auth/user/register`, {
-        name,
-        username,
-        password,
-        konfirmasi_password,
-        job,
-        role,
-      });
-      console.log('ini respons registrasi: ', response.data.data);
-      if (response.data.code == '201') {
-        Alert.alert('Akun berhasil dibuat', undefined, [
-          {text: 'OK', onPress: () => navigation.navigate('Login')},
-        ]);
-        setName('');
-        setUsername('');
-        setPassword('');
-        setKonfirmasi_password('');
-      }
+    } else if (name.length > 50 || username.length > 20) {
       setIsLoading(false);
-    } catch (error: any) {
-      setIsLoading(false);
-      if (
-        error.response &&
-        error.response.data &&
-        error.response.data.code === '409'
-      ) {
+      Alert.alert(
+        (name.length > 50 && 'Nama terlalu panjang, maksimal 50 karakter') ||
+          'Username terlalu panjang, maksimal 20 karakter',
+      );
+    } else {
+      try {
+        const response = await axios.post(`${API_HOST}/auth/user/register`, {
+          name,
+          username,
+          password,
+          konfirmasi_password,
+          job,
+          role,
+        });
+        console.log('ini respons registrasi: ', response.data.data);
+        if (response.data.code == '201') {
+          Alert.alert('Akun berhasil dibuat', undefined, [
+            {text: 'OK', onPress: () => navigation.navigate('Login')},
+          ]);
+          setName('');
+          setUsername('');
+          setPassword('');
+          setKonfirmasi_password('');
+        }
         setIsLoading(false);
-        Alert.alert('Username sudah pernah digunakan');
+      } catch (error: any) {
+        setIsLoading(false);
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.code === '409'
+        ) {
+          setIsLoading(false);
+          Alert.alert('Username sudah pernah digunakan');
+        }
+        console.log(error);
       }
-      console.log(error);
     }
   };
 
@@ -200,12 +207,10 @@ const SignUp = ({navigation}: any) => {
         <View style={styles.modalBackground}>
           <View style={styles.modal}>
             <View style={styles.modalContent}>
-              {renderJob('Dokter')}
               {renderJob('Perawat')}
-              {renderJob('Petugas IGD')}
-              {renderJob('Petugas Rawat Inap')}
-              {renderJob('Petugas Pendaftaran')}
-              {renderJob('Security')}
+              {renderJob('Dokter')}
+              {renderJob('Administrasi')}
+              {renderJob('Tenaga Kesehatan Lainnya')}
             </View>
           </View>
         </View>
@@ -268,13 +273,14 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     alignSelf: 'center',
   },
-  modalContent: {},
+  modalContent: {
+    rowGap: 10,
+  },
   modalItems: {
     padding: 5,
     borderRadius: 10,
     borderWidth: 1,
     borderColor: MyColor.Primary,
-    marginBottom: 10,
   },
   modalBackground: {
     flex: 1,

@@ -170,7 +170,7 @@ const DetailLaporan = ({navigation, route}: any) => {
       <View style={styles.container1}>
         <Gap height={30} />
         <Title label="Data Karakteristik Pasien" />
-        <Text style={styles.txtKey}>Nama</Text>
+        <Text style={styles.txtKey}>Nama Pasien</Text>
         <View style={styles.box}>
           <Text style={styles.txtValue}>{laporanDetail?.nama_pasien}</Text>
         </View>

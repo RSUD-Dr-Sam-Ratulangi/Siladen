@@ -9,6 +9,7 @@ import {
   Linking,
   Modal,
   Dimensions,
+  ScrollView,
 } from 'react-native';
 import React, {useState, useCallback} from 'react';
 import {MyColor} from '../../components/atoms/MyColor';
@@ -116,7 +117,7 @@ const Settings = ({navigation}: any) => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Header backgroundTransparent />
       <View style={styles.container1}>
         <Gap height={20} />
@@ -124,7 +125,7 @@ const Settings = ({navigation}: any) => {
         <Gap height={10} />
         <View style={styles.cardProfile}>
           <Image source={ProfilePlaceHolder} style={styles.img} />
-          <View>
+          <View style={{width: '70%'}}>
             <Text style={styles.txtBold}>{name}</Text>
             {role === 'user' ? (
               <Text style={styles.txt}>
@@ -247,7 +248,7 @@ const Settings = ({navigation}: any) => {
           </View>
         </Modal>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -260,8 +261,7 @@ const styles = StyleSheet.create({
   container1: {
     flex: 1,
     padding: 20,
-    // alignItems: 'center',
-    // justifyContent: 'center',
+    marginBottom: 70,
   },
   btn: {
     borderWidth: 2,

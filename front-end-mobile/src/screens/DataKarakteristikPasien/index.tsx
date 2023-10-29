@@ -426,7 +426,9 @@ const DataKarakteristikPasien = ({navigation, route}: any) => {
               text: 'OK',
               onPress: () => {
                 if (!idUser) {
-                  socket.off('message received');
+                  if (socket) {
+                    socket.off('message received');
+                  }
                   resetForm();
                   navigation.navigate('WelcomePage');
                 } else {
@@ -540,7 +542,9 @@ const DataKarakteristikPasien = ({navigation, route}: any) => {
                   {
                     text: 'OK',
                     onPress: () => {
-                      socket.off('message received');
+                      if (socket) {
+                        socket.off('message received');
+                      }
                       resetForm();
                       navigation.navigate('WelcomePage');
                     },
