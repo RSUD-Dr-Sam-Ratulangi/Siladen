@@ -1,4 +1,4 @@
-import {StyleSheet, Text, View, Image, TouchableOpacity} from 'react-native';
+import {StyleSheet, View, Image, TouchableOpacity} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import React from 'react';
 import HomePage from '../screens/HomePage';
@@ -54,7 +54,11 @@ const Navigation = ({navigation, route}: any) => {
               <Image
                 source={IconHome}
                 resizeMode="contain"
-                style={{tintColor: focused ? MyColor.Primary : '#121212'}}
+                style={{
+                  tintColor: focused ? MyColor.Primary : '#121212',
+                  width: 35,
+                  height: 35,
+                }}
               />
             </View>
           ),
@@ -71,7 +75,11 @@ const Navigation = ({navigation, route}: any) => {
               <Image
                 source={IconRiwayat}
                 resizeMode="contain"
-                style={{tintColor: focused ? MyColor.Primary : '#121212'}}
+                style={{
+                  tintColor: focused ? MyColor.Primary : '#121212',
+                  width: 35,
+                  height: 35,
+                }}
               />
             </View>
           ),
@@ -89,6 +97,8 @@ const Navigation = ({navigation, route}: any) => {
               resizeMode="contain"
               style={{
                 tintColor: focused ? MyColor.Light : '#ffffff',
+                width: 35,
+                height: 35,
               }}
             />
           ),
@@ -106,7 +116,11 @@ const Navigation = ({navigation, route}: any) => {
               <Image
                 source={iconNews}
                 resizeMode="contain"
-                style={{tintColor: focused ? MyColor.Primary : '#121212'}}
+                style={{
+                  tintColor: focused ? MyColor.Primary : '#121212',
+                  width: 50,
+                  height: 50,
+                }}
               />
             </View>
           ),
@@ -122,7 +136,11 @@ const Navigation = ({navigation, route}: any) => {
               <Image
                 source={IconSetting}
                 resizeMode="contain"
-                style={{tintColor: focused ? MyColor.Primary : '#121212'}}
+                style={{
+                  tintColor: focused ? MyColor.Primary : '#121212',
+                  width: 35,
+                  height: 35,
+                }}
               />
             </View>
           ),

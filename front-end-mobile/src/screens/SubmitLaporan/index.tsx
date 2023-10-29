@@ -1,6 +1,12 @@
-import {StyleSheet, Text, View, Alert, ActivityIndicator} from 'react-native';
-import React, {useEffect, useState} from 'react';
-import {MyFont} from '../../components/atoms/MyFont';
+import {
+  StyleSheet,
+  Text,
+  View,
+  Alert,
+  ActivityIndicator,
+  BackHandler,
+} from 'react-native';
+import React, {useState} from 'react';
 import {MyColor} from '../../components/atoms/MyColor';
 import Button from '../../components/atoms/Button';
 import {IconPanahKanan} from '../../assets/icons';
@@ -33,18 +39,19 @@ import {
   saveDeskripsiPernahTerjadiAction,
   savePernahTerjadiAction,
   saveImageCameraAction,
+  saveInsidenTerjadiPadaPasienOptionAction,
+  saveInputPelaporPertamaAction,
+  saveInputTindakLanjutOlehAction,
 } from '../../../redux/action';
-import socket from '../../../socket';
+import {defineSocket, socket} from '../../../socket';
 import {API_HOST} from '../../../config';
 import {CommonActions} from '@react-navigation/native';
 
 const SubmitLaporan = ({navigation, route}: any) => {
   const dispatch = useDispatch();
-  // const dataUser = route.params;
-  // const dataUser = useSelector((data: any) => data);
   const [checked, setChecked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
+  const nameSelector = useSelector((data: any) => data.name);
   const idUserSelector = useSelector((data: any) => data.id_user);
   const tokenSelector = useSelector((data: any) => data.token);
   const namePasienSelector = useSelector((data: any) => data.namePasien);
@@ -98,7 +105,7 @@ const SubmitLaporan = ({navigation, route}: any) => {
     waktuInsiden: waktuInsidenSelector,
     insiden: insidenSelector,
     kronologiInsiden: kronologiInsidenSelector,
-    insidenTerjadiPadaPasien: insidenTerjadiPadaPasienSelector,
+    insidenTerjadiPadaPasien: `${insidenTerjadiPadaPasienSelector} dan Subspesialisasinya`,
     pelaporPertama: pelaporPertamaSelector,
     pasienTerkait: pasienTerkaitSelector,
     dampakInsiden: dampakInsidenSelector,
@@ -160,14 +167,41 @@ const SubmitLaporan = ({navigation, route}: any) => {
       : null,
   );
 
+  const resetForm = () => {
+    dispatch(saveNamePasienAction(''));
+    dispatch(saveNoMRAction(''));
+    dispatch(saveRuanganAction(''));
+    dispatch(saveAgeAction(''));
+    dispatch(saveAgeNoAction(''));
+    dispatch(saveSelectedAgeTypeAction(''));
+    dispatch(saveAsuransiAction(''));
+    dispatch(saveJenisKelaminAction(''));
+    dispatch(saveWaktuMendapatPelayananAction(new Date().toString()));
+    dispatch(saveWaktuInsidenAction(new Date().toString()));
+    dispatch(saveInsidenAction(''));
+    dispatch(saveKronologiInsidenAction(''));
+    dispatch(saveInsidenTerjadiPadaPasienAction(''));
+    dispatch(saveInsidenTerjadiPadaPasienOptionAction(''));
+    dispatch(savePelaporPertamaAction(''));
+    dispatch(saveInputPelaporPertamaAction(''));
+    dispatch(savePasienTerkaitAction(0));
+    dispatch(saveDampakInsidenAction(''));
+    dispatch(saveLokasiInsidenAction(''));
+    dispatch(saveProbabilitasAction(''));
+    dispatch(saveUnitTerkaitAction(''));
+    dispatch(saveTindakLanjutAction(''));
+    dispatch(saveTindakLanjutOlehAction(''));
+    dispatch(saveInputTindakLanjutOlehAction(''));
+    dispatch(saveIsPernahTerjadiAction(false));
+    dispatch(saveDeskripsiPernahTerjadiAction(''));
+    dispatch(savePernahTerjadiAction(''));
+    dispatch(saveImageCameraAction(null));
+  };
+
   const handleCheckboxToggle = () => {
     setChecked(!checked);
     console.log(checked);
   };
-
-  useEffect(() => {
-    console.log('Ini di langkah 4', dataUser);
-  }, []);
 
   const handleSubmit = async () => {
     if (!checked) {
@@ -176,7 +210,7 @@ const SubmitLaporan = ({navigation, route}: any) => {
         'Anda harus menyetujui pernyataan sebelum mengirim laporan.',
       );
     } else {
-      console.log('tes satu-satuu: ', dataUser.asuransi);
+      console.log('tes satu-satuu: ', dataUser.imageCamera);
       console.log('ini headers: ', dataUser.token);
       console.log('ini id user: ', dataUser.id_user);
       console.log('Ini form data: ', formData);
@@ -214,39 +248,20 @@ const SubmitLaporan = ({navigation, route}: any) => {
           );
         }
         console.log('ini respon post: ', response.data);
-        console.log('ini response: ', response.data.data);
         const token = response.data.data.token;
         console.log('ini token: ', token);
-
         if (response.data.code == '201') {
-          dispatch(saveNamePasienAction(''));
-          dispatch(saveNoMRAction(''));
-          dispatch(saveRuanganAction(''));
-          dispatch(saveAgeAction(''));
-          dispatch(saveAgeNoAction(''));
-          dispatch(saveSelectedAgeTypeAction(''));
-          dispatch(saveAsuransiAction(''));
-          dispatch(saveJenisKelaminAction(''));
-          dispatch(saveWaktuMendapatPelayananAction(new Date()));
-
-          dispatch(saveWaktuInsidenAction(new Date()));
-          dispatch(saveInsidenAction(''));
-          dispatch(saveKronologiInsidenAction(''));
-          dispatch(saveInsidenTerjadiPadaPasienAction(''));
-          dispatch(savePelaporPertamaAction(''));
-          dispatch(savePasienTerkaitAction(0));
-          dispatch(saveDampakInsidenAction(''));
-          dispatch(saveLokasiInsidenAction(''));
-          dispatch(saveProbabilitasAction(''));
-          dispatch(saveUnitTerkaitAction(''));
-          dispatch(saveTindakLanjutAction(''));
-          dispatch(saveTindakLanjutOlehAction(''));
-          dispatch(saveIsPernahTerjadiAction(false));
-          dispatch(saveDeskripsiPernahTerjadiAction(''));
-          dispatch(savePernahTerjadiAction(''));
-
-          dispatch(saveImageCameraAction(null));
-          socket.emit('message admin', 'helo admin, saya sudah submit laporan');
+          resetForm();
+          if (!dataUser.id_user) {
+            defineSocket();
+          }
+          const data = {
+            title: 'Ada laporan masuk!',
+            message: dataUser.id_user
+              ? `${nameSelector} mengirim laporan, segera periksa!`
+              : `Laporan anonim, segera periksa!`,
+          };
+          socket.emit('message admin', data);
           Alert.alert(
             'Laporan Terkirim',
             'Laporan anda akan segera ditangani, terima kasih sudah mau membantu kami dalam meningkatkan kualitas pelayanan Rumah Sakit',
@@ -256,6 +271,7 @@ const SubmitLaporan = ({navigation, route}: any) => {
                 onPress: () => {
                   if (!dataUser.id_user) {
                     socket.off('message received');
+                    socket.disconnect();
                     navigation.dispatch(
                       CommonActions.reset({
                         index: 0,
@@ -275,26 +291,34 @@ const SubmitLaporan = ({navigation, route}: any) => {
               },
             ],
           );
-          // navigation.navigate(
-          //   'Navigation',
-          //   // {
-          //   //   id_user: dataUser.dataUser.id_user,
-          //   //   name: dataUser.dataUser.name,
-          //   //   token: dataUser.dataUser.token,
-          //   //   username: dataUser.dataUser.username,
-          //   // }
-          // );
           console.log('Laporan Terkirim');
         }
         setIsLoading(false);
       } catch (error: any) {
         setIsLoading(false);
         if (error.response) {
-          console.log('ini dari post', error);
-          if (error.response.data.code == '400') {
+          console.log('ini dari post', error.response.data.code);
+          if (error.response.data.code === '400') {
             Alert.alert(
               'Gagal mengirim laporan',
               'Mohon periksa lagi inputan anda lalu coba lagi',
+            );
+          } else if (
+            error.response.data.code === '401' ||
+            error.response.data.code === '403'
+          ) {
+            resetForm();
+            Alert.alert(
+              'Sesi anda telah habis, harap restart aplikasi lalu login kembali',
+              undefined,
+              [
+                {
+                  text: 'Restart',
+                  onPress: () => {
+                    BackHandler.exitApp();
+                  },
+                },
+              ],
             );
           } else {
             Alert.alert(
@@ -319,7 +343,6 @@ const SubmitLaporan = ({navigation, route}: any) => {
         <Checkbox
           status={checked ? 'checked' : 'unchecked'}
           onPress={handleCheckboxToggle}
-          // uncheckedColor={MyColor.Primary}
           color={MyColor.Primary}
         />
         <Text style={styles.txt}>

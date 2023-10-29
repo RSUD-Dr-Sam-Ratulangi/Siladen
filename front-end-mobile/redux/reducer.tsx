@@ -1,10 +1,10 @@
-import {createSelector} from 'reselect';
 import {
   saveIdUser,
   saveName,
   saveRole,
   saveToken,
   saveUsername,
+  saveJob,
   // DATA KARAKTERISTIK PASIEN
   saveNamePasien,
   saveNoMR,
@@ -20,7 +20,9 @@ import {
   saveInsiden,
   saveKronologiInsiden,
   saveInsidenTerjadiPadaPasien,
+  saveInsidenTerjadiPadaPasienOption,
   savePelaporPertama,
+  saveInputPelaporPertama,
   savePasienTerkait,
   saveDampakInsiden,
   saveLokasiInsiden,
@@ -28,6 +30,7 @@ import {
   saveUnitTerkait,
   saveTindakLanjut,
   saveTindakLanjutOleh,
+  saveInputTindakLanjutOleh,
   saveIsPernahTerjadi,
   saveDeskripsiPernahTerjadi,
   savePernahTerjadi,
@@ -35,6 +38,9 @@ import {
   saveImageCamera,
   // CHANNEL ID
   saveChannelId,
+  //AdminHistoryItems
+  saveMonth,
+  saveYear,
 } from './tipe';
 
 const initData = {
@@ -52,13 +58,15 @@ const initData = {
   selectedAgeType: '',
   asuransi: '',
   jenisKelamin: '',
-  waktuMendapatPelayanan: new Date(),
+  waktuMendapatPelayanan: new Date().toString(),
   // DATA RINCIAN KEJADIAN
-  waktuInsiden: new Date(),
+  waktuInsiden: new Date().toString(),
   insiden: '',
   kronologiInsiden: '',
   insidenTerjadiPadaPasien: '',
+  insidenTerjadiPadaPasienOption: '',
   pelaporPertama: '',
+  inputPelaporPertama: '',
   pasienTerkait: 0,
   dampakInsiden: '',
   lokasiInsiden: '',
@@ -66,6 +74,7 @@ const initData = {
   unitTerkait: '',
   tindakLanjut: '',
   tindakLanjutOleh: '',
+  inputTindakLanjutOleh: '',
   isPernahTerjadi: undefined,
   deskripsiPernahTerjadi: '',
   pernahTerjadi: '',
@@ -73,15 +82,14 @@ const initData = {
   imageCamera: null,
   // CHANNEL ID
   channelId: [],
+  //AdminHistoryItems
+  month: new Date().getMonth(),
+  year: new Date().getFullYear().toString(),
 };
 
 export const rootReducer = (state = initData, action: any) => {
   switch (action.type) {
     case saveIdUser:
-      //   console.log('print value halo: ', action);
-      //   console.log('ini didalam state: ', state);
-      //   return {...state, value: action.data};
-      console.log('Berhasil simpan data id user yyyeeee rasengan!!!');
       return {...state, id_user: action.data};
 
     case saveName:
@@ -95,6 +103,9 @@ export const rootReducer = (state = initData, action: any) => {
 
     case saveUsername:
       return {...state, username: action.data};
+
+    case saveJob:
+      return {...state, job: action.data};
 
     case saveNamePasien:
       return {...state, namePasien: action.data};
@@ -136,8 +147,14 @@ export const rootReducer = (state = initData, action: any) => {
     case saveInsidenTerjadiPadaPasien:
       return {...state, insidenTerjadiPadaPasien: action.data};
 
+    case saveInsidenTerjadiPadaPasienOption:
+      return {...state, insidenTerjadiPadaPasienOption: action.data};
+
     case savePelaporPertama:
       return {...state, pelaporPertama: action.data};
+
+    case saveInputPelaporPertama:
+      return {...state, inputPelaporPertama: action.data};
 
     case savePasienTerkait:
       return {...state, pasienTerkait: action.data};
@@ -160,6 +177,9 @@ export const rootReducer = (state = initData, action: any) => {
     case saveTindakLanjutOleh:
       return {...state, tindakLanjutOleh: action.data};
 
+    case saveInputTindakLanjutOleh:
+      return {...state, inputTindakLanjutOleh: action.data};
+
     case saveIsPernahTerjadi:
       return {...state, isPernahTerjadi: action.data};
 
@@ -173,8 +193,13 @@ export const rootReducer = (state = initData, action: any) => {
       return {...state, imageCamera: action.data};
 
     case saveChannelId:
-      console.log('ini masuk save channel: ', action.data);
       return {...state, channelId: action.data};
+
+    case saveMonth:
+      return {...state, month: action.data};
+
+    case saveYear:
+      return {...state, year: action.data};
 
     default:
       return state;

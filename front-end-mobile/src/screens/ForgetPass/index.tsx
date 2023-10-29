@@ -1,22 +1,13 @@
-import React, {useState} from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  TextInput as Input,
-  ScrollView,
-  Linking,
-} from 'react-native';
+import React from 'react';
+import {StyleSheet, Text, View, Image, ScrollView, Linking} from 'react-native';
 import Gap from '../../components/atoms/Gap';
 import {Logo} from '../../assets/images';
 import {MyFont} from '../../components/atoms/MyFont';
 import {MyColor} from '../../components/atoms/MyColor';
-import {IconPanahKanan} from '../../assets/icons';
 import Button from '../../components/atoms/Button';
 
 const ForgetPass = ({navigation}: any) => {
-  const phoneNumber = '+6281234567890';
+  const phoneNumber = '+6285159556468';
 
   const handleTelepon = () => {
     Linking.openURL(`tel:${phoneNumber}`)
@@ -60,7 +51,7 @@ const ForgetPass = ({navigation}: any) => {
           nomor yang ada dibawah ini
         </Text>
         <Gap height={30} />
-        <Text style={styles.txtPhoneNumber}>0812-3456-7890</Text>
+        <Text style={styles.txtPhoneNumber}>0851-5955-6468</Text>
         <View style={{flexDirection: 'row', columnGap: 30, marginTop: 10}}>
           <Button
             label="Telepon"

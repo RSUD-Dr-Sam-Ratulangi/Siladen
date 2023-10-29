@@ -6,12 +6,13 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useState, useCallback} from 'react';
 import {useFocusEffect} from '@react-navigation/native';
 import Header from '../../components/molecules/Header';
 import {MyColor} from '../../components/atoms/MyColor';
 import {
   IconCentang,
+  IconKedaluwarsa,
   IconLaporan,
   IconSedangDitindak,
   IconTolak,
@@ -22,23 +23,19 @@ import Gap from '../../components/atoms/Gap';
 import axios from 'axios';
 import {useSelector} from 'react-redux';
 import {ImagePlaceHolder} from '../../assets/images';
+import {API_HOST} from '../../../config';
 
-interface Laporan {
+type Laporan = {
   status: string;
   id_laporan: string;
   tanggal_laporan_dikirim: Date;
   gambar: string;
-}
+};
 
 const History = ({navigation, route}: any) => {
-  // const dataUser = useSelector((data: any) => data);
   const [laporan, setLaporan] = useState<Laporan[]>([]);
-  // const dataUser = route.params;
-  // const dataUser =
-
   const idUser = useSelector((data: any) => data.id_user);
   const token = useSelector((data: any) => data.token);
-
   const dataUser = {
     id_user: idUser,
     token,
@@ -47,7 +44,6 @@ const History = ({navigation, route}: any) => {
   useFocusEffect(
     useCallback(() => {
       getAllLaporan();
-      console.log('ini so masuk di history: ', dataUser);
     }, []),
   );
 
@@ -59,7 +55,7 @@ const History = ({navigation, route}: any) => {
           Authorization: `Bearer ${dataUser.token}`,
         };
         const response = await axios.get(
-          `https://backend-pelaporan-final.glitch.me/api/laporan/user/${dataUser.id_user}`,
+          `${API_HOST}/api/laporan/user/${dataUser.id_user}`,
           {headers},
         );
         console.log('halo ', response.data);
@@ -81,6 +77,8 @@ const History = ({navigation, route}: any) => {
         return '#008656';
       case 'laporan ditolak':
         return '#8D0000';
+      case 'laporan kedaluwarsa':
+        return '#3A3A3A';
       default:
         return 'transparent';
     }
@@ -96,6 +94,8 @@ const History = ({navigation, route}: any) => {
         return 'Laporan Selesai';
       case 'laporan ditolak':
         return 'Laporan Ditolak';
+      case 'laporan kedaluwarsa':
+        return 'Laporan Kedaluwarsa';
       default:
         return null;
     }
@@ -111,26 +111,24 @@ const History = ({navigation, route}: any) => {
         return <IconCentang />;
       case 'laporan ditolak':
         return <IconTolak />;
+      case 'laporan kedaluwarsa':
+        return <IconKedaluwarsa />;
       default:
         return '';
     }
   };
 
-  function formatHour(date: any) {
-    const localTime = new Date(date.getTime());
-
-    const hours = localTime.getHours().toString().padStart(2, '0');
-    const minutes = localTime.getMinutes().toString().padStart(2, '0');
+  function formatHour(date: Date) {
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
 
     return `${hours}:${minutes}`;
   }
 
-  function formatDate(date: any) {
-    const localTime = new Date(date.getTime());
-
-    const year = localTime.getFullYear().toString();
-    const month = getMonthName(localTime.getMonth());
-    const day = localTime.getDate().toString();
+  function formatDate(date: Date) {
+    const year = date.getFullYear().toString();
+    const month = getMonthName(date.getMonth());
+    const day = date.getDate().toString();
 
     return `${day} ${month} ${year}`;
   }
@@ -153,42 +151,9 @@ const History = ({navigation, route}: any) => {
     return monthNames[monthIndex];
   }
 
-  // const riwayat = [
-  //   {
-  //     jenis: 'Radiologi',
-  //     waktu: '19:45',
-  //     tanggal: '6 September 2023',
-  //     status: 'Laporan Selesai',
-  //   },
-  //   {
-  //     jenis: 'Radiologi',
-  //     waktu: '19:45',
-  //     tanggal: '6 September 2023',
-  //     status: 'Sedang Ditindak',
-  //   },
-  //   {
-  //     jenis: 'Radiologi',
-  //     waktu: '19:45',
-  //     tanggal: '6 September 2023',
-  //     status: 'Dalam Antrian',
-  //   },
-  //   {
-  //     jenis: 'Radiologi',
-  //     waktu: '19:45',
-  //     tanggal: '6 September 2023',
-  //     status: 'Laporan Ditolak',
-  //   },
-  //   {
-  //     jenis: 'Radiologi',
-  //     waktu: '19:45',
-  //     tanggal: '6 September 2023',
-  //     status: 'Laporan Ditolak',
-  //   },
-  // ];
-
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Header />
+      <Header backgroundTransparent />
       <Gap height={20} />
       <View style={styles.container1}>
         <Text
@@ -211,7 +176,11 @@ const History = ({navigation, route}: any) => {
               <Text style={styles.createReportButtonText}>
                 Tekan disini untuk {'\n'}membuat laporan baru!
               </Text>
-              <Image source={IconLaporan} resizeMode="contain" />
+              <Image
+                source={IconLaporan}
+                resizeMode="contain"
+                style={{height: 45}}
+              />
             </TouchableOpacity>
           </View>
         ) : (
@@ -297,7 +266,7 @@ const styles = StyleSheet.create({
   },
   createReportButton: {
     flexDirection: 'row',
-    columnGap: 50,
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
   },
   createReportButtonText: {

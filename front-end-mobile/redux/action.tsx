@@ -4,6 +4,7 @@ import {
   saveRole,
   saveToken,
   saveUsername,
+  saveJob,
   // DATA_KARAKTERISTIK
   saveNamePasien,
   saveNoMR,
@@ -19,7 +20,9 @@ import {
   saveInsiden,
   saveKronologiInsiden,
   saveInsidenTerjadiPadaPasien,
+  saveInsidenTerjadiPadaPasienOption,
   savePelaporPertama,
+  saveInputPelaporPertama,
   savePasienTerkait,
   saveDampakInsiden,
   saveLokasiInsiden,
@@ -27,6 +30,7 @@ import {
   saveUnitTerkait,
   saveTindakLanjut,
   saveTindakLanjutOleh,
+  saveInputTindakLanjutOleh,
   saveIsPernahTerjadi,
   saveDeskripsiPernahTerjadi,
   savePernahTerjadi,
@@ -34,6 +38,9 @@ import {
   saveImageCamera,
   // channel id
   saveChannelId,
+  //AdminHistoryItems
+  saveMonth,
+  saveYear,
 } from './tipe';
 
 export const saveIdUserAction = (data: string) => ({
@@ -58,6 +65,10 @@ export const saveTokenAction = (data: string) => ({
 
 export const saveUsernameAction = (data: string) => ({
   type: saveUsername,
+  data,
+});
+export const saveJobAction = (data: string) => ({
+  type: saveJob,
   data,
 });
 
@@ -101,12 +112,12 @@ export const saveJenisKelaminAction = (data: string) => ({
   data,
 });
 
-export const saveWaktuMendapatPelayananAction = (data: Date) => ({
+export const saveWaktuMendapatPelayananAction = (data: string) => ({
   type: saveWaktuMendapatPelayanan,
   data,
 });
 
-export const saveWaktuInsidenAction = (data: Date) => ({
+export const saveWaktuInsidenAction = (data: string) => ({
   type: saveWaktuInsiden,
   data,
 });
@@ -126,8 +137,18 @@ export const saveInsidenTerjadiPadaPasienAction = (data: string) => ({
   data,
 });
 
+export const saveInsidenTerjadiPadaPasienOptionAction = (data: string) => ({
+  type: saveInsidenTerjadiPadaPasienOption,
+  data,
+});
+
 export const savePelaporPertamaAction = (data: string) => ({
   type: savePelaporPertama,
+  data,
+});
+
+export const saveInputPelaporPertamaAction = (data: string) => ({
+  type: saveInputPelaporPertama,
   data,
 });
 
@@ -166,6 +187,11 @@ export const saveTindakLanjutOlehAction = (data: string) => ({
   data,
 });
 
+export const saveInputTindakLanjutOlehAction = (data: string) => ({
+  type: saveInputTindakLanjutOleh,
+  data,
+});
+
 export const saveIsPernahTerjadiAction = (data: boolean) => ({
   type: saveIsPernahTerjadi,
   data,
@@ -187,5 +213,13 @@ export const saveImageCameraAction = (data: any) => ({
 });
 export const saveChannelIdAction = (data: any) => ({
   type: saveChannelId,
+  data,
+});
+export const saveMonthAction = (data: any) => ({
+  type: saveMonth,
+  data,
+});
+export const saveYearAction = (data: string) => ({
+  type: saveYear,
   data,
 });

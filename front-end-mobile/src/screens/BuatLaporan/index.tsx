@@ -1,20 +1,15 @@
-import React, {useState, useEffect} from 'react';
-import {View, Text, StyleSheet, ScrollView, Alert} from 'react-native';
+import React, {useState} from 'react';
+import {View, Text, StyleSheet, ScrollView} from 'react-native';
 import Header from '../../components/molecules/Header';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import DataKarakteristikPasien from '../DataKarakteristikPasien';
 import {MyColor} from '../../components/atoms/MyColor';
 import {MyFont} from '../../components/atoms/MyFont';
 import Gap from '../../components/atoms/Gap';
-import {
-  useFocusEffect,
-  useNavigationState,
-  useRoute,
-} from '@react-navigation/native';
 import RincianKejadian from '../RincianKejadian';
 import FotoPendukung from '../FotoPendukung';
 import SubmitLaporan from '../SubmitLaporan';
-import {useSelector, useDispatch} from 'react-redux';
+import {useSelector} from 'react-redux';
 
 const Stack = createNativeStackNavigator();
 

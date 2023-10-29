@@ -3,6 +3,7 @@ export const saveName: string = 'SAVE_NAME';
 export const saveRole: string = 'SAVE_ROLE';
 export const saveToken: string = 'SAVE_TOKEN';
 export const saveUsername: string = 'SAVE_USERNAME';
+export const saveJob: string = 'SAVE_JOB';
 
 export const saveNamePasien: string = 'SAVE_NAME_PASIEN';
 export const saveNoMR: string = 'SAVE_NO_MR';
@@ -20,7 +21,10 @@ export const saveWaktuInsiden = 'SAVE_WAKTU_INSIDEN';
 export const saveInsiden = 'SAVE_INSIDEN';
 export const saveKronologiInsiden = 'SAVE_KRONOLOGI_INSIDEN';
 export const saveInsidenTerjadiPadaPasien = 'SAVE_INSIDEN_TERJADI_PADA_PASIEN';
+export const saveInsidenTerjadiPadaPasienOption =
+  'SAVE_INSIDEN_TERJADI_PADA_PASIEN_OPTION';
 export const savePelaporPertama = 'SAVE_PELAPOR_PERTAMA';
+export const saveInputPelaporPertama = 'SAVE_INPUT_PELAPOR_PERTAMA';
 export const savePasienTerkait = 'SAVE_PASIEN_TERKAIT';
 export const saveDampakInsiden = 'SAVE_DAMPAK_INSIDEN';
 export const saveLokasiInsiden = 'SAVE_LOKASI_INSIDEN';
@@ -28,6 +32,7 @@ export const saveProbabilitas = 'SAVE_PROBABILITAS';
 export const saveUnitTerkait = 'SAVE_UNIT_TERKAIT';
 export const saveTindakLanjut = 'SAVE_TINDAK_LANJUT';
 export const saveTindakLanjutOleh = 'SAVE_TINDAK_LANJUT_OLEH';
+export const saveInputTindakLanjutOleh = 'SAVE_INPUT_TINDAK_LANJUT_OLEH';
 export const saveIsPernahTerjadi = 'SAVE_IS_PERNAH_TERJADI';
 export const saveDeskripsiPernahTerjadi = 'SAVE_DESKRIPSI_PERNAH_TERJADI';
 export const savePernahTerjadi = 'SAVE_PERNAH_TERJADI';
@@ -37,3 +42,7 @@ export const saveImageCamera = 'SAVE_IMAGE_CAMERA';
 
 // channelId
 export const saveChannelId = 'SAVE_CHANNEL_ID';
+
+// AdminHistoryItems
+export const saveMonth = 'SAVE_MONTH';
+export const saveYear = 'SAVE_YEAR';

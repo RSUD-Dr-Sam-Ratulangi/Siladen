@@ -6,12 +6,13 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useState, useCallback} from 'react';
 import {useFocusEffect} from '@react-navigation/native';
 import axios from 'axios';
 import Header from '../../components/molecules/Header';
 import {
   IconCentang,
+  IconKedaluwarsa,
   IconSedangDitindak,
   IconTolak,
   IconWaktu,
@@ -20,20 +21,19 @@ import {MyColor} from '../../components/atoms/MyColor';
 import {MyFont} from '../../components/atoms/MyFont';
 import {ImagePlaceHolder} from '../../assets/images';
 import {useSelector} from 'react-redux';
+import {API_HOST} from '../../../config';
 
-interface Laporan {
+type Laporan = {
   id_laporan: string;
   nama_pasien: string;
   insiden: string;
   tanggal_laporan_dikirim: Date;
   gambar: string;
   status: string;
-}
+};
 
 const AdminHistoryByStatus = ({navigation, route}: any) => {
-  // const {dataUser, status} = route.params;
-  const {status} = route.params;
-
+  const {status, month, year} = route.params;
   const tokenSelector = useSelector((data: any) => data.token);
 
   const dataUser = {
@@ -44,8 +44,6 @@ const AdminHistoryByStatus = ({navigation, route}: any) => {
   useFocusEffect(
     useCallback(() => {
       getLaporan();
-      console.log('Ini di history by status: ', dataUser, status);
-      console.log('ini list laporan: ', laporanList);
     }, []),
   );
 
@@ -55,7 +53,9 @@ const AdminHistoryByStatus = ({navigation, route}: any) => {
         Authorization: `Bearer ${dataUser.token}`,
       };
       const response = await axios.get(
-        `https://backend-pelaporan-final.glitch.me/api/laporan?status=${status}`,
+        `${API_HOST}/api/laporan?status=${status}&month=${
+          month + 1
+        }&year=${year}`,
         {headers},
       );
       setLaporanList(response.data.data);
@@ -75,6 +75,8 @@ const AdminHistoryByStatus = ({navigation, route}: any) => {
         return '#008656';
       case 'laporan ditolak':
         return '#8D0000';
+      case 'laporan kedaluwarsa':
+        return '#3A3A3A';
       default:
         return 'transparent';
     }
@@ -90,6 +92,8 @@ const AdminHistoryByStatus = ({navigation, route}: any) => {
         return 'Laporan Selesai';
       case 'laporan ditolak':
         return 'Laporan Ditolak';
+      case 'laporan kedaluwarsa':
+        return 'Laporan Kedaluwarsa';
       default:
         return null;
     }
@@ -105,6 +109,8 @@ const AdminHistoryByStatus = ({navigation, route}: any) => {
         return <IconCentang />;
       case 'laporan ditolak':
         return <IconTolak />;
+      case 'laporan kedaluwarsa':
+        return <IconKedaluwarsa />;
       default:
         return '';
     }
@@ -142,7 +148,12 @@ const AdminHistoryByStatus = ({navigation, route}: any) => {
       <Header backgroundTransparent />
       <View style={[styles.status, {backgroundColor: getStatusColor(status)}]}>
         <View
-          style={{flexDirection: 'row', columnGap: 20, alignItems: 'center'}}>
+          style={{
+            flexDirection: 'row',
+            columnGap: 20,
+            maxWidth: '80%',
+            alignItems: 'center',
+          }}>
           {getStatusIcon(status)}
           <Text style={styles.txtStatus}>{convertStatus(status)}</Text>
         </View>
@@ -223,6 +234,7 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   txtStatus: {
+    flex: 1,
     fontFamily: 'Poppins-Bold',
     color: MyColor.Light,
     fontSize: 17,

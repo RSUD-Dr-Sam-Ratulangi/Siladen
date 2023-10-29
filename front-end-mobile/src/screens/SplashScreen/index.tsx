@@ -1,6 +1,14 @@
-import {StyleSheet, Text, View, ImageBackground, Image} from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  ImageBackground,
+  Image,
+  Alert,
+  BackHandler,
+} from 'react-native';
 import React, {useEffect} from 'react';
-import {BackgroundRS, Logo} from '../../assets/images';
+import {BackgroundRS1, Logo} from '../../assets/images';
 import Gap from '../../components/atoms/Gap';
 import {MyColor} from '../../components/atoms/MyColor';
 import {MyFont} from '../../components/atoms/MyFont';
@@ -16,8 +24,9 @@ import {
 import {API_HOST} from '../../../config';
 import axios from 'axios';
 import PushNotification from 'react-native-push-notification';
+import {defineSocket, socket} from '../../../socket';
 
-const SplashScreen = ({navigation, route}: any) => {
+const SplashScreen = ({navigation}: any) => {
   const timestamp = Date.now();
   const dispatch = useDispatch();
   useEffect(() => {
@@ -31,9 +40,7 @@ const SplashScreen = ({navigation, route}: any) => {
     if (channel_ids.length < 1) {
       PushNotification.createChannel(
         {
-          // channelId: `tes-channel1`,
           channelId: `${timestamp}`,
-          // channelId: pake user pe id
           channelName: 'myChannel',
         },
         created => {},
@@ -72,33 +79,71 @@ const SplashScreen = ({navigation, route}: any) => {
 
         if (roleAsync === 'user') {
           try {
-            const response = await axios.get(
-              `${API_HOST}/api/laporan/user/latest/${idUserAsync}`,
-              {headers},
-            );
+            const response = await axios.get(`${API_HOST}/auth/user/session/`, {
+              headers,
+            });
 
-            if (response.data.data) {
+            if (response.data.code === '200') {
+              console.log('ini respons splashscreen', response);
               navigation.replace('Navigation');
+              if (!socket) {
+                defineSocket();
+              }
             }
-          } catch (error) {
-            navigation.replace('WelcomePage');
+          } catch (error: any) {
+            console.log('ini response error: ', error.code);
+            if (error.code === 'ERR_NETWORK') {
+              console.log('ini error splashscreen', error);
+              Alert.alert(
+                'Kesalahan jaringan',
+                'Pastikan anda telah terhubung ke internet lalu restart aplikasi',
+                [
+                  {
+                    text: 'Restart',
+                    onPress: () => BackHandler.exitApp(), // Memanggil fungsi keluarAplikasi saat tombol OK diklik
+                  },
+                ],
+              );
+            } else {
+              console.log('ini token expire');
+              navigation.replace('WelcomePage');
+            }
           }
         } else if (roleAsync === 'admin') {
           try {
-            const response = await axios.get(
-              `${API_HOST}/api/laporan/user/latest/${idUserAsync}`,
-              {headers},
-            );
+            const response = await axios.get(`${API_HOST}/auth/user/session/`, {
+              headers,
+            });
 
-            if (response.data.data) {
+            if (response.data.code === '200') {
+              console.log('ini respons splashscreen', response);
               navigation.replace('AdminHomepage');
+              if (!socket) {
+                defineSocket();
+              }
             }
-          } catch (error) {
-            navigation.replace('WelcomePage');
+          } catch (error: any) {
+            if (error.code === 'ERR_NETWORK') {
+              console.log('ini error splashscreen', error);
+              Alert.alert(
+                'Kesalahan jaringan',
+                'Pastikan anda telah terhubung ke internet lalu restart aplikasi',
+                [
+                  {
+                    text: 'Restart',
+                    onPress: () => BackHandler.exitApp(), // Memanggil fungsi keluarAplikasi saat tombol OK diklik
+                  },
+                ],
+              );
+            } else {
+              console.log('ini token expire');
+              navigation.replace('WelcomePage');
+            }
           }
         }
       } else {
         const navigateToDashboard = setTimeout(() => {
+          console.log('tidak ada token dan id');
           navigation.replace('WelcomePage');
         }, 3000);
         return () => clearTimeout(navigateToDashboard);
@@ -111,7 +156,7 @@ const SplashScreen = ({navigation, route}: any) => {
   return (
     <View style={styles.container}>
       <ImageBackground
-        source={BackgroundRS}
+        source={BackgroundRS1}
         resizeMode="cover"
         style={styles.bgRS}>
         <View style={styles.overlay}></View>

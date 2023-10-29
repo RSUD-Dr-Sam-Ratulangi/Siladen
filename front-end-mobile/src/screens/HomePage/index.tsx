@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useMemo, useCallback} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   Image,
   ScrollView,
@@ -12,9 +12,10 @@ import Header from '../../components/molecules/Header';
 import {MyFont} from '../../components/atoms/MyFont';
 import {MyColor} from '../../components/atoms/MyColor';
 import Gap from '../../components/atoms/Gap';
-import {Ilustrasi, Ilustrasi1, ImagePlaceHolder} from '../../assets/images';
+import {ImagePlaceHolder} from '../../assets/images';
 import {
   IconCentang,
+  IconKedaluwarsa,
   IconLaporan,
   IconPanahKanan,
   IconSedangDitindak,
@@ -26,21 +27,16 @@ import {useSelector, useDispatch} from 'react-redux';
 import {useFocusEffect} from '@react-navigation/native';
 import PushNotification from 'react-native-push-notification';
 import {API_HOST} from '../../../config';
-import socket from '../../../socket';
+import {socket} from '../../../socket';
 
-interface Laporan {
+type Laporan = {
   id_laporan: string;
   tanggal_laporan_dikirim: Date;
   gambar: string;
   status: string;
-}
+};
 
 const HomePage = ({navigation, route}: any) => {
-  // const dataUser = useSelector((data: any) => ({
-  //   id_user: selectUserId(data),
-  //   name: selectUserName(data),
-  //   token: selectUserToken(data),
-  // }));
   const channel_ids = useSelector((data: any) => data.channelId);
   const idUser = useSelector((data: any) => data.id_user);
   const nameUser = useSelector((data: any) => data.name);
@@ -55,22 +51,22 @@ const HomePage = ({navigation, route}: any) => {
   const today = new Date();
   const [name, setName] = useState('');
   const [latestLaporan, setLatestLaporan] = useState<Laporan[]>([]);
-  // const dataUser = route.params;
 
   useEffect(() => {
     setName(dataUser.name);
-    getLatestLaporan();
-    console.log('ehem: ', dataUser);
     console.log('INI EE id user memang: ', dataUser);
+    socket.off('message received');
 
     // konfigurasi socket
     socket.emit('join chat', dataUser.id_user);
     socket.emit('join admin', 'admin');
-    socket.on('message received', message => {
+    socket.on('message received', (data: any) => {
+      getLatestLaporan();
+      console.log('apa kek');
       PushNotification.localNotification({
         channelId: `${channel_ids}`,
-        title: 'Response dari Admin!',
-        message,
+        title: data.title,
+        message: data.message,
       });
     });
   }, []);
@@ -89,7 +85,7 @@ const HomePage = ({navigation, route}: any) => {
           Authorization: `Bearer ${dataUser.token}`,
         };
         const response = await axios.get(
-          `https://backend-pelaporan-final.glitch.me/api/laporan/user/latest/${dataUser.id_user}`,
+          `${API_HOST}/api/laporan/user/latest/${dataUser.id_user}`,
           {headers},
         );
         setLatestLaporan(response.data.data);
@@ -110,6 +106,8 @@ const HomePage = ({navigation, route}: any) => {
         return '#008656';
       case 'laporan ditolak':
         return '#8D0000';
+      case 'laporan kedaluwarsa':
+        return '#3A3A3A';
       default:
         return 'transparent';
     }
@@ -125,6 +123,8 @@ const HomePage = ({navigation, route}: any) => {
         return 'Laporan Selesai';
       case 'laporan ditolak':
         return 'Laporan Ditolak';
+      case 'laporan kedaluwarsa':
+        return 'Laporan Kedaluwarsa';
       default:
         return null;
     }
@@ -140,25 +140,11 @@ const HomePage = ({navigation, route}: any) => {
         return <IconCentang />;
       case 'laporan ditolak':
         return <IconTolak />;
+      case 'laporan kedaluwarsa':
+        return <IconKedaluwarsa />;
       default:
         return '';
     }
-  };
-
-  const riwayat = [
-    {
-      jenis: 'Radiologi',
-      waktu: '19:45',
-      tanggal: '2023-02-07',
-      status: 'Laporan Selesai',
-    },
-  ];
-
-  const dummyCardData = {
-    gambar: require('../../assets/images/ilustrasi1.png'),
-    judul: '4 Strategi Pemerintah kendalikan TB di Indonesia',
-    tanggal: '5 September 2021',
-    sumber: 'sehatnegeriku.kemkes.go.id',
   };
 
   function greeting(date: Date) {
@@ -175,21 +161,17 @@ const HomePage = ({navigation, route}: any) => {
     }
   }
 
-  function formatHour(date: any) {
-    const localTime = new Date(date.getTime());
-
-    const hours = localTime.getHours().toString().padStart(2, '0');
-    const minutes = localTime.getMinutes().toString().padStart(2, '0');
+  function formatHour(date: Date) {
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
 
     return `${hours}:${minutes}`;
   }
 
-  function formatDate(date: any) {
-    const localTime = new Date(date.getTime());
-
-    const year = localTime.getFullYear().toString();
-    const month = getMonthName(localTime.getMonth());
-    const day = localTime.getDate().toString();
+  function formatDate(date: Date) {
+    const year = date.getFullYear().toString();
+    const month = getMonthName(date.getMonth());
+    const day = date.getDate().toString();
 
     return `${day} ${month} ${year}`;
   }
@@ -226,7 +208,11 @@ const HomePage = ({navigation, route}: any) => {
               <Text style={styles.createReportButtonText}>
                 Tekan disini untuk {'\n'}membuat laporan baru!
               </Text>
-              <Image source={IconLaporan} resizeMode="contain" />
+              <Image
+                source={IconLaporan}
+                resizeMode="contain"
+                style={{height: 45}}
+              />
             </TouchableOpacity>
           </View>
         ) : (
@@ -340,20 +326,31 @@ const HomePage = ({navigation, route}: any) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Header />
+      <Header backgroundTransparent />
       <Gap height={20} />
       <View style={styles.container1}>
         <Text style={styles.txtWelcome}>
           {greeting(today)},{'\n'}
           <Text style={styles.txtName}>{name}</Text>
         </Text>
+        <Gap height={10} />
         {laporanTerakhir()}
         <Gap height={20} />
         {latestLaporan && latestLaporan.length > 1 ? riwayatLaporan() : null}
         <Gap height={20} />
         <View style={styles.card}>
           <Text style={styles.txtCardTitle}>Berita Kesehatan</Text>
-          <View
+          <Text
+            style={{
+              fontFamily: 'Poppins-Bold',
+              color: MyColor.Primary,
+              fontSize: 20,
+              width: '100%',
+              padding: 20,
+            }}>
+            Belum ada berita saat ini
+          </Text>
+          {/* <View
             style={{
               backgroundColor: MyColor.Light,
               flexDirection: 'row',
@@ -391,14 +388,15 @@ const HomePage = ({navigation, route}: any) => {
                 {dummyCardData.sumber}
               </Text>
             </View>
-          </View>
+          </View> */}
           <Pressable style={styles.cardFooter}>
             <Text
               style={{
                 fontFamily: MyFont.Primary,
                 fontSize: 12,
                 color: MyColor.Light,
-              }}>
+              }}
+              onPress={() => navigation.navigate('News')}>
               Lihat informasi & berita kesehatan lainnya
             </Text>
             <IconPanahKanan />
