@@ -153,7 +153,7 @@ const History = ({navigation, route}: any) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Header />
+      <Header backgroundTransparent />
       <Gap height={20} />
       <View style={styles.container1}>
         <Text

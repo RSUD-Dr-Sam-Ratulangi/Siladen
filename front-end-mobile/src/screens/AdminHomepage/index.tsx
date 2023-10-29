@@ -43,11 +43,13 @@ const AdminHomepage = ({navigation, route}: any) => {
   const tokenSelector = useSelector((data: any) => data.token);
   const nameSelector = useSelector((data: any) => data.name);
   const roleSelector = useSelector((data: any) => data.role);
+  const jobSelector = useSelector((data: any) => data.job);
 
   const dataUser = {
     token: tokenSelector,
     name: nameSelector,
     role: roleSelector,
+    job: jobSelector,
   };
 
   const today = new Date();
@@ -57,13 +59,16 @@ const AdminHomepage = ({navigation, route}: any) => {
   useFocusEffect(
     useCallback(() => {
       getTodayReports();
-      getCurrentMonthReports();
+      // getCurrentMonthReports();
     }, []),
   );
 
   useEffect(() => {
+    socket.off('admin received');
     socket.emit('join admin', 'admin');
     socket.on('admin received', (data: any) => {
+      getTodayReports();
+      console.log('halo sssssss');
       PushNotification.localNotification({
         channelId: `${channel_ids}`,
         title: data.title,
@@ -352,7 +357,9 @@ const AdminHomepage = ({navigation, route}: any) => {
         <View>
           <Text style={styles.txtWelcome}>{greeting(today)},</Text>
           <Text style={styles.txtUsername}>{dataUser.name}</Text>
-          <Text style={styles.txtRole}>{dataUser.role}</Text>
+          <Text style={styles.txtRole}>
+            {dataUser.job ? dataUser.job : null}
+          </Text>
         </View>
         <View style={{flexDirection: 'row', columnGap: 20}}>
           <TouchableOpacity
@@ -379,26 +386,26 @@ const AdminHomepage = ({navigation, route}: any) => {
         <Gap height={20} />
         {todayReport()}
         <Gap height={20} />
-        {currentMonthReport()}
+        {/* {currentMonthReport()} */}
         <Gap height={20} />
-        <TouchableOpacity
-          style={styles.btnReportList}
-          onPress={() =>
-            navigation.navigate(
-              'AdminHistoryItems',
-              dataUser,
-              console.log('Ini dataUser di homepage Admin: ', dataUser),
-            )
-          }>
-          <Text style={styles.txtCardStatus}>Daftar Semua Laporan</Text>
-          <Image
-            source={IconRiwayat}
-            resizeMode="contain"
-            style={{height: 35}}
-            tintColor={MyColor.Light}
-          />
-        </TouchableOpacity>
       </View>
+      <TouchableOpacity
+        style={styles.btnReportList}
+        onPress={() =>
+          navigation.navigate(
+            'AdminHistoryItems',
+            dataUser,
+            console.log('Ini dataUser di homepage Admin: ', dataUser),
+          )
+        }>
+        <Text style={styles.txtCardStatus}>Daftar Semua Laporan</Text>
+        <Image
+          source={IconRiwayat}
+          resizeMode="contain"
+          style={{height: 35}}
+          tintColor={MyColor.Light}
+        />
+      </TouchableOpacity>
     </ScrollView>
   );
 };
@@ -448,6 +455,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     padding: 15,
+    margin: 20,
     alignItems: 'center',
   },
   txtTodayReport: {

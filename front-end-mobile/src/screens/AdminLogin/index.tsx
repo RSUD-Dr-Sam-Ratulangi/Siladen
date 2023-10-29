@@ -224,8 +224,6 @@ const styles = StyleSheet.create({
   txtInput: {
     fontSize: 14,
     fontFamily: MyFont.Primary,
-    borderWidth: 1,
-    borderColor: 'grey',
     backgroundColor: 'white',
     borderRadius: 10,
     paddingStart: 10,
@@ -251,8 +249,6 @@ const styles = StyleSheet.create({
   passwordInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'grey',
     borderRadius: 10,
     backgroundColor: 'white',
     width: '100%',

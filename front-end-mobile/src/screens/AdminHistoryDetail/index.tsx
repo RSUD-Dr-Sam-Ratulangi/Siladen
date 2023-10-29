@@ -266,7 +266,7 @@ const AdminHistoryDetail = ({navigation, route}: any) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Header />
+      <Header backgroundTransparent />
       <View
         style={[
           styles.statusLaporan,
@@ -306,7 +306,7 @@ const AdminHistoryDetail = ({navigation, route}: any) => {
       <View style={styles.container1}>
         <Gap height={30} />
         <Title label="Data Karakteristik Pasien" />
-        <Text style={styles.txtKey}>Nama</Text>
+        <Text style={styles.txtKey}>Nama Pasien</Text>
         <View style={styles.box}>
           <Text style={styles.txtValue}>{laporanDetail?.nama_pasien}</Text>
         </View>
@@ -522,10 +522,20 @@ const AdminHistoryDetail = ({navigation, route}: any) => {
             <TouchableOpacity
               style={[
                 styles.gradingBtn,
-                {backgroundColor: '#008656', width: 'auto', margin: 20},
+                {
+                  borderRadius: 20,
+                  backgroundColor: '#008656',
+                  width: 'auto',
+                  margin: 20,
+                  paddingVertical: 15,
+                },
               ]}
               onPress={() => handleSelesai(laporanDetail?.id_user)}>
-              <Text style={[styles.txtCard, {color: MyColor.Light}]}>
+              <Text
+                style={[
+                  styles.txtCard,
+                  {color: MyColor.Light, fontFamily: 'Poppins-Medium'},
+                ]}>
                 Selesaikan laporan
               </Text>
             </TouchableOpacity>

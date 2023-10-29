@@ -54,13 +54,14 @@ const HomePage = ({navigation, route}: any) => {
 
   useEffect(() => {
     setName(dataUser.name);
-    console.log('ehem: ', dataUser);
     console.log('INI EE id user memang: ', dataUser);
+    socket.off('message received');
 
     // konfigurasi socket
     socket.emit('join chat', dataUser.id_user);
     socket.emit('join admin', 'admin');
     socket.on('message received', (data: any) => {
+      getLatestLaporan();
       console.log('apa kek');
       PushNotification.localNotification({
         channelId: `${channel_ids}`,
@@ -325,13 +326,14 @@ const HomePage = ({navigation, route}: any) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Header />
+      <Header backgroundTransparent />
       <Gap height={20} />
       <View style={styles.container1}>
         <Text style={styles.txtWelcome}>
           {greeting(today)},{'\n'}
           <Text style={styles.txtName}>{name}</Text>
         </Text>
+        <Gap height={10} />
         {laporanTerakhir()}
         <Gap height={20} />
         {latestLaporan && latestLaporan.length > 1 ? riwayatLaporan() : null}

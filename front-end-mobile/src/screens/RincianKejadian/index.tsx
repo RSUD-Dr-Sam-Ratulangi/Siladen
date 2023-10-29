@@ -883,7 +883,12 @@ const RincianKejadian = ({navigation, route}: any) => {
         <Title label="Rincian Kejadian" />
         <Text style={styles.txtSection}>Waktu Insiden</Text>
         {datePick()}
-        <Text style={styles.txtSection}>Insiden</Text>
+        <Text style={styles.txtSection}>
+          Insiden{' '}
+          <Text style={styles.txtInfo}>
+            (cth: pasien terjatuh, salah suntik, salah minum obat)
+          </Text>
+        </Text>
         <Input
           style={styles.inputBox}
           // placeholder="Nama anda"
@@ -892,7 +897,10 @@ const RincianKejadian = ({navigation, route}: any) => {
           value={insiden}
           multiline={true}
         />
-        <Text style={styles.txtSection}>Kronologis Insiden</Text>
+        <Text style={styles.txtSection}>
+          Kronologis Insiden{' '}
+          <Text style={styles.txtInfo}>(cerita dari insiden yang terjadi)</Text>
+        </Text>
         <Input
           style={styles.inputBox}
           // placeholder="Nama anda"
@@ -952,7 +960,7 @@ const RincianKejadian = ({navigation, route}: any) => {
           }}>
           <View style={styles.modalBackground}>
             <View style={styles.modal}>
-              <View style={styles.modalContent}>
+              <ScrollView style={styles.modalContent}>
                 <Text
                   style={{
                     fontFamily: 'Poppins-Bold',
@@ -1059,7 +1067,7 @@ const RincianKejadian = ({navigation, route}: any) => {
                     <Text style={[styles.txtModal, {fontSize: 18}]}>OK</Text>
                   </Pressable>
                 </View>
-              </View>
+              </ScrollView>
             </View>
           </View>
         </Modal>
@@ -1075,7 +1083,9 @@ const RincianKejadian = ({navigation, route}: any) => {
         {btnPasienTerkait()}
         <Text style={styles.txtSection}>
           Tempat Insiden{' '}
-          <Text style={styles.txtInfo}>(tempat pasien berada)</Text>
+          <Text style={styles.txtInfo}>
+            (cth: lobby, kamar mandi, tempat tidur)
+          </Text>
         </Text>
         <Input
           style={styles.inputBox}
@@ -1087,7 +1097,7 @@ const RincianKejadian = ({navigation, route}: any) => {
         />
         <Text style={styles.txtSection}>
           Unit / Departemen terkait yang menyebabkan insiden{' '}
-          <Text style={styles.txtInfo}>(contoh: UGD)</Text>
+          <Text style={styles.txtInfo}>(cth: farmasi, lab, UGD)</Text>
         </Text>
         <Input
           style={styles.inputBox}
