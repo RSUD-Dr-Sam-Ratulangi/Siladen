@@ -133,7 +133,7 @@ const Laporan = db.define(
       allowNull: true,
     },
     gambar: {
-      type: DataTypes.TEXT,
+      type: DataTypes.BLOB("medium"),
       allowNull: true,
     },
   },
