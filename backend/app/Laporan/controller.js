@@ -104,7 +104,7 @@ const getLaporanByIdLaporan = async (req, res) => {
   try {
     const id_laporan = req.params.id_laporan;
     const status = req.query.status;
-    console.log("status: ", status);
+
     if (status === "dalam antrian" || status === "investigasi" || status === "laporan kedaluwarsa") {
       const laporan = await Laporan.findOne({
         where: {
@@ -264,8 +264,6 @@ const getLaporanByIdLaporan = async (req, res) => {
           },
         ],
       });
-
-      console.log("ini loh laporan selesai: ", laporan.laporan.id_laporan);
       let dataUri = laporan.laporan.gambar ? `data:image/jpeg;base64,${laporan.laporan.gambar.toString("base64")}` : null;
 
       const revLaporan = {
@@ -342,7 +340,6 @@ const getLaporanByIdLaporan = async (req, res) => {
 const getLaporanByUserId = async (req, res) => {
   try {
     const id_user = req.params.id_user;
-    console.log("ini id user: ", id_user);
 
     const laporan = await Laporan.findAll({
       attributes: ["id_laporan", "status", "tanggal_laporan_dikirim", "gambar"],
@@ -425,9 +422,6 @@ const getLatestThreeLaporanByUserId = async (req, res) => {
 const getLaporanToday = async (req, res) => {
   const TODAY_START = moment.tz("Asia/Makassar").startOf("day");
   const NOW = moment.tz("Asia/Makassar");
-
-  console.log("ini now: ", NOW);
-  console.log("ini today start: ", TODAY_START);
 
   try {
     const laporan = await Laporan.findAll({
@@ -577,12 +571,6 @@ const getLaporanAmount = async (req, res) => {
 
       const amountAllLaporan = amountLaporanDalamAntrian + amountLaporanInvestigasi + amountLaporanSelesai + amountLaporanKedaluwarsa;
 
-      console.log("jumlah laporan dalam antrian: ", amountLaporanDalamAntrian);
-      console.log("jumlah laporan investigasi: ", amountLaporanInvestigasi);
-      console.log("jumlah laporan laporan selesai: ", amountLaporanSelesai);
-      console.log("jumlah laporan laporan kedaluwarsa: ", amountLaporanKedaluwarsa);
-      console.log("jumlah laporan semua: ", amountAllLaporan);
-
       res.status(200).json({
         code: "200",
         status: "OK",
@@ -658,8 +646,6 @@ const postLaporanByUser = async (req, res) => {
     kejadian_sama_pernah_terjadi_di_unit_lain,
     gambar,
   } = req.body;
-
-  console.log("ini adalah waktu kejadian insiden: ", waktu_kejadian_insiden);
 
   if (gambar?.length > MAX_FILE_SIZE) {
     return res.status(400).json({
@@ -873,8 +859,6 @@ const updateStatusLaporanInvestigasi = async (req, res) => {
   const id_user = req.id_user;
   const diinvestigasi_oleh = req.body.diinvestigasi_oleh;
 
-  console.log("ini id_user: ", id_user);
-
   if (!diinvestigasi_oleh) {
     return res.status(400).json({
       code: "400",
@@ -924,8 +908,6 @@ const updateStatusLaporanInvestigasi = async (req, res) => {
     );
 
     await t.commit();
-
-    console.log("ini hasil update: ", laporan[0]);
 
     res.status(200).json({
       code: "200",
