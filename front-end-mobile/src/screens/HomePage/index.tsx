@@ -54,7 +54,6 @@ const HomePage = ({navigation, route}: any) => {
 
   useEffect(() => {
     setName(dataUser.name);
-    console.log('INI EE id user memang: ', dataUser);
     socket.off('message received');
 
     // konfigurasi socket
@@ -62,7 +61,6 @@ const HomePage = ({navigation, route}: any) => {
     socket.emit('join admin', 'admin');
     socket.on('message received', (data: any) => {
       getLatestLaporan();
-      console.log('apa kek');
       PushNotification.localNotification({
         channelId: `${channel_ids}`,
         title: data.title,
@@ -80,7 +78,6 @@ const HomePage = ({navigation, route}: any) => {
   const getLatestLaporan = async () => {
     if (dataUser.id_user) {
       try {
-        console.log(dataUser.token);
         const headers = {
           Authorization: `Bearer ${dataUser.token}`,
         };
@@ -89,7 +86,6 @@ const HomePage = ({navigation, route}: any) => {
           {headers},
         );
         setLatestLaporan(response.data.data);
-        console.log('ini response.data.data: ', response.data.data);
       } catch (error) {
         console.log(error);
       }

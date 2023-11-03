@@ -1,4 +1,4 @@
-import {StyleSheet} from 'react-native';
+import {StyleSheet, PermissionsAndroid, Platform} from 'react-native';
 import React, {useEffect} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
@@ -24,8 +24,26 @@ const Stack = createNativeStackNavigator();
 
 const App = () => {
   useEffect(() => {
-    Permission.checkPermission(PERMISSIONS_TYPE.notifications);
+    requestNotificationPermission();
+    // Permission.checkPermission(PERMISSIONS_TYPE.notifications);
   }, []);
+
+  const requestNotificationPermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          //akses diterima
+        } else {
+          console.log('Izin notifikasi ditolak');
+        }
+      } catch (err) {
+        console.warn(err);
+      }
+    }
+  };
 
   return (
     <Provider store={storeState}>

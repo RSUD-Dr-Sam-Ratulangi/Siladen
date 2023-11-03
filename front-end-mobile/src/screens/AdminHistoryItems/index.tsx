@@ -7,6 +7,7 @@ import {
   Modal,
   Pressable,
   BackHandler,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useState, useCallback} from 'react';
 import {CommonActions, useFocusEffect} from '@react-navigation/native';
@@ -53,6 +54,7 @@ const AdminHistoryItems = ({navigation, route}: any) => {
   const [isFilter, setIsFilter] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(month);
   const [selectedYear, setSelectedYear] = useState(year);
+  const [isLoading, setIsLoading] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -82,6 +84,7 @@ const AdminHistoryItems = ({navigation, route}: any) => {
   );
 
   const getJumlahLaporan = async () => {
+    setIsLoading(true);
     try {
       const headers = {
         Authorization: `Bearer ${dataUser.token}`, // Tambahkan token ke header dengan format Bearer
@@ -91,9 +94,10 @@ const AdminHistoryItems = ({navigation, route}: any) => {
         `${API_HOST}/api/laporan/amount?month=${month + 1}&year=${year}`,
         {headers},
       );
+      setIsLoading(false);
       setJumlahLaporan(response.data.data);
-      console.log('jumlah laporan: ', response.data.data);
     } catch (error) {
+      setIsLoading(false);
       console.log(error);
     }
   };
@@ -285,20 +289,31 @@ const AdminHistoryItems = ({navigation, route}: any) => {
                   <View style={{flexDirection: 'row', gap: 10}}>
                     <Pressable
                       style={styles.modalItems}
-                      onPress={() => setIsFilter(false)}>
+                      onPress={() => {
+                        setIsFilter(false),
+                          setSelectedMonth(month),
+                          setSelectedYear(year);
+                      }}>
                       <Text
                         style={[styles.txtModal, {fontFamily: MyFont.Primary}]}>
                         Batal
                       </Text>
                     </Pressable>
-                    <Pressable
-                      style={[styles.modalItems, {flex: 1}]}
-                      onPress={() => handleFilter()}>
-                      <Text
-                        style={[styles.txtModal, {fontFamily: MyFont.Primary}]}>
-                        OK
-                      </Text>
-                    </Pressable>
+                    {isLoading ? (
+                      <ActivityIndicator size="large" color={MyColor.Primary} />
+                    ) : (
+                      <Pressable
+                        style={[styles.modalItems, {flex: 1}]}
+                        onPress={() => handleFilter()}>
+                        <Text
+                          style={[
+                            styles.txtModal,
+                            {fontFamily: MyFont.Primary},
+                          ]}>
+                          OK
+                        </Text>
+                      </Pressable>
+                    )}
                   </View>
                 </View>
               </View>
@@ -378,7 +393,7 @@ const AdminHistoryItems = ({navigation, route}: any) => {
             <Text style={styles.txt2}>
               Total semua laporan ke RSUD Dr. Sam Ratulangi Tondano di bulan{' '}
               <Text style={{fontFamily: 'Poppins-Bold'}}>
-                {getMonthName(selectedMonth)} {selectedYear}
+                {getMonthName(month)} {year}
               </Text>
             </Text>
             <Text style={[styles.txtJumlah, {color: 'black'}]}>
@@ -389,7 +404,7 @@ const AdminHistoryItems = ({navigation, route}: any) => {
           <View style={{paddingHorizontal: 20, paddingVertical: 10}}>
             <Line height={3} />
           </View>
-          <View style={{padding: 10}}>
+          {/* <View style={{padding: 10}}>
             <Pressable
               onPress={printPDF}
               style={[
@@ -415,7 +430,7 @@ const AdminHistoryItems = ({navigation, route}: any) => {
               </Text>
               <IconPrint />
             </Pressable>
-          </View>
+          </View> */}
         </View>
       </View>
     </ScrollView>

@@ -93,7 +93,6 @@ const SignUp = ({navigation}: any) => {
           job,
           role,
         });
-        console.log('ini respons registrasi: ', response.data.data);
         if (response.data.code == '201') {
           Alert.alert('Akun berhasil dibuat', undefined, [
             {text: 'OK', onPress: () => navigation.navigate('Login')},

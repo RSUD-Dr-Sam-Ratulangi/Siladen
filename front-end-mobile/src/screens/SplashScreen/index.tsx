@@ -34,31 +34,25 @@ const SplashScreen = ({navigation}: any) => {
   }, [navigation]);
 
   PushNotification.getChannels(function (channel_ids) {
-    console.log(channel_ids);
-    console.log('ini timestamp', timestamp);
-
     if (channel_ids.length < 1) {
       PushNotification.createChannel(
         {
           channelId: `${timestamp}`,
           channelName: 'myChannel',
         },
-        created => {},
+        created => {
+          console.log(created);
+        },
       );
       (async () => {
-        console.log('ini e timestamp: ', timestamp.toString());
         const timestampString = timestamp.toString();
         await AsyncStorage.setItem('channel_id', timestampString);
       })();
     }
     (async () => {
-      console.log('masuk dalam');
       const item = await AsyncStorage.getItem('channel_id');
       dispatch(saveChannelIdAction(item));
-      console.log('ini channel id: ', item);
     })();
-
-    console.log('ini channel id notif: ', channel_ids);
   });
 
   const cekAuth = async () => {
@@ -84,16 +78,13 @@ const SplashScreen = ({navigation}: any) => {
             });
 
             if (response.data.code === '200') {
-              console.log('ini respons splashscreen', response);
               navigation.replace('Navigation');
               if (!socket) {
                 defineSocket();
               }
             }
           } catch (error: any) {
-            console.log('ini response error: ', error.code);
             if (error.code === 'ERR_NETWORK') {
-              console.log('ini error splashscreen', error);
               Alert.alert(
                 'Kesalahan jaringan',
                 'Pastikan anda telah terhubung ke internet lalu restart aplikasi',
@@ -105,7 +96,6 @@ const SplashScreen = ({navigation}: any) => {
                 ],
               );
             } else {
-              console.log('ini token expire');
               navigation.replace('WelcomePage');
             }
           }
@@ -116,7 +106,6 @@ const SplashScreen = ({navigation}: any) => {
             });
 
             if (response.data.code === '200') {
-              console.log('ini respons splashscreen', response);
               navigation.replace('AdminHomepage');
               if (!socket) {
                 defineSocket();
@@ -124,7 +113,6 @@ const SplashScreen = ({navigation}: any) => {
             }
           } catch (error: any) {
             if (error.code === 'ERR_NETWORK') {
-              console.log('ini error splashscreen', error);
               Alert.alert(
                 'Kesalahan jaringan',
                 'Pastikan anda telah terhubung ke internet lalu restart aplikasi',
@@ -136,14 +124,12 @@ const SplashScreen = ({navigation}: any) => {
                 ],
               );
             } else {
-              console.log('ini token expire');
               navigation.replace('WelcomePage');
             }
           }
         }
       } else {
         const navigateToDashboard = setTimeout(() => {
-          console.log('tidak ada token dan id');
           navigation.replace('WelcomePage');
         }, 3000);
         return () => clearTimeout(navigateToDashboard);
