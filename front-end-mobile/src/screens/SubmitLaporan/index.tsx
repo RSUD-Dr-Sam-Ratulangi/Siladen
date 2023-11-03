@@ -6,7 +6,7 @@ import {
   ActivityIndicator,
   BackHandler,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {MyColor} from '../../components/atoms/MyColor';
 import Button from '../../components/atoms/Button';
 import {IconPanahKanan} from '../../assets/icons';
@@ -91,6 +91,7 @@ const SubmitLaporan = ({navigation, route}: any) => {
   );
   const pernahTerjadiSelector = useSelector((data: any) => data.pernahTerjadi);
   const imageCameraSelector = useSelector((data: any) => data.imageCamera);
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
 
   const dataUser = {
     id_user: idUserSelector,
@@ -156,16 +157,7 @@ const SubmitLaporan = ({navigation, route}: any) => {
     'kejadian_sama_pernah_terjadi_di_unit_lain',
     dataUser.pernahTerjadi,
   );
-  formData.append(
-    'gambar',
-    dataUser.imageCamera
-      ? {
-          uri: dataUser.imageCamera.uri,
-          type: dataUser.imageCamera.type,
-          name: dataUser.imageCamera.fileName,
-        }
-      : null,
-  );
+  imageBase64 ? formData.append('gambar', imageBase64.split(',')[1]) : '';
 
   const resetForm = () => {
     dispatch(saveNamePasienAction(''));
@@ -200,8 +192,13 @@ const SubmitLaporan = ({navigation, route}: any) => {
 
   const handleCheckboxToggle = () => {
     setChecked(!checked);
-    console.log(checked);
   };
+
+  useEffect(() => {
+    if (imageCameraSelector) {
+      imageToBase64(imageCameraSelector?.uri);
+    }
+  }, []);
 
   const handleSubmit = async () => {
     if (!checked) {
@@ -210,15 +207,12 @@ const SubmitLaporan = ({navigation, route}: any) => {
         'Anda harus menyetujui pernyataan sebelum mengirim laporan.',
       );
     } else {
-      console.log('tes satu-satuu: ', dataUser.imageCamera);
-      console.log('ini headers: ', dataUser.token);
-      console.log('ini id user: ', dataUser.id_user);
-      console.log('Ini form data: ', formData);
+      // console.log('Ini form data: ', formData);
       setIsLoading(true);
       try {
         const headers = {
           'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${dataUser.token}`, // Tambahkan token ke header dengan format Beare
+          Authorization: `Bearer ${dataUser.token}`,
         };
 
         const headersAnonim = {
@@ -228,7 +222,6 @@ const SubmitLaporan = ({navigation, route}: any) => {
         let response;
 
         if (dataUser.id_user) {
-          console.log('ada id user yang dijalankan');
           response = await axios.post(
             `${API_HOST}/api/laporan/user/${dataUser.id_user}`,
             formData,
@@ -238,7 +231,6 @@ const SubmitLaporan = ({navigation, route}: any) => {
             },
           );
         } else {
-          console.log('anonim yang dijalankan');
           response = await axios.post(
             `${API_HOST}/api/laporan/anonim`,
             formData,
@@ -247,9 +239,7 @@ const SubmitLaporan = ({navigation, route}: any) => {
             },
           );
         }
-        console.log('ini respon post: ', response.data);
-        const token = response.data.data.token;
-        console.log('ini token: ', token);
+        setIsLoading(false);
         if (response.data.code == '201') {
           resetForm();
           if (!dataUser.id_user) {
@@ -291,13 +281,11 @@ const SubmitLaporan = ({navigation, route}: any) => {
               },
             ],
           );
-          console.log('Laporan Terkirim');
         }
-        setIsLoading(false);
       } catch (error: any) {
         setIsLoading(false);
+        console.log('error submit', error);
         if (error.response) {
-          console.log('ini dari post', error.response.data.code);
           if (error.response.data.code === '400') {
             Alert.alert(
               'Gagal mengirim laporan',
@@ -327,13 +315,53 @@ const SubmitLaporan = ({navigation, route}: any) => {
             );
           }
         } else if (error.request) {
-          console.log('INI ERROR: ', error);
           Alert.alert(
             'Kesalahan Jaringan',
-            'Pastikan anda telah terhubung ke internet',
+            'Pastikan anda telah terhubung ke internet lalu coba lagi',
           );
         }
       }
+    }
+  };
+
+  const imageToBase64 = async (uri: string) => {
+    // console.log('masuk');
+    try {
+      const response = await fetch(uri);
+      const blob = await response.blob();
+      return new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          if (typeof reader.result === 'string') {
+            resolve(reader.result);
+            setImageBase64(reader.result);
+          } else {
+            reject('Failed to convert image to base64.');
+          }
+        };
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      Alert.alert(
+        'Terjadi kesalahan saat memuat data',
+        'Silahkan coba lagi atau hapus/ganti foto pendukung karena mungkin ada masalah di foto yang anda berikan',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              navigation.navigate('FotoPendukung');
+            },
+          },
+          {
+            text: 'Coba Lagi',
+            onPress: () => {
+              imageToBase64(imageCameraSelector?.uri);
+            },
+          },
+        ],
+      );
+      console.error('Kesalahan saat mengonversi gambar ke base64:', error);
+      throw error;
     }
   };
 

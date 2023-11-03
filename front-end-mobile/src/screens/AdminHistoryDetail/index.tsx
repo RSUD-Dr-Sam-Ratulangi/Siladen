@@ -60,16 +60,13 @@ const AdminHistoryDetail = ({navigation, route}: any) => {
         `${API_HOST}/api/laporan/detail/${id_laporan}?status=${status}`,
         {headers},
       );
-      console.log('ini status di getlaporan: ', status);
       setLaporanDetail(response.data.data);
-      console.log('ini response.data.data', response.data.data);
     } catch (error) {
       console.log(error);
     }
   };
 
   const handleUpdateStatus = async (id_user: string) => {
-    console.log('ini eee id USER PARAH: ', id_user);
     setIsLoading(true);
     try {
       const headers = {
@@ -81,14 +78,13 @@ const AdminHistoryDetail = ({navigation, route}: any) => {
         {headers},
       );
       getLaporan();
-      console.log('ini updated status: ', response.data);
       const data = {
         id_user,
         title: 'Respon dari petugas!',
         message: `laporan ini sedang diinvestigasi oleh ${dataUser.name}`,
       };
       socket.emit('new message', data);
-      navigation.navigate('AdminHistoryItems', dataUser);
+      navigation.navigate('AdminHistoryItems', {dataUser, status: null});
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
@@ -121,13 +117,12 @@ const AdminHistoryDetail = ({navigation, route}: any) => {
       if (response.data.success === true) {
         const data = {
           id_user,
-          message: 'laporan ini selesai',
+          message: 'laporan anda telah selesai ditindak',
         };
         socket.emit('new message', data);
         setStatus('laporan selesai');
       }
-      console.log('ini updated status: ', response.data);
-      navigation.navigate('AdminHistoryItems', dataUser);
+      navigation.navigate('AdminHistoryItems', {dataUser, status: null});
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
@@ -436,18 +431,11 @@ const AdminHistoryDetail = ({navigation, route}: any) => {
               }
               style={styles.img}
             />
-            {/* <Text>{laporanDetail.gambar}</Text> */}
-            <Text style={styles.txtImage}>
-              {laporanDetail.gambar
-                ? laporanDetail.gambar.split('/').pop()
-                : 'Tidak ada gambar'}
-            </Text>
           </View>
         )}
         <Gap height={40} />
       </View>
       {laporanDetail?.status === 'dalam antrian' ? (
-        // Tampilan untuk kondisi 'dalam antrian'
         isLoading ? (
           <View style={{alignSelf: 'center', padding: 30}}>
             <ActivityIndicator size="large" color={MyColor.Primary} />
@@ -462,7 +450,6 @@ const AdminHistoryDetail = ({navigation, route}: any) => {
         )
       ) : laporanDetail?.status === 'investigasi' &&
         laporanDetail?.investigator_id_user === dataUser.id_investigator ? (
-        // Tampilan untuk kondisi 'investigasi'
         isLoading ? (
           <View style={{alignSelf: 'center', padding: 30}}>
             <ActivityIndicator size="large" color={MyColor.Primary} />
@@ -667,14 +654,13 @@ const styles = StyleSheet.create({
     backgroundColor: MyColor.Light,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    // width: '90%',
     borderRadius: 10,
     gap: 10,
   },
   boxImage: {
     overflow: 'hidden',
     backgroundColor: MyColor.Light,
-    borderRadius: 10,
+    borderRadius: 20,
   },
   img: {
     height: 350,

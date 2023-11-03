@@ -7,7 +7,7 @@ import {MyColor} from '../../components/atoms/MyColor';
 import Button from '../../components/atoms/Button';
 
 const ForgetPass = ({navigation}: any) => {
-  const phoneNumber = '+6285159556468';
+  const phoneNumber = '+6285756948021';
 
   const handleTelepon = () => {
     Linking.openURL(`tel:${phoneNumber}`)
@@ -25,6 +25,7 @@ const ForgetPass = ({navigation}: any) => {
 
   const handleWhatsApp = () => {
     Linking.openURL(`whatsapp://send?phone=${phoneNumber}`)
+      // Linking.openURL(`https://chat.whatsapp.com/LFFMeQtBsAp2Z4C1Rxrg8B`)
       .then(result => {
         if (result) {
           console.log('Aplikasi WhatsApp telah dibuka');
@@ -37,6 +38,21 @@ const ForgetPass = ({navigation}: any) => {
       });
   };
 
+  // const handleTelegram = () => {
+  //   // Linking.openURL(`whatsapp://send?phone=${phoneNumber}`)
+  //   Linking.openURL(`https://t.me/+P2Ljm3sMJyY4MDBl`)
+  //     .then(result => {
+  //       if (result) {
+  //         console.log('Aplikasi Telegram telah dibuka');
+  //       } else {
+  //         console.log('Gagal membuka aplikasi Telegram');
+  //       }
+  //     })
+  //     .catch(error => {
+  //       console.error('Error:', error);
+  //     });
+  // };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Gap height={110} />
@@ -47,11 +63,13 @@ const ForgetPass = ({navigation}: any) => {
       <Gap height={110} />
       <View style={styles.content}>
         <Text style={styles.txt}>
+          {/* Jika Anda lupa password akun, silahkan menghubungi di telegram IT Help
+          Desk RSUD Sam Ratulangi Tondano. */}
           Jika Anda lupa password akun, silahkan menghubungi bagian admin IT di
           nomor yang ada dibawah ini
         </Text>
         <Gap height={30} />
-        <Text style={styles.txtPhoneNumber}>0851-5955-6468</Text>
+        <Text style={styles.txtPhoneNumber}>0857-5694-8021</Text>
         <View style={{flexDirection: 'row', columnGap: 30, marginTop: 10}}>
           <Button
             label="Telepon"
