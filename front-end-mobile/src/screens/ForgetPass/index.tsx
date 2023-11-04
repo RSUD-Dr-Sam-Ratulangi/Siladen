@@ -60,29 +60,22 @@ const ForgetPass = ({navigation}: any) => {
         <Image source={Logo} resizeMode="contain" style={styles.logo} />
         <Text style={styles.txtLogo}>RSUD Dr.Sam Ratulangi{'\n'}Tondano</Text>
       </View>
-      <Gap height={110} />
+      <Gap height={100} />
       <View style={styles.content}>
         <Text style={styles.txt}>
           {/* Jika Anda lupa password akun, silahkan menghubungi di telegram IT Help
           Desk RSUD Sam Ratulangi Tondano. */}
-          Jika Anda lupa password akun, silahkan menghubungi bagian admin IT di
-          nomor yang ada dibawah ini
+          Jika Anda lupa password akun, silahkan menghubungi bagian{' '}
+          <Text style={{fontFamily: 'Poppins-Bold'}}>admin IT</Text> melalui
+          kontak yang ada dibawah ini
         </Text>
         <Gap height={30} />
-        <Text style={styles.txtPhoneNumber}>0857-5694-8021</Text>
         <View style={{flexDirection: 'row', columnGap: 30, marginTop: 10}}>
           <Button
-            label="Telepon"
-            width={110}
-            backgroundColor="transparent"
-            textColor={MyColor.Primary}
-            onClick={handleTelepon}
-          />
-          <Button
-            label="Whatsapp"
-            width={110}
-            backgroundColor="transparent"
-            textColor={MyColor.Primary}
+            label="Whatsapp admin IT"
+            width={250}
+            backgroundColor={MyColor.Primary}
+            textColor="white"
             onClick={handleWhatsApp}
           />
         </View>
@@ -102,12 +95,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   logo: {
-    width: 33,
+    width: 43,
     height: 43,
   },
   logoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    columnGap: 10,
   },
   txtLogo: {
     fontFamily: MyFont.Primary,

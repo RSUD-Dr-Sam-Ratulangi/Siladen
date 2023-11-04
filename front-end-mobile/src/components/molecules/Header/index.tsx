@@ -34,11 +34,11 @@ const styles = StyleSheet.create({
     height: 76,
     columnGap: 20,
     flexDirection: 'row',
-    paddingHorizontal: 30,
+    paddingHorizontal: 20,
   },
   logo: {
-    height: 50,
-    width: 38,
+    height: 57,
+    width: 57,
     resizeMode: 'contain',
   },
   txtRSUD: {

@@ -204,12 +204,13 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   logo: {
-    width: 33,
+    width: 43,
     height: 43,
   },
   logoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    columnGap: 10,
   },
   txtLogo: {
     fontFamily: MyFont.Primary,
