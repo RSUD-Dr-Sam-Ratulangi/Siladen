@@ -3,6 +3,7 @@ const { dbName, dbUsername, dbPassword, dbHostname, port } = require("../config/
 
 const db = new Sequelize(dbName, dbUsername, dbPassword, {
   host: dbHostname,
+  password: dbPassword,
   port,
   dialect: "mysql",
   // timezone: "Asia/Makassar",
