@@ -44,11 +44,9 @@ const styles = StyleSheet.create({
   txtRSUD: {
     fontFamily: MyFont.Primary,
     fontSize: 11,
-    marginBottom: 0,
     color: 'grey',
   },
   txt: {
-    marginTop: 0,
     fontFamily: 'Poppins-Bold',
     fontSize: 16,
   },
