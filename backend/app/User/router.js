@@ -10,6 +10,6 @@ const VerifyTokenUser = require("../../middleware/VerifyTokenUser");
 
 router.get("/users", VerifyTokenAdmin, getAllUser);
 router.get("/user/:id_user", VerifyTokenUser, getUserById);
-router.patch("/user/:id_user", updateDeviceTokenById);
+router.patch("/user/device-token/:id_user", updateDeviceTokenById);
 
 module.exports = router;

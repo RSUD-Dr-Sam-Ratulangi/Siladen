@@ -66,8 +66,8 @@ const getUserById = async (req, res) => {
   }
 };
 
-//@description     Update User data By Id
-//@route           PATCH /api/user/:id_user
+//@description     Update device token user By User Id
+//@route           PATCH /api/user/device-token/:id_user
 //@access          Public
 const updateDeviceTokenById = async (req, res) => {
   const id_user = req.params.id_user;
