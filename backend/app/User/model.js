@@ -39,6 +39,10 @@ const User = db.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    device_token: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
   },
   {
     freezeTableName: true,
