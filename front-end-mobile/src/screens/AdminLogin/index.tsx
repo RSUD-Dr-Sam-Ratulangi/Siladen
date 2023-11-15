@@ -80,10 +80,7 @@ const AdminLogin = ({navigation}: any) => {
         username,
         password,
       });
-      console.log('ini response: ', response.data);
       const token = response.data.data.token;
-      console.log('ini token: ', token);
-
       const id_user = response.data.data.id_user;
       const name = response.data.data.name;
       const role = response.data.data.role;
@@ -96,7 +93,6 @@ const AdminLogin = ({navigation}: any) => {
       await AsyncStorage.setItem('job', job);
 
       const value = await AsyncStorage.getItem('token');
-      console.log('ini adalah value: ', value);
       if (response.data.code == '200') {
         const dataUser = response.data.data;
         if (dataUser.role === 'admin') {
@@ -106,9 +102,6 @@ const AdminLogin = ({navigation}: any) => {
           dispatch(saveRoleAction(dataUser.role));
           dispatch(saveJobAction(dataUser.job));
           defineSocket();
-          console.log('ini di LOGIN: ', dataUser);
-          console.log('ini di LOGIN id user: ', dataUser.id_user);
-          // navigation.navigate('AdminHomepage');
 
           navigation.dispatch(
             CommonActions.reset({
@@ -153,9 +146,7 @@ const AdminLogin = ({navigation}: any) => {
         <Image source={Logo} resizeMode="contain" style={styles.logo} />
         <Text style={styles.txtLogo}>RSUD Dr.Sam Ratulangi{'\n'}Tondano</Text>
       </View>
-      <Gap height={40} />
-      <Text style={styles.txt}>Buat Laporan dengan Akun</Text>
-      <Gap height={10} />
+      <Gap height={50} />
       <Text style={styles.txtBold}>Silahkan masuk dengan akun petugas</Text>
       <Gap height={40} />
       <Input
@@ -198,12 +189,13 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   logo: {
-    width: 33,
+    width: 43,
     height: 43,
   },
   logoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    columnGap: 10,
   },
   txtLogo: {
     fontFamily: MyFont.Primary,

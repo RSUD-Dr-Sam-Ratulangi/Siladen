@@ -83,10 +83,7 @@ const Login = ({navigation}: any) => {
         username,
         password,
       });
-      console.log('ini response: ', response.data);
       const token = response.data.data.token;
-      console.log('ini token: ', token);
-
       const id_user = response.data.data.id_user;
       const name = response.data.data.name;
       const role = response.data.data.role;
@@ -98,18 +95,6 @@ const Login = ({navigation}: any) => {
       await AsyncStorage.setItem('role', role);
       await AsyncStorage.setItem('job', job);
 
-      const tokenAsync = await AsyncStorage.getItem('token');
-      const nameAsync = await AsyncStorage.getItem('name');
-      const idUserAsync = await AsyncStorage.getItem('id_user');
-      const roleAsync = await AsyncStorage.getItem('role');
-      const jobAsync = await AsyncStorage.getItem('job');
-
-      console.log('ini adalah token: ', tokenAsync);
-      console.log('ini name dari asyn storage: ', nameAsync);
-      console.log('ini id user dari asyn: ', idUserAsync);
-      console.log('ini role dari asyn: ', roleAsync);
-      console.log('ini job dari async', jobAsync);
-
       if (response.data.code == '200') {
         const dataUser = response.data.data;
         if (dataUser.role !== 'admin') {
@@ -120,8 +105,6 @@ const Login = ({navigation}: any) => {
           dispatch(saveUsernameAction(dataUser.username));
           dispatch(saveJobAction(dataUser.job));
           defineSocket();
-          console.log('ini di LOGIN: ', dataUser);
-          console.log('ini di LOGIN id user: ', dataUser.id_user);
           navigation.dispatch(
             CommonActions.reset({
               index: 0,
@@ -161,7 +144,6 @@ const Login = ({navigation}: any) => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Gap height={90} />
-      {/* <Text>{valueRedux}</Text> */}
       <View style={styles.logoContainer}>
         <Image source={Logo} resizeMode="contain" style={styles.logo} />
         <Text style={styles.txtLogo}>RSUD Dr.Sam Ratulangi{'\n'}Tondano</Text>
@@ -222,12 +204,13 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   logo: {
-    width: 33,
+    width: 43,
     height: 43,
   },
   logoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    columnGap: 10,
   },
   txtLogo: {
     fontFamily: MyFont.Primary,

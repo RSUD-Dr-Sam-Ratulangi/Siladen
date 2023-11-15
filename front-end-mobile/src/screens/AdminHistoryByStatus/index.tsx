@@ -5,6 +5,8 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useState, useCallback} from 'react';
 import {useFocusEffect} from '@react-navigation/native';
@@ -40,6 +42,7 @@ const AdminHistoryByStatus = ({navigation, route}: any) => {
     token: tokenSelector,
   };
   const [laporanList, setLaporanList] = useState<Laporan[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -48,6 +51,7 @@ const AdminHistoryByStatus = ({navigation, route}: any) => {
   );
 
   const getLaporan = async () => {
+    setIsLoading(true);
     try {
       const headers = {
         Authorization: `Bearer ${dataUser.token}`,
@@ -58,10 +62,22 @@ const AdminHistoryByStatus = ({navigation, route}: any) => {
         }&year=${year}`,
         {headers},
       );
+      setIsLoading(false);
       setLaporanList(response.data.data);
-      console.log('ini response.data.data', response.data.data);
     } catch (error) {
-      console.log(error);
+      setIsLoading(false);
+      Alert.alert(
+        'Terjadi kesalahan saat memuat data',
+        'Pastikan anda telah terhubung ke internet lalu coba lagi atau restart aplikasi',
+        [
+          {
+            text: 'Coba Lagi',
+            onPress: () => {
+              getLaporan();
+            },
+          },
+        ],
+      );
     }
   };
 
@@ -162,44 +178,52 @@ const AdminHistoryByStatus = ({navigation, route}: any) => {
           <Text style={styles.txt}>Laporan</Text>
         </View>
       </View>
-      {laporanList.map((item, index) => (
-        <TouchableOpacity
-          style={{
-            flexDirection: 'row',
-            columnGap: 10,
-            height: 134,
-            paddingHorizontal: 20,
-            paddingVertical: 10,
-            alignItems: 'center',
-            backgroundColor: index % 2 === 0 ? '#fff' : 'transparent',
-            // marginBottom: 20,
-          }}
-          key={index}
-          onPress={() =>
-            navigation.navigate('AdminHistoryDetail', {
-              id_laporan: item.id_laporan,
-              status: item.status,
-              dataUser: dataUser,
-            })
-          }>
-          <Image
-            source={item.gambar ? {uri: item.gambar} : ImagePlaceHolder}
-            style={styles.img}
-          />
-          <View style={{flex: 1}}>
-            <Text style={styles.txt2}>{item.nama_pasien}</Text>
-            <Text style={[styles.txt2, {fontFamily: 'Poppins-Bold'}]}>
-              {formatDateTime(new Date(item.tanggal_laporan_dikirim))}
-            </Text>
-            <Text
-              style={[styles.txt2, {fontSize: 11}]}
-              ellipsizeMode="tail"
-              numberOfLines={3}>
-              {item.insiden}
-            </Text>
-          </View>
-        </TouchableOpacity>
-      ))}
+      {isLoading ? (
+        <View style={{flex: 1, justifyContent: 'center'}}>
+          <ActivityIndicator size="large" color={MyColor.Primary} />
+        </View>
+      ) : (
+        <>
+          {laporanList.map((item, index) => (
+            <TouchableOpacity
+              style={{
+                flexDirection: 'row',
+                columnGap: 10,
+                height: 134,
+                paddingHorizontal: 20,
+                paddingVertical: 10,
+                alignItems: 'center',
+                backgroundColor: index % 2 === 0 ? '#fff' : 'transparent',
+                // marginBottom: 20,
+              }}
+              key={index}
+              onPress={() =>
+                navigation.navigate('AdminHistoryDetail', {
+                  id_laporan: item.id_laporan,
+                  status: item.status,
+                  dataUser: dataUser,
+                })
+              }>
+              <Image
+                source={item.gambar ? {uri: item.gambar} : ImagePlaceHolder}
+                style={styles.img}
+              />
+              <View style={{flex: 1}}>
+                <Text style={styles.txt2}>{item.nama_pasien}</Text>
+                <Text style={[styles.txt2, {fontFamily: 'Poppins-Bold'}]}>
+                  {formatDateTime(new Date(item.tanggal_laporan_dikirim))}
+                </Text>
+                <Text
+                  style={[styles.txt2, {fontSize: 11}]}
+                  ellipsizeMode="tail"
+                  numberOfLines={3}>
+                  {item.insiden}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </>
+      )}
     </ScrollView>
   );
 };

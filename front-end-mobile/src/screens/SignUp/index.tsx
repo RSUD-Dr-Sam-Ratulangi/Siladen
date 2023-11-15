@@ -93,7 +93,6 @@ const SignUp = ({navigation}: any) => {
           job,
           role,
         });
-        console.log('ini respons registrasi: ', response.data.data);
         if (response.data.code == '201') {
           Alert.alert('Akun berhasil dibuat', undefined, [
             {text: 'OK', onPress: () => navigation.navigate('Login')},
@@ -295,12 +294,13 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   logo: {
-    width: 33,
+    width: 43,
     height: 43,
   },
   logoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    columnGap: 10,
   },
   txtLogo: {
     fontFamily: MyFont.Primary,

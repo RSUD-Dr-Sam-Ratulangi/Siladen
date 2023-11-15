@@ -64,7 +64,6 @@ const Settings = ({navigation}: any) => {
         {headers},
       );
       setTotalLaporan(response.data.data);
-      console.log('total laporan', response.data);
     } catch (error) {
       console.log(error);
     }
@@ -112,7 +111,6 @@ const Settings = ({navigation}: any) => {
         'Terjadi kesalahan',
         'Mohon coba lagi, jika kesalahan terus berlanjut silahkan hubungi Costumer Service',
       );
-      console.log('ini error login: ', error);
     }
   };
 
@@ -304,7 +302,7 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
   modal: {
-    height: 200,
+    maxHeight: 250,
     width: '100%',
     maxWidth: 350,
     marginHorizontal: 20,
