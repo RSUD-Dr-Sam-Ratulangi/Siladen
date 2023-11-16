@@ -4,12 +4,14 @@ var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 const cors = require("cors");
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpecs = require("./public/docs/openapi.json");
+const { serverFcmKey } = require("./config");
 
 var laporan = require("./app/Laporan/router");
 var user = require("./app/User/router");
 var authUser = require("./app/AuthUser/router");
 var jenisPasien = require("./app/JenisPasien/router");
-const { serverFcmKey } = require("./config");
 
 var app = express();
 
@@ -27,6 +29,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
+// Middleware untuk menampilkan Spesifikasi API dengan Swagger UI
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
+
 // Routing WELCOME PAGE
 app.get("/", (req, res) => {
   res.json("Welcome to Siladen API");
@@ -39,10 +44,10 @@ app.get("/fcm/key", (req, res) => {
   });
 });
 
+// Routing untuk transaksi ke database
 app.use("/api", laporan);
 app.use("/api", user);
 app.use("/api", jenisPasien);
-
 app.use("/auth", authUser);
 
 // catch 404 and forward to error handler
