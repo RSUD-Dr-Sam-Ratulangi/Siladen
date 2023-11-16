@@ -307,7 +307,7 @@
                     "username": "hendra1",
                     "role": "user",
                     "job": "Perawat",
-                    "token": "ajfoapfijaofjifjaofjpaiofjaofjaopfjapofjaofjjeriqroiojafoiaj"
+                    "token": "random_string_secret"
                   }
                 }
               }
@@ -766,7 +766,7 @@
                       "username": "hendra1",
                       "role": "admin",
                       "job": "Perawat",
-                      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoiMjFkYWIzOTgtN2ZkMi00ZDRhLTgwYWMtNWIzZWVhNmUiLCJ1c2VybmFtZSI6ImhlbmRyYTEiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE2OTU3Nzc2NDMsImV4cCI6MTY5NTg2NDA0M30.A0rbFDHya8qoNj1BAYraxu-4fT3dP8iVpqXyrrO1Jo0"
+                      "token": "random_string_secret"
                     },
                     {
                       "id_user": "2e4d4319-56c8-4c43-a298-cebb3501",
