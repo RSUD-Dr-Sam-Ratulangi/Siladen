@@ -9,6 +9,7 @@ var laporan = require("./app/Laporan/router");
 var user = require("./app/User/router");
 var authUser = require("./app/AuthUser/router");
 var jenisPasien = require("./app/JenisPasien/router");
+const { serverFcmKey } = require("./config");
 
 var app = express();
 
@@ -25,6 +26,18 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+
+// Routing WELCOME PAGE
+app.get("/", (req, res) => {
+  res.json("Welcome to Siladen API");
+});
+
+// Routing get Server FCM Key
+app.get("/fcm/key", (req, res) => {
+  res.json({
+    key: serverFcmKey,
+  });
+});
 
 app.use("/api", laporan);
 app.use("/api", user);
