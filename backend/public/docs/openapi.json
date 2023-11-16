@@ -1,0 +1,2658 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API Aplikasi Pelaporan Insiden",
+    "description": "OpenAPI for Aplikasi Pelaporan Insiden RESTful API. API ini menggunakan Authentikasi JWT. Untuk status 'dalam antrian' akan kedaluwarsa dalam waktu 2 x 24 jam. Dan pada server akan selalu dilakukan pengecekan terhadap laporan dengan status 'dalam antrian' setiap 6 jam. API DOC dapat diakses pada 'api_host/api-docs'",
+    "contact": {
+      "name": "Jerico Katong",
+      "email": "jericokatong@gmail.com"
+    },
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5173",
+      "description": "Development Server"
+    },
+    {
+      "url": "https://backend-pelaporan-final.glitch.me",
+      "description": "Staging Server"
+    }
+  ],
+  "paths": {
+    "/fcm/key": {
+      "get": {
+        "tags": ["Cloud Messaging"],
+        "summary": "Dapat token server key",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "Mendapat server key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "key": "random_string_secret"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/user/session": {
+      "get": {
+        "security": [
+          {
+            "siladenAuth": []
+          }
+        ],
+        "tags": ["Authentikasi User"],
+        "summary": "Cek Session User",
+        "description": "Endpoint ini hanya untuk cek session user",
+        "responses": {
+          "200": {
+            "description": "Session user masih ada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "session": {
+                      "type": "boolean"
+                    }
+                  },
+                  "example": {
+                    "code": "200",
+                    "status": "OK",
+                    "session": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/user/register": {
+      "post": {
+        "tags": ["Authentikasi User"],
+        "summary": "Register user",
+        "description": "Register user dengan role bisa 'admin' atau 'user' (user biasa)",
+        "requestBody": {
+          "required": true,
+          "description": "untuk job tidak wajib",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "konfirmasi_password": {
+                    "type": "string"
+                  },
+                  "job": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "username",
+                  "password",
+                  "konfirmasi_password",
+                  "role"
+                ],
+                "example": {
+                  "name": "Hendra Luntungan",
+                  "username": "hendra1",
+                  "password": "123456",
+                  "konfirmasi_password": "123456",
+                  "job": "Perawat",
+                  "role": "user"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success Register",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "username": {
+                          "type": "string"
+                        },
+                        "password": {
+                          "type": "string"
+                        },
+                        "job": {
+                          "type": "string"
+                        },
+                        "role": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "example": {
+                    "code": "201",
+                    "status": "CREATED",
+                    "data": {
+                      "name": "Hendra Luntungan",
+                      "username": "hendra1",
+                      "password": "123456",
+                      "job": "Perawat",
+                      "role": "user"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Client Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                },
+                "examples": {
+                  "password do not match": {
+                    "value": {
+                      "code": "400",
+                      "status": "BAD_REQUEST",
+                      "errors": "Password and confirmation password do not match"
+                    }
+                  },
+                  "Empty Field": {
+                    "value": {
+                      "code": "400",
+                      "status": "BAD_REQUEST",
+                      "errors": "Name, Username, Password and password confirmation Fields Are Required"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Failed: username alread exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                },
+                "example": {
+                  "code": "409",
+                  "status": "CONFLICT",
+                  "errors": "Username already exists"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/user/login": {
+      "post": {
+        "tags": ["Authentikasi User"],
+        "summary": "Login User",
+        "description": "Login user untuk admin dan user biasa",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                },
+                "example": {
+                  "username": "hendra1",
+                  "password": "123456"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success Login",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id_user": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "username": {
+                          "type": "string"
+                        },
+                        "role": {
+                          "type": "string"
+                        },
+                        "job": {
+                          "type": "string"
+                        },
+                        "token": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "code": "200",
+                  "status": "OK",
+                  "data": {
+                    "id_user": "21dab398-7fd2-4d4a-80ac-5b3eea6e",
+                    "name": "Hendra Luntungan",
+                    "username": "hendra1",
+                    "role": "user",
+                    "job": "Perawat",
+                    "token": "ajfoapfijaofjifjaofjpaiofjaofjaopfjapofjaofjjeriqroiojafoiaj"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Client Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                },
+                "examples": {
+                  "User Not Found": {
+                    "value": {
+                      "code": "400",
+                      "status": "BAD_REQUEST",
+                      "errors": "User Not Found"
+                    }
+                  },
+                  "Incorrect Password": {
+                    "value": {
+                      "code": "400",
+                      "status": "BAD_REQUEST",
+                      "errors": "Incorrect Password"
+                    }
+                  },
+                  "Empty Field": {
+                    "value": {
+                      "code": "400",
+                      "status": "BAD_REQUEST",
+                      "errors": "Username and Password Fields Are Required"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Mencoba login dengan akun yang sementara digunakan oleh user lain",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                },
+                "example": {
+                  "code": "403",
+                  "status": "FORBIDDEN",
+                  "errors": "Akun sedang login di perangkat lain"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/user/logout": {
+      "delete": {
+        "security": [
+          {
+            "siladenAuth": []
+          }
+        ],
+        "tags": ["Authentikasi User"],
+        "summary": "Logout User",
+        "description": "User melakukan Logout",
+        "responses": {
+          "200": {
+            "description": "Succes Logout",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  },
+                  "example": {
+                    "code": "200",
+                    "status": "OK",
+                    "success": true
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User belum login",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                },
+                "example": {
+                  "code": "401",
+                  "status": "UNAUTHORIZED",
+                  "errors": "User hasn't login yet"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User is not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                },
+                "example": {
+                  "code": "404",
+                  "status": "NOT_FOUND",
+                  "errors": "User is not found"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/user/password/reset": {
+      "patch": {
+        "security": [
+          {
+            "siladenAuth": []
+          }
+        ],
+        "tags": ["Authentikasi User"],
+        "summary": "Reset Password User - AUTH ADMIN",
+        "description": "Jika user lupa password mereka, dan saat mereka menghubungi admin, maka admin bisa mengganti password mereka dengan username lama mereka dan kemudian mengisi password baru",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "old_username": {
+                    "type": "string"
+                  },
+                  "new_password": {
+                    "type": "string"
+                  }
+                },
+                "example": {
+                  "old_username": "roger4",
+                  "new_password": "123"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success Mengganti Password User",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  },
+                  "example": {
+                    "code": "200",
+                    "status": "OK",
+                    "success": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Client Error - All field Required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                },
+                "example": {
+                  "code": "400",
+                  "status": "BAD_REQUEST",
+                  "errors": "All fields are required: old_username and new_password"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Client Error - username tidak ada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                },
+                "example": {
+                  "code": "404",
+                  "status": "NOT_FOUND",
+                  "errors": "User is not found"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/user/session/reset": {
+      "patch": {
+        "security": [
+          {
+            "siladenAuth": []
+          }
+        ],
+        "tags": ["Authentikasi User"],
+        "summary": "Reset Session User - AUTH ADMIN",
+        "description": "Endpoint ini menjaga kemungkinan jika ada user yang lupa logout sehingga session masih ada di server, sehingga admin dapat menghapus session berdasarkan username yang benar",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  }
+                },
+                "example": {
+                  "username": "roger4"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Berhasil reset session user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  },
+                  "example": {
+                    "code": "200",
+                    "status": "OK",
+                    "success": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Client Error - All field Required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                },
+                "example": {
+                  "code": "400",
+                  "status": "BAD_REQUEST",
+                  "errors": "There's no username"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Client Error - username tidak ada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                },
+                "example": {
+                  "code": "404",
+                  "status": "NOT_FOUND",
+                  "errors": "User is not found"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/{id_user}": {
+      "get": {
+        "security": [
+          {
+            "siladenAuth": []
+          }
+        ],
+        "tags": ["User"],
+        "summary": "Get user by ID",
+        "description": "Get detail user by ID",
+        "parameters": [
+          {
+            "name": "id_user",
+            "description": "Mendapatkan detail user berdasarkan id user",
+            "required": true,
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success get user by ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id_user": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "username": {
+                          "type": "string"
+                        },
+                        "job": {
+                          "type": "string"
+                        },
+                        "role": {
+                          "type": "string"
+                        },
+                        "device_token": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "example": {
+                    "code": "200",
+                    "status": "OK",
+                    "data": {
+                      "id_user": "21dab398-7fd2-4d4a-80ac-5b3eea6e",
+                      "name": "hendra luntungan",
+                      "username": "hendra1",
+                      "job": "Perawat",
+                      "role": "user",
+                      "device_token": "random_string_secret"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                },
+                "example": {
+                  "code": "404",
+                  "status": "NOT_FOUND",
+                  "errors": "User is not found"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users": {
+      "get": {
+        "security": [
+          {
+            "siladenAuth": []
+          }
+        ],
+        "tags": ["User"],
+        "summary": "Get All User  - AUTH ADMIN",
+        "description": "Get All Detail User",
+        "responses": {
+          "200": {
+            "description": "Success Get All User",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id_user": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "username": {
+                            "type": "string"
+                          },
+                          "role": {
+                            "type": "string"
+                          },
+                          "job": {
+                            "type": "string"
+                          },
+                          "token": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "code": "200",
+                  "status": "OK",
+                  "data": [
+                    {
+                      "id_user": "21dab398-7fd2-4d4a-80ac-5b3eea6e",
+                      "name": "hendra luntungan",
+                      "username": "hendra1",
+                      "role": "admin",
+                      "job": "Perawat",
+                      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoiMjFkYWIzOTgtN2ZkMi00ZDRhLTgwYWMtNWIzZWVhNmUiLCJ1c2VybmFtZSI6ImhlbmRyYTEiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE2OTU3Nzc2NDMsImV4cCI6MTY5NTg2NDA0M30.A0rbFDHya8qoNj1BAYraxu-4fT3dP8iVpqXyrrO1Jo0"
+                    },
+                    {
+                      "id_user": "2e4d4319-56c8-4c43-a298-cebb3501",
+                      "name": "Ovel Tjia",
+                      "username": "ovel1",
+                      "job": "Dokter",
+                      "role": "user",
+                      "token": null
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/device-token/{id_user}": {
+      "patch": {
+        "tags": ["User"],
+        "summary": "Update Device Token by ID User",
+        "description": "Digunakan saat login untuk isi value device token dan saat logout untuk hapus isi value device token. Semua berdasarkan id user.",
+        "parameters": [
+          {
+            "name": "id_user",
+            "description": "Update Device Token by ID User",
+            "required": true,
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success Update Device Token User",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "code": "200",
+                  "status": "OK",
+                  "success": true
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Id User tidak ditemukan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                },
+                "example": {
+                  "code": "404",
+                  "status": "NOT_FOUND",
+                  "errors": "No Data Jenis Pasien Found"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/api/jenis_pasien": {
+      "get": {
+        "security": [
+          {
+            "siladenAuth": []
+          }
+        ],
+        "tags": ["Jenis Pasien"],
+        "summary": "Get All Jenis Pasien",
+        "description": "Get All nama jenis pasien untuk kebutuhan input laporan",
+        "responses": {
+          "200": {
+            "description": "Success Get All Jenis Pasien",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id_jenis_pasien": {
+                            "type": "integer"
+                          },
+                          "nama_jenis_pasien": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "code": "200",
+                  "status": "OK",
+                  "data": [
+                    {
+                      "id_jenis_pasien": 1,
+                      "nama_jenis_pasien": "Pasien rawat inap"
+                    },
+                    {
+                      "id_jenis_pasien": 2,
+                      "nama_jenis_pasien": "Pasien rawat jalan"
+                    },
+                    {
+                      "id_jenis_pasien": 3,
+                      "nama_jenis_pasien": "Pasien UGD"
+                    },
+                    {
+                      "id_jenis_pasien": 4,
+                      "nama_jenis_pasien": "Lain-lain"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Data jenis pasien tidak ditemukan / tidak ada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                },
+                "example": {
+                  "code": "404",
+                  "status": "NOT_FOUND",
+                  "errors": "No Data Jenis Pasien Found"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "siladenAuth": []
+          }
+        ],
+        "tags": ["Jenis Pasien"],
+        "summary": "Post Jenis Pasien  - AUTH ADMIN",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nama_jenis_pasien": {
+                    "type": "string"
+                  }
+                },
+                "example": {
+                  "nama_jenis_pasien": "Pasien rawat inap"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success Post Jenis Pasien",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id_jenis_pasien": {
+                          "type": "integer"
+                        },
+                        "nama_jenis_pasien": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "code": "200",
+                  "status": "OK",
+                  "data": {
+                    "id_jenis_pasien": 1,
+                    "nama_jenis_pasien": "Pasien rawat inap"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/laporan": {
+      "get": {
+        "security": [
+          {
+            "siladenAuth": []
+          }
+        ],
+        "tags": ["Laporan"],
+        "summary": "Get All Laporan  - AUTH ADMIN",
+        "description": "Get All Laporan, tetapi ada query parameter untuk dapat semua laporan berdasarkan status. Dan urutan data laporan mulai dari yang terbaru. Harus sertakan month dan year. contoh: /api/laporan?status=dalam antrian&month=10&year=2023",
+        "parameters": [
+          {
+            "name": "status",
+            "description": "ada 4 status yang bisa anda pilih yaitu: 'dalam antrian', 'investigasi', 'laporan selesai' dan 'laporan kedaluwarsa'",
+            "required": true,
+            "example": "dalan antrian",
+            "in": "query"
+          },
+          {
+            "name": "month",
+            "description": "contoh value month=1. Jadi value-nya dalam bentuk angka bukan huruf.",
+            "required": true,
+            "example": 10,
+            "in": "query"
+          },
+          {
+            "name": "year",
+            "description": "contoh value year=2023. Jadi value-nya dalam bentuk angka bukan huruf.",
+            "required": true,
+            "example": 2023,
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success Get All data Laporan. Jika tidak disertai req.query maka akan mendapat semua laporan untuk semua status. Jika disertai req.query akan mendapat semua laporan berdasarkan status, bulan dan tahun",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id_laporan": {
+                            "type": "string"
+                          },
+                          "nama_pasien": {
+                            "type": "string"
+                          },
+                          "waktu_mendapatkan_pelayanan": {
+                            "type": "string"
+                          },
+                          "waktu_kejadian_insiden": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "tanggal_laporan_dikirim": {
+                            "type": "string"
+                          },
+                          "tanggal_laporan_kedaluwarsa": {
+                            "type": "string"
+                          },
+                          "gambar": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "example": {
+                    "code": "200",
+                    "status": "OK",
+                    "data": [
+                      {
+                        "id_laporan": 15,
+                        "nama_pasien": "Sheren Kalalo",
+                        "insiden": "Pasien jatuh",
+                        "waktu_mendapatkan_pelayanan": "2023-09-22T05:48:52.000Z",
+                        "waktu_kejadian_insiden": "2023-09-22T06:48:52.000Z",
+                        "status": "dalam antrian",
+                        "tanggal_laporan_dikirim": "2023-10-18T03:21:22.000Z",
+                        "tanggal_laporan_kedaluwarsa": "2023-10-18T03:26:22.000Z",
+                        "gambar": null
+                      },
+                      {
+                        "id_laporan": 14,
+                        "nama_pasien": "Hendra Luntungan",
+                        "waktu_mendapatkan_pelayanan": "2023-09-22T05:48:52.000Z",
+                        "waktu_kejadian_insiden": "2023-09-22T06:48:52.000Z",
+                        "insiden": "Pasien jatuh",
+                        "status": "laporan selesai",
+                        "tanggal_laporan_dikirim": "2023-10-18T03:21:22.000Z",
+                        "tanggal_laporan_kedaluwarsa": "2023-10-18T03:26:22.000Z",
+                        "gambar": null
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/laporan/current/day": {
+      "get": {
+        "security": [
+          {
+            "siladenAuth": []
+          }
+        ],
+        "tags": ["Laporan"],
+        "summary": "Get semua laporan hari ini  - AUTH ADMIN",
+        "description": "Mendapat semua laporan hari ini dan limit 10 data terbaru",
+        "responses": {
+          "200": {
+            "description": "Success get all laporan hari ini",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id_laporan": {
+                            "type": "integer"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "tanggal_laporan_dikirim": {
+                            "type": "string"
+                          },
+                          "gambar": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "code": "200",
+                  "status": "OK",
+                  "data": [
+                    {
+                      "id_laporan": 19,
+                      "status": "dalam antrian",
+                      "tanggal_laporan_dikirim": "2023-10-18T03:21:22.000Z",
+                      "gambar": null
+                    },
+                    {
+                      "id_laporan": 18,
+                      "status": "dalam antrian",
+                      "tanggal_laporan_dikirim": "2023-10-18T03:21:22.000Z",
+                      "gambar": null
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/laporan/current/month": {
+      "get": {
+        "security": [
+          {
+            "siladenAuth": []
+          }
+        ],
+        "tags": ["Laporan"],
+        "summary": "Get all laporan bulan sekarang  - AUTH ADMIN",
+        "description": "Mendapatkan data laporan bulan sekarang dan limit hanya 10 data terbaru di bulan tersebut",
+        "responses": {
+          "200": {
+            "description": "Success get all laporan current month",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id_laporan": {
+                            "type": "integer"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "tanggal_laporan_dikirim": {
+                            "type": "string"
+                          },
+                          "gambar": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "code": "200",
+                  "status": "OK",
+                  "data": [
+                    {
+                      "id_laporan": 19,
+                      "status": "dalam antrian",
+                      "tanggal_laporan_dikirim": "2023-10-18T03:21:22.000Z",
+                      "gambar": null
+                    },
+                    {
+                      "id_laporan": 15,
+                      "status": "dalam antrian",
+                      "tanggal_laporan_dikirim": "2023-10-18T03:21:22.000Z",
+                      "gambar": null
+                    },
+                    {
+                      "id_laporan": 17,
+                      "status": "investigasi",
+                      "tanggal_laporan_dikirim": "2023-10-18T03:21:22.000Z",
+                      "gambar": null
+                    },
+                    {
+                      "id_laporan": 16,
+
+                      "status": "dalam antrian",
+                      "tanggal_laporan_dikirim": "2023-10-18T03:21:22.000Z",
+                      "gambar": null
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/laporan/amount": {
+      "get": {
+        "security": [
+          {
+            "siladenAuth": []
+          }
+        ],
+        "tags": ["Laporan"],
+        "summary": "Get jumlah laporan  - AUTH ADMIN",
+        "description": "Get jumlah laporan berdasarkan status dan jumlah keseluruhan",
+        "parameters": [
+          {
+            "name": "month",
+            "description": "contoh value month=1. Jadi value-nya dalam bentuk angka bukan huruf.",
+            "required": true,
+            "example": 10,
+            "in": "query"
+          },
+          {
+            "name": "year",
+            "description": "contoh value year=2023. Jadi value-nya dalam bentuk angka bukan huruf.",
+            "required": true,
+            "example": 2023,
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success Get jumlah laporan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "jumlah_laporan_dalam_antrian": {
+                          "type": "integer"
+                        },
+                        "jumlah_laporan_investigasi": {
+                          "type": "integer"
+                        },
+                        "jumlah_laporan_selesai": {
+                          "type": "integer"
+                        },
+                        "jumlah_laporan_kedaluwarsa": {
+                          "type": "integer"
+                        },
+                        "jumlah_keseluruhan": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "code": "200",
+                  "status": "OK",
+                  "data": {
+                    "jumlah_laporan_dalam_antrian": 3,
+                    "jumlah_laporan_investigasi": 1,
+                    "jumlah_laporan_selesai": 1,
+                    "jumlah_laporan_kedaluwarsa": 0,
+                    "jumlah_keseluruhan": 5
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "There's no query parameter month or year",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                },
+                "example": {
+                  "code": "400",
+                  "status": "BAD_REQUEST",
+                  "errors": "There's no query parameter month or year at your endpoint"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/laporan/amount/user/{id_user}": {
+      "get": {
+        "security": [
+          {
+            "siladenAuth": []
+          }
+        ],
+        "tags": ["Laporan"],
+        "summary": "Get Jumlah Laporan User Tertentu",
+        "description": "Sertakaan id user pada req.path",
+        "parameters": [
+          {
+            "name": "id_user",
+            "description": "Get jumlah laporan user berdasarkan id user",
+            "example": "0fccf0f3-23a9-42d1-9b0d-5d2b1c787509",
+            "required": true,
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses dapat jumlah laporan berdasarkan user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "integer"
+                    }
+                  },
+                  "example": {
+                    "code": "200",
+                    "status": "OK",
+                    "data": 8
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/laporan/detail/{id_laporan}": {
+      "get": {
+        "security": [
+          {
+            "siladenAuth": []
+          }
+        ],
+        "tags": ["Laporan"],
+        "summary": "Get laporan by id laporan",
+        "description": "Get laporan disertai dengan status di query parameter",
+        "parameters": [
+          {
+            "name": "id_laporan",
+            "description": "Get laporan berdasarkan id laporan",
+            "example": 15,
+            "required": true,
+            "in": "path"
+          },
+          {
+            "name": "status",
+            "description": "status: 'dalam antrian', 'investigasi', 'laporan selesai' dan 'laporan kedaluwarsa'",
+            "example": "dalam antrian",
+            "required": true,
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success Get Laporan By ID Laporan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id_laporan": {
+                          "type": "integer"
+                        },
+                        "id_user": {
+                          "type": "string"
+                        },
+                        "nama_pasien": {
+                          "type": "string"
+                        },
+                        "no_rekam_medis": {
+                          "type": "string"
+                        },
+                        "ruangan": {
+                          "type": "string"
+                        },
+                        "umur": {
+                          "type": "string"
+                        },
+                        "asuransi": {
+                          "type": "string"
+                        },
+                        "jenis_kelamin_pasien": {
+                          "type": "string"
+                        },
+                        "waktu_mendapatkan_pelayanan": {
+                          "type": "string"
+                        },
+                        "waktu_kejadian_insiden": {
+                          "type": "string"
+                        },
+                        "insiden": {
+                          "type": "string"
+                        },
+                        "kronologis_insiden": {
+                          "type": "string"
+                        },
+                        "insiden_terjadi_pada_pasien": {
+                          "type": "string"
+                        },
+                        "dampak_insiden_terhadap_pasien": {
+                          "type": "string"
+                        },
+                        "probabilitas": {
+                          "type": "string"
+                        },
+                        "orang_pertama_melaporkan_insiden": {
+                          "type": "string"
+                        },
+                        "jenis_pasien": {
+                          "type": "string"
+                        },
+                        "tempat_insiden": {
+                          "type": "string"
+                        },
+                        "departement_penyebab_insiden": {
+                          "type": "string"
+                        },
+                        "tindak_lanjut_setelah_kejadian_dan_hasil": {
+                          "type": "string"
+                        },
+                        "yang_melakukan_tindak_lanjut_setelah_insiden": {
+                          "type": "string"
+                        },
+                        "kejadian_sama_pernah_terjadi_di_unit_lain": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "tanggal_laporan_dikirim": {
+                          "type": "string"
+                        },
+                        "gambar": {
+                          "type": "string"
+                        },
+                        "pelapor_id_user": {
+                          "type": "string"
+                        },
+                        "pelapor_username": {
+                          "type": "string"
+                        },
+                        "pelapor_name": {
+                          "type": "string"
+                        },
+                        "pelapor_job": {
+                          "type": "string"
+                        },
+                        "pelapor_role": {
+                          "type": "string"
+                        },
+
+                        "investigator_id_user": {
+                          "type": "string"
+                        },
+                        "investigator_username": {
+                          "type": "string"
+                        },
+                        "investigator_job": {
+                          "type": "string"
+                        },
+                        "investigator_role": {
+                          "type": "string"
+                        },
+                        "id_kajian_laporan": {
+                          "type": "integer"
+                        },
+                        "jenis_insiden": {
+                          "type": "string"
+                        },
+                        "grading_risiko_kejadian": {
+                          "type": "string"
+                        },
+                        "tanggal_laporan_diterima": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "status: 'dalam antrian'": {
+                    "value": {
+                      "code": "200",
+                      "status": "OK",
+                      "data": {
+                        "id_laporan": 15,
+                        "id_user": "dd976c30-55c1-45bf-82c7-d0e23d002531",
+                        "nama_pasien": "Josua Tumatar",
+                        "no_rekam_medis": "123458",
+                        "ruangan": "Poli umum",
+                        "umur": "20 tahun",
+                        "asuransi": "BPJS",
+                        "jenis_kelamin_pasien": "Laki-laki",
+                        "waktu_mendapatkan_pelayanan": "2023-09-22 13:48:52",
+                        "waktu_kejadian_insiden": "2023-09-22 14:48:52",
+                        "insiden": "Pasien jatuh",
+                        "kronologis_insiden": "pada waktu pagi pasien jatuh di kamar mandi akibat lantai licin",
+                        "insiden_terjadi_pada_pasien": "Penyakit Dalam dan Subspesialisasinya",
+                        "dampak_insiden_terhadap_pasien": "Cedera Ringan",
+                        "probabilitas": "Jarang",
+                        "orang_pertama_melaporkan_insiden": "perawat",
+                        "jenis_pasien": "Pasien rawat inap",
+                        "tempat_insiden": "di loby",
+                        "departement_penyebab_insiden": "Rawat jalan",
+                        "tindak_lanjut_setelah_kejadian_dan_hasil": "tindak lanjut ditolong dan diobati dan hasilnya didapatkan Vulnus laceratum di dengkul kiri dan telapak tangan kiri",
+                        "yang_melakukan_tindak_lanjut_setelah_insiden": "Perawat",
+                        "kejadian_sama_pernah_terjadi_di_unit_lain": "Ya, tindakan untuk pencegahan yaitu memasang tanda lantai basah",
+                        "status": "dalam antrian",
+                        "tanggal_laporan_dikirim": "2023-09-27 14:53:34",
+                        "gambar": null,
+                        "pelapor_id_user": "0fccf0f3-23a9-42d1-9b0d-5d2b1c787509",
+                        "pelapor_username": "roger1",
+                        "pelapor_name": "Roger Wagiu",
+                        "pelapor_job": "Perawat",
+                        "pelapor_role": "admin",
+                        "investigator_id_user": null,
+                        "investigator_username": null,
+                        "investigator_name": null,
+                        "investigator_job": null,
+                        "investigator_role": null,
+                        "id_kajian_laporan": null,
+                        "jenis_insiden": null,
+                        "grading_risiko_kejadian": null,
+                        "tanggal_laporan_diterima": null
+                      }
+                    }
+                  },
+                  "status: 'investigasi'": {
+                    "value": {
+                      "code": "200",
+                      "status": "OK",
+                      "data": {
+                        "id_laporan": 15,
+                        "id_user": "dd976c30-55c1-45bf-82c7-d0e23d002531",
+                        "nama_pasien": "Josua Tumatar",
+                        "no_rekam_medis": "123458",
+                        "ruangan": "Poli umum",
+                        "umur": "20 tahun",
+                        "asuransi": "BPJS",
+                        "jenis_kelamin_pasien": "Laki-laki",
+                        "waktu_mendapatkan_pelayanan": "2023-09-22 13:48:52",
+                        "waktu_kejadian_insiden": "2023-09-22 14:48:52",
+                        "insiden": "Pasien jatuh",
+                        "kronologis_insiden": "pada waktu pagi pasien jatuh di kamar mandi akibat lantai licin",
+                        "insiden_terjadi_pada_pasien": "Penyakit Dalam dan Subspesialisasinya",
+                        "dampak_insiden_terhadap_pasien": "Cedera Ringan",
+                        "probabilitas": "Jarang",
+                        "orang_pertama_melaporkan_insiden": "perawat",
+                        "jenis_pasien": "Pasien rawat inap",
+                        "tempat_insiden": "di loby",
+                        "departement_penyebab_insiden": "Rawat jalan",
+                        "tindak_lanjut_setelah_kejadian_dan_hasil": "tindak lanjut ditolong dan diobati dan hasilnya didapatkan Vulnus laceratum di dengkul kiri dan telapak tangan kiri",
+                        "yang_melakukan_tindak_lanjut_setelah_insiden": "Perawat",
+                        "kejadian_sama_pernah_terjadi_di_unit_lain": "Ya, tindakan untuk pencegahan yaitu memasang tanda lantai basah",
+                        "status": "investigasi",
+                        "tanggal_laporan_dikirim": "2023-09-27 14:53:34",
+                        "gambar": null,
+                        "pelapor_id_user": "0fccf0f3-23a9-42d1-9b0d-5d2b1c787509",
+                        "pelapor_username": "roger1",
+                        "pelapor_name": "Roger Wagiu",
+                        "pelapor_job": null,
+                        "pelapor_role": "admin",
+                        "investigator_id_user": "0fccf0f3-23a9-42d1-9b0d-5d2b1c787509",
+                        "investigator_username": "roger1",
+                        "investigator_name": "Roger Wagiu",
+                        "investigator_job": null,
+                        "investigator_role": "admin",
+                        "id_kajian_laporan": null,
+                        "jenis_insiden": null,
+                        "grading_risiko_kejadian": null,
+                        "tanggal_laporan_diterima": null
+                      }
+                    }
+                  },
+                  "status: 'laporan selesai'": {
+                    "value": {
+                      "code": "200",
+                      "status": "OK",
+                      "data": {
+                        "id_laporan": 15,
+                        "id_user": "dd976c30-55c1-45bf-82c7-d0e23d002531",
+                        "nama_pasien": "Josua Tumatar",
+                        "no_rekam_medis": "123458",
+                        "ruangan": "Poli umum",
+                        "umur": "20 tahun",
+                        "asuransi": "BPJS",
+                        "jenis_kelamin_pasien": "Laki-laki",
+                        "waktu_mendapatkan_pelayanan": "2023-09-22 13:48:52",
+                        "waktu_kejadian_insiden": "2023-09-22 14:48:52",
+                        "insiden": "Pasien jatuh",
+                        "kronologis_insiden": "pada waktu pagi pasien jatuh di kamar mandi akibat lantai licin",
+                        "insiden_terjadi_pada_pasien": "Penyakit Dalam dan Subspesialisasinya",
+                        "dampak_insiden_terhadap_pasien": "Cedera Ringan",
+                        "probabilitas": "Jarang",
+                        "orang_pertama_melaporkan_insiden": "perawat",
+                        "jenis_pasien": "Pasien rawat inap",
+                        "tempat_insiden": "di loby",
+                        "departement_penyebab_insiden": "Rawat jalan",
+                        "tindak_lanjut_setelah_kejadian_dan_hasil": "tindak lanjut ditolong dan diobati dan hasilnya didapatkan Vulnus laceratum di dengkul kiri dan telapak tangan kiri",
+                        "yang_melakukan_tindak_lanjut_setelah_insiden": "Perawat",
+                        "kejadian_sama_pernah_terjadi_di_unit_lain": "Ya, tindakan untuk pencegahan yaitu memasang tanda lantai basah",
+                        "status": "laporan selesai",
+                        "tanggal_laporan_dikirim": "2023-09-27 14:53:34",
+                        "gambar": null,
+                        "pelapor_id_user": "0fccf0f3-23a9-42d1-9b0d-5d2b1c787509",
+                        "pelapor_username": "roger1",
+                        "pelapor_name": "Roger Wagiu",
+                        "pelapor_job": null,
+                        "pelapor_role": "admin",
+                        "investigator_id_user": "0fccf0f3-23a9-42d1-9b0d-5d2b1c787509",
+                        "investigator_username": "roger1",
+                        "investigator_name": "Roger Wagiu",
+                        "investigator_job": null,
+                        "investigator_role": "admin",
+                        "id_kajian_laporan": 4,
+                        "jenis_insiden": "Pasien rawat inap",
+                        "grading_risiko_kejadian": "hijau",
+                        "tanggal_laporan_diterima": "2023-09-27 14:48:52"
+                      }
+                    }
+                  },
+                  "status: 'laporan kedaluwarsa'": {
+                    "value": {
+                      "code": "200",
+                      "status": "OK",
+                      "data": {
+                        "id_laporan": 15,
+                        "id_user": "dd976c30-55c1-45bf-82c7-d0e23d002531",
+                        "nama_pasien": "Josua Wuisan",
+                        "no_rekam_medis": "123458",
+                        "ruangan": "Poli umum",
+                        "umur": "20 tahun",
+                        "asuransi": "BPJS",
+                        "jenis_kelamin_pasien": "Laki-laki",
+                        "waktu_mendapatkan_pelayanan": "2023-09-22 13:48:52",
+                        "waktu_kejadian_insiden": "2023-09-22 14:48:52",
+                        "insiden": "Pasien jatuh",
+                        "kronologis_insiden": "pada waktu pagi pasien jatuh di kamar mandi akibat lantai licin",
+                        "insiden_terjadi_pada_pasien": "Penyakit Dalam dan Subspesialisasinya",
+                        "dampak_insiden_terhadap_pasien": "Cedera Ringan",
+                        "probabilitas": "Jarang",
+                        "orang_pertama_melaporkan_insiden": "perawat",
+                        "jenis_pasien": "Pasien rawat inap",
+                        "tempat_insiden": "di loby",
+                        "departement_penyebab_insiden": "Rawat jalan",
+                        "tindak_lanjut_setelah_kejadian_dan_hasil": "tindak lanjut ditolong dan diobati dan hasilnya didapatkan Vulnus laceratum di dengkul kiri dan telapak tangan kiri",
+                        "yang_melakukan_tindak_lanjut_setelah_insiden": "Perawat",
+                        "kejadian_sama_pernah_terjadi_di_unit_lain": "Ya, tindakan untuk pencegahan yaitu memasang tanda lantai basah",
+                        "status": "laporan ditolak",
+                        "tanggal_laporan_dikirim": "2023-09-27 14:53:34",
+                        "gambar": null,
+                        "pelapor_id_user": "0fccf0f3-23a9-42d1-9b0d-5d2b1c787509",
+                        "pelapor_username": "roger1",
+                        "pelapor_name": "Roger Wagiu",
+                        "pelapor_job": null,
+                        "pelapor_role": "admin",
+                        "investigator_id_user": null,
+                        "investigator_username": null,
+                        "investigator_name": null,
+                        "investigator_job": null,
+                        "investigator_role": null,
+                        "id_kajian_laporan": null,
+                        "jenis_insiden": null,
+                        "grading_risiko_kejadian": null,
+                        "tanggal_laporan_diterima": null
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Failed, because there's no parameter query 'status'",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                },
+                "example": {
+                  "code": "400",
+                  "status": "BAD_REQUEST",
+                  "errors": "There's no parameter 'status'"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/laporan/user/latest/{id_user}": {
+      "get": {
+        "security": [
+          {
+            "siladenAuth": []
+          }
+        ],
+        "tags": ["Laporan"],
+        "summary": "Mendapatkan tiga laporan user terbaru berdasarkan user ID",
+        "parameters": [
+          {
+            "name": "id_user",
+            "description": "get 3 laporan terbaru berdasarkan id user",
+            "required": true,
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success Get 3 laporan terbaru berdasarkan user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id_laporan": {
+                            "type": "integer"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "tanggal_laporan_dikirim": {
+                            "type": "string"
+                          },
+                          "gambar": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "code": "200",
+                  "status": "OK",
+                  "data": [
+                    {
+                      "id_laporan": 19,
+                      "status": "dalam antrian",
+                      "tanggal_laporan_dikirim": "2023-10-18T08:38:51.000Z",
+                      "gambar": null
+                    },
+                    {
+                      "id_laporan": 15,
+                      "status": "dalam antrian",
+                      "tanggal_laporan_dikirim": "2023-10-18T03:21:22.000Z",
+                      "gambar": null
+                    },
+                    {
+                      "id_laporan": 17,
+                      "status": "investigasi",
+                      "tanggal_laporan_dikirim": "2023-10-18T03:21:21.000Z",
+                      "gambar": null
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/laporan/user/{id_user}": {
+      "get": {
+        "security": [
+          {
+            "siladenAuth": []
+          }
+        ],
+        "tags": ["Laporan"],
+        "summary": "Get All Laporan By User ID",
+        "description": "get semua laporan milik user tertentu",
+        "parameters": [
+          {
+            "name": "id_user",
+            "description": "parameter path untuk id user",
+            "required": true,
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success Get All Laporan By User ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id_laporan": {
+                            "type": "integer"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "tanggal_laporan_dikirim": {
+                            "type": "string"
+                          },
+                          "gambar": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "code": "200",
+                  "status": "OK",
+                  "data": [
+                    {
+                      "id_laporan": 19,
+                      "status": "dalam antrian",
+                      "tanggal_laporan_dikirim": "2023-10-18T08:38:51.000Z",
+                      "gambar": null
+                    },
+                    {
+                      "id_laporan": 15,
+                      "status": "dalam antrian",
+                      "tanggal_laporan_dikirim": "2023-10-18T03:21:22.000Z",
+                      "gambar": null
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "siladenAuth": []
+          }
+        ],
+        "tags": ["Laporan"],
+        "summary": "Post Laporan By User",
+        "description": "Post laporan untuk tiap user yang diidentifikasi berdasarkan id user",
+        "parameters": [
+          {
+            "name": "id_user",
+            "description": "id user sebagai penanda kepemilikan laporan dan juga sebagai tanda siapa yang membuat laporan",
+            "required": true,
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nama_pasien": {
+                    "type": "string",
+                    "example": "Sheren Kalalo"
+                  },
+                  "no_rekam_medis": {
+                    "type": "string",
+                    "example": "123458"
+                  },
+                  "ruangan": {
+                    "type": "string",
+                    "example": "Poli umum"
+                  },
+                  "umur": {
+                    "type": "string",
+                    "example": "20 tahun"
+                  },
+                  "asuransi": {
+                    "type": "string",
+                    "example": "BPJS"
+                  },
+                  "jenis_kelamin_pasien": {
+                    "type": "string",
+                    "example": "Perempuan"
+                  },
+                  "waktu_mendapatkan_pelayanan": {
+                    "type": "string",
+                    "example": "2023-09-22 13:48:52"
+                  },
+                  "waktu_kejadian_insiden": {
+                    "type": "string",
+                    "example": "2023-09-22 14:48:52"
+                  },
+                  "insiden": {
+                    "type": "string",
+                    "example": "Pasien jatuh"
+                  },
+                  "kronologis_insiden": {
+                    "type": "string",
+                    "example": "pada waktu pagi pasien jatuh di kamar mandi akibat lantai licin"
+                  },
+                  "insiden_terjadi_pada_pasien": {
+                    "type": "string",
+                    "example": "Penyakit Dalam dan Subspesialisasinya"
+                  },
+                  "dampak_insiden_terhadap_pasien": {
+                    "type": "string",
+                    "example": "Cedera Ringan"
+                  },
+                  "probabilitas": {
+                    "type": "string",
+                    "example": "Jarang"
+                  },
+                  "orang_pertama_melaporkan_insiden": {
+                    "type": "string",
+                    "example": "Perawat"
+                  },
+                  "id_jenis_pasien": {
+                    "type": "integer",
+                    "example": 1
+                  },
+                  "tempat_insiden": {
+                    "type": "string",
+                    "example": "di loby"
+                  },
+                  "departement_penyebab_insiden": {
+                    "type": "string",
+                    "example": "Rawat jalan"
+                  },
+                  "tindak_lanjut_setelah_kejadian_dan_hasil": {
+                    "type": "string",
+                    "example": "tindak lanjut ditolong dan diobati dan hasilnya didapatkan Vulnus laceratum di dengkul kiri dan telapak tangan kiri"
+                  },
+                  "yang_melakukan_tindak_lanjut_setelah_insiden": {
+                    "type": "string",
+                    "example": "Perawat"
+                  },
+                  "kejadian_sama_pernah_terjadi_di_unit_lain": {
+                    "type": "string",
+                    "example": "Ya, tindakan untuk pencegahan yaitu memasang tanda lantai basah"
+                  },
+                  "gambar": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "nama_pasien",
+                  "no_rekam_medis",
+                  "ruangan",
+                  "umur",
+                  "asuransi",
+                  "jenis_kelamin_pasien",
+                  "waktu_mendapatkan_pelayanan",
+                  "waktu_kejadian_insiden",
+                  "insiden",
+                  "kronologis_insiden",
+                  "insiden_terjadi_pada_pasien",
+                  "dampak_insiden_terhadap_pasien",
+                  "probabilitas",
+                  "orang_pertama_melaporkan_insiden",
+                  "id_jenis_pasien",
+                  "tempat_insiden",
+                  "departement_penyebab_insiden",
+                  "tindak_lanjut_setelah_kejadian_dan_hasil",
+                  "yang_melakukan_tindak_lanjut_setelah_insiden",
+                  "kejadian_sama_pernah_terjadi_di_unit_lain"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success create laporan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id_laporan": {
+                          "type": "integer"
+                        },
+                        "id_user": {
+                          "type": "string"
+                        },
+                        "nama_pasien": {
+                          "type": "string"
+                        },
+                        "no_rekam_medis": {
+                          "type": "string"
+                        },
+                        "ruangan": {
+                          "type": "string"
+                        },
+                        "umur": {
+                          "type": "string"
+                        },
+                        "asuransi": {
+                          "type": "string"
+                        },
+                        "jenis_kelamin_pasien": {
+                          "type": "string"
+                        },
+                        "waktu_mendapatkan_pelayanan": {
+                          "type": "string"
+                        },
+                        "waktu_kejadian_insiden": {
+                          "type": "string"
+                        },
+                        "insiden": {
+                          "type": "string"
+                        },
+                        "kronologis_insiden": {
+                          "type": "string"
+                        },
+                        "insiden_terjadi_pada_pasien": {
+                          "type": "string"
+                        },
+                        "dampak_insiden_terhadap_pasien": {
+                          "type": "string"
+                        },
+                        "probabilitas": {
+                          "type": "string"
+                        },
+                        "orang_pertama_melaporkan_insiden": {
+                          "type": "string"
+                        },
+                        "id_jenis_pasien": {
+                          "type": "integer"
+                        },
+                        "tempat_insiden": {
+                          "type": "string"
+                        },
+                        "departement_penyebab_insiden": {
+                          "type": "string"
+                        },
+                        "tindak_lanjut_setelah_kejadian_dan_hasil": {
+                          "type": "string"
+                        },
+                        "yang_melakukan_tindak_lanjut_setelah_insiden": {
+                          "type": "string"
+                        },
+                        "kejadian_sama_pernah_terjadi_di_unit_lain": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "gambar": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "code": "201",
+                  "status": "CREATED",
+                  "data": {
+                    "id_laporan": 20,
+                    "id_user": "cfa9e090-fb52-455f-a058-708ac619",
+                    "nama_pasien": "Josua Wuisan",
+                    "no_rekam_medis": "123458",
+                    "ruangan": "Poli umum",
+                    "umur": "20 tahun",
+                    "asuransi": "BPJS",
+                    "jenis_kelamin_pasien": "Laki-laki",
+                    "waktu_mendapatkan_pelayanan": "2023-09-22T05:48:52.000Z",
+                    "waktu_kejadian_insiden": "2023-09-22T06:48:52.000Z",
+                    "insiden": "Pasien jatuh",
+                    "kronologis_insiden": "pada waktu pagi pasien jatuh di kamar mandi akibat lantai licin",
+                    "insiden_terjadi_pada_pasien": "Penyakit Dalam dan Subspesialisasinya",
+                    "dampak_insiden_terhadap_pasien": "Cedera Ringan",
+                    "probabilitas": "Jarang",
+                    "orang_pertama_melaporkan_insiden": "perawat",
+                    "id_jenis_pasien": "1",
+                    "tempat_insiden": "di loby",
+                    "departement_penyebab_insiden": "Rawat jalan",
+                    "tindak_lanjut_setelah_kejadian_dan_hasil": "tindak lanjut ditolong dan diobati dan hasilnya didapatkan Vulnus laceratum di dengkul kiri dan telapak tangan kiri",
+                    "yang_melakukan_tindak_lanjut_setelah_insiden": "Perawat",
+                    "kejadian_sama_pernah_terjadi_di_unit_lain": "Ya, tindakan untuk pencegahan yaitu memasang tanda lantai basah",
+                    "status": "dalam antrian",
+                    "gambar": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "User tidak input semua field",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                },
+                "example": {
+                  "code": "400",
+                  "status": "BAD_REQUEST",
+                  "errors": "All Fields Are Required"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/laporan/anonim": {
+      "post": {
+        "tags": ["Laporan"],
+        "summary": "Post Laporan By Anonim",
+        "description": "Tanpa harus membuat akun, laporan bisa dibuat dan dikirim",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nama_pasien": {
+                    "type": "string",
+                    "example": "Sheren Kalalo"
+                  },
+                  "no_rekam_medis": {
+                    "type": "string",
+                    "example": "123456"
+                  },
+                  "ruangan": {
+                    "type": "string",
+                    "example": "Poli umum"
+                  },
+                  "umur": {
+                    "type": "string",
+                    "example": "20 tahun"
+                  },
+                  "asuransi": {
+                    "type": "string",
+                    "example": "BPJS"
+                  },
+                  "jenis_kelamin_pasien": {
+                    "type": "string",
+                    "example": "Perempuan"
+                  },
+                  "waktu_mendapatkan_pelayanan": {
+                    "type": "string",
+                    "example": "2023-09-22 13:48:52"
+                  },
+                  "waktu_kejadian_insiden": {
+                    "type": "string",
+                    "example": "2023-09-22 14:48:52"
+                  },
+                  "insiden": {
+                    "type": "string",
+                    "example": "Pasien jatuh"
+                  },
+                  "kronologis_insiden": {
+                    "type": "string",
+                    "example": "pada waktu pagi pasien jatuh di kamar mandi akibat lantai licin"
+                  },
+                  "insiden_terjadi_pada_pasien": {
+                    "type": "string",
+                    "example": "Penyakit Dalam dan Subspesialisasinya"
+                  },
+                  "dampak_insiden_terhadap_pasien": {
+                    "type": "string",
+                    "example": "Cedera Ringan"
+                  },
+                  "probabilitas": {
+                    "type": "string",
+                    "example": "Jarang"
+                  },
+                  "orang_pertama_melaporkan_insiden": {
+                    "type": "string",
+                    "example": "perawat"
+                  },
+                  "id_jenis_pasien": {
+                    "type": "integer",
+                    "example": 1
+                  },
+                  "tempat_insiden": {
+                    "type": "string",
+                    "example": "di loby"
+                  },
+                  "departement_penyebab_insiden": {
+                    "type": "string",
+                    "example": "Rawat jalan"
+                  },
+                  "tindak_lanjut_setelah_kejadian_dan_hasil": {
+                    "type": "string",
+                    "example": "tindak lanjut ditolong dan diobati dan hasilnya didapatkan Vulnus laceratum di dengkul kiri dan telapak tangan kiri"
+                  },
+                  "yang_melakukan_tindak_lanjut_setelah_insiden": {
+                    "type": "string",
+                    "example": "Perawat"
+                  },
+                  "kejadian_sama_pernah_terjadi_di_unit_lain": {
+                    "type": "string",
+                    "example": "Ya, tindakan untuk pencegahan yaitu memasang tanda lantai basah"
+                  },
+                  "gambar": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "nama_pasien",
+                  "no_rekam_medis",
+                  "ruangan",
+                  "umur",
+                  "asuransi",
+                  "jenis_kelamin_pasien",
+                  "waktu_mendapatkan_pelayanan",
+                  "waktu_kejadian_insiden",
+                  "insiden",
+                  "kronologis_insiden",
+                  "insiden_terjadi_pada_pasien",
+                  "dampak_insiden_terhadap_pasien",
+                  "probabilitas",
+                  "orang_pertama_melaporkan_insiden",
+                  "id_jenis_pasien",
+                  "tempat_insiden",
+                  "departement_penyebab_insiden",
+                  "tindak_lanjut_setelah_kejadian_dan_hasil",
+                  "yang_melakukan_tindak_lanjut_setelah_insiden",
+                  "kejadian_sama_pernah_terjadi_di_unit_lain"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success create laporan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id_laporan": {
+                          "type": "integer"
+                        },
+                        "nama_pasien": {
+                          "type": "string"
+                        },
+                        "no_rekam_medis": {
+                          "type": "string"
+                        },
+                        "ruangan": {
+                          "type": "string"
+                        },
+                        "umur": {
+                          "type": "string"
+                        },
+                        "asuransi": {
+                          "type": "string"
+                        },
+                        "jenis_kelamin_pasien": {
+                          "type": "string"
+                        },
+                        "waktu_mendapatkan_pelayanan": {
+                          "type": "string"
+                        },
+                        "waktu_kejadian_insiden": {
+                          "type": "string"
+                        },
+                        "insiden": {
+                          "type": "string"
+                        },
+                        "kronologis_insiden": {
+                          "type": "string"
+                        },
+                        "insiden_terjadi_pada_pasien": {
+                          "type": "string"
+                        },
+                        "dampak_insiden_terhadap_pasien": {
+                          "type": "string"
+                        },
+                        "probabilitas": {
+                          "type": "string"
+                        },
+                        "orang_pertama_melaporkan_insiden": {
+                          "type": "string"
+                        },
+                        "id_jenis_pasien": {
+                          "type": "integer"
+                        },
+                        "tempat_insiden": {
+                          "type": "string"
+                        },
+                        "departement_penyebab_insiden": {
+                          "type": "string"
+                        },
+                        "tindak_lanjut_setelah_kejadian_dan_hasil": {
+                          "type": "string"
+                        },
+                        "yang_melakukan_tindak_lanjut_setelah_insiden": {
+                          "type": "string"
+                        },
+                        "kejadian_sama_pernah_terjadi_di_unit_lain": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "gambar": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "code": "201",
+                  "status": "CREATED",
+                  "data": {
+                    "id_laporan": 20,
+                    "nama_pasien": "Josua Wuisan",
+                    "no_rekam_medis": "123458",
+                    "ruangan": "Poli umum",
+                    "umur": "20 tahun",
+                    "asuransi": "BPJS",
+                    "jenis_kelamin_pasien": "Laki-laki",
+                    "waktu_mendapatkan_pelayanan": "2023-09-22T05:48:52.000Z",
+                    "waktu_kejadian_insiden": "2023-09-22T06:48:52.000Z",
+                    "insiden": "Pasien jatuh",
+                    "kronologis_insiden": "pada waktu pagi pasien jatuh di kamar mandi akibat lantai licin",
+                    "insiden_terjadi_pada_pasien": "Penyakit Dalam dan Subspesialisasinya",
+                    "dampak_insiden_terhadap_pasien": "Cedera Ringan",
+                    "probabilitas": "Jarang",
+                    "orang_pertama_melaporkan_insiden": "perawat",
+                    "id_jenis_pasien": "1",
+                    "tempat_insiden": "di loby",
+                    "departement_penyebab_insiden": "Rawat jalan",
+                    "tindak_lanjut_setelah_kejadian_dan_hasil": "tindak lanjut ditolong dan diobati dan hasilnya didapatkan Vulnus laceratum di dengkul kiri dan telapak tangan kiri",
+                    "yang_melakukan_tindak_lanjut_setelah_insiden": "Perawat",
+                    "kejadian_sama_pernah_terjadi_di_unit_lain": "Ya, tindakan untuk pencegahan yaitu memasang tanda lantai basah",
+                    "status": "dalam antrian",
+                    "gambar": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "All field required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                },
+                "example": {
+                  "code": "400",
+                  "status": "BAD_REQUEST",
+                  "errors": "All Fields Are Required"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/laporan/status/investigasi/{id_laporan}": {
+      "patch": {
+        "security": [
+          {
+            "siladenAuth": []
+          }
+        ],
+        "tags": ["Laporan"],
+        "summary": "Update status jadi INVESTIGASI  - AUTH ADMIN",
+        "description": "Update status dari 'dalam antrian' menjadi 'investigasi'",
+        "parameters": [
+          {
+            "name": "id_laporan",
+            "description": "id laporan yang akan di update statusnya",
+            "required": true,
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Hanya diperlukan id_user investigator",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "diinvestigasi_oleh": {
+                    "type": "string"
+                  }
+                },
+                "example": {
+                  "diinvestigasi_oleh": "0fccf0f3-23a9-42d1-9b0d-5d2b1c787509"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success Update status dari 'dalam antrian' menjadi 'investigasi'",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "code": "200",
+                  "status": "OK",
+                  "success": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/laporan/status/selesai/{id_laporan}": {
+      "patch": {
+        "security": [
+          {
+            "siladenAuth": []
+          }
+        ],
+        "tags": ["Laporan"],
+        "summary": "Update Status SELESAI  - AUTH ADMIN",
+        "description": "update status dari 'investigasi' menjadi 'laporan selesai'. Untuk update harus mengisi jenis_insiden dan grading risiko kejadiannya",
+        "parameters": [
+          {
+            "name": "id_laporan",
+            "description": "id laporan yang akan diubah status dari 'investigasi' menjadi 'laporan selesai'",
+            "required": true,
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jenis_insiden": {
+                    "type": "string"
+                  },
+                  "grading_risiko_kejadian": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "jenis_insiden": "Kejadian Nyaris Cedera / KNC (Near miss)",
+                "grading_risiko_kejadian": "merah"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success update status menjadi 'laporan selesai'",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "code": "200",
+                  "status": "OK",
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "empty field saat pengisian jenis insiden dan grading risiko kejadian.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                },
+                "example": {
+                  "code": "400",
+                  "status": "BAD_REQUEST",
+                  "errors": "jenis_insiden and grading_risiko_kejadian are required"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "siladenAuth": {
+        "description": "Authentication for siladen RESTful API",
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "GeneralError": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
