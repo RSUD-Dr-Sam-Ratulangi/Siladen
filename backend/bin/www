@@ -36,11 +36,10 @@ const io = new Server(server, {
   },
 });
 
-// interval setiap 6 jam cek status dalam antrian
+// Interval setiap 6 jam cek status dalam antrian
 setInterval(async () => {
   const dateNow = new Date();
 
-  console.log("a");
   const t = await db.transaction();
   try {
     const update = await Laporan.update(
@@ -66,29 +65,35 @@ setInterval(async () => {
   }
 }, 6 * 60 * 60 * 1000);
 
+// Konfigurasi Socket
 io.on("connection", (Socket) => {
   console.log("User Connected");
 
+  // User join pada room berdasarkan id user-nya sendiri yang unik untuk masing-masing user
   Socket.on("join chat", (room) => {
     Socket.join(room);
     console.log("User Joined Room: ", room);
   });
 
+  // Admin emit ke user tertentu berdasarkan room id user yang unik
   Socket.on("new message", (data) => {
     console.log("dari admin ini");
     console.log(data.id_user);
     Socket.to(data.id_user).emit("message received", data);
   });
 
+  // Setiap akun admin akan join pada room admin, untuk keperluan broadcast dari user emit ke semua admin
   Socket.on("join admin", (room) => {
     Socket.join(room);
     console.log("user join admin " + room);
   });
 
+  // User emit ke room admin (broadcast ke semua akun admin)
   Socket.on("message admin", (data) => {
     Socket.to("admin").emit("admin received", data);
   });
 
+  // User disconnect
   Socket.on("disconnect", (reason) => {
     console.log(`User disconnected (${reason})`);
   });

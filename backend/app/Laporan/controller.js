@@ -1,8 +1,6 @@
 const Laporan = require("./model");
 const User = require("../User/model");
 const KajianLaporan = require("../KajianLaporan/model");
-const fs = require("fs");
-const path = require("path");
 const db = require("../../database");
 const JenisPasien = require("../JenisPasien/model");
 const { Op, Sequelize } = require("sequelize");
@@ -22,9 +20,23 @@ const getAllLaporan = async (req, res) => {
 
     if (status && month && year) {
       laporan = await Laporan.findAll({
-        attributes: ["id_laporan", "nama_pasien", "insiden", "waktu_mendapatkan_pelayanan", "waktu_kejadian_insiden", "status", "tanggal_laporan_dikirim", "tanggal_laporan_kedaluwarsa", "gambar"],
+        attributes: [
+          "id_laporan",
+          "nama_pasien",
+          "insiden",
+          "waktu_mendapatkan_pelayanan",
+          "waktu_kejadian_insiden",
+          "status",
+          "tanggal_laporan_dikirim",
+          "tanggal_laporan_kedaluwarsa",
+          "gambar",
+        ],
         where: {
-          [Op.and]: [Sequelize.literal(`MONTH(tanggal_laporan_dikirim) = ${month}`), Sequelize.literal(`YEAR(tanggal_laporan_dikirim) = ${year}`), Sequelize.literal(`status = '${status}'`)],
+          [Op.and]: [
+            Sequelize.literal(`MONTH(tanggal_laporan_dikirim) = ${month}`),
+            Sequelize.literal(`YEAR(tanggal_laporan_dikirim) = ${year}`),
+            Sequelize.literal(`status = '${status}'`),
+          ],
         },
         order: [["tanggal_laporan_dikirim", "DESC"]],
         include: [
@@ -46,7 +58,17 @@ const getAllLaporan = async (req, res) => {
       });
     } else {
       laporan = await Laporan.findAll({
-        attributes: ["id_laporan", "nama_pasien", "insiden", "waktu_mendapatkan_pelayanan", "waktu_kejadian_insiden", "status", "tanggal_laporan_dikirim", "tanggal_laporan_kedaluwarsa", "gambar"],
+        attributes: [
+          "id_laporan",
+          "nama_pasien",
+          "insiden",
+          "waktu_mendapatkan_pelayanan",
+          "waktu_kejadian_insiden",
+          "status",
+          "tanggal_laporan_dikirim",
+          "tanggal_laporan_kedaluwarsa",
+          "gambar",
+        ],
         order: [["tanggal_laporan_dikirim", "DESC"]],
         include: [
           {
@@ -68,16 +90,26 @@ const getAllLaporan = async (req, res) => {
     }
 
     const revLaporan = laporan.map((item) => {
-      let dataUri = item.gambar ? `data:image/jpeg;base64,${item.gambar.toString("base64")}` : null;
+      let dataUri = item.gambar
+        ? `data:image/jpeg;base64,${item.gambar.toString("base64")}`
+        : null;
       return {
         id_laporan: item.id_laporan,
         nama_pasien: item.nama_pasien,
         insiden: item.insiden,
-        waktu_mendapatkan_pelayanan: `${moment(item.waktu_mendapatkan_pelayanan).tz("Asia/Makassar")}`,
-        waktu_kejadian_insiden: `${moment(item.waktu_kejadian_insiden).tz("Asia/Makassar")}`,
+        waktu_mendapatkan_pelayanan: `${moment(
+          item.waktu_mendapatkan_pelayanan
+        ).tz("Asia/Makassar")}`,
+        waktu_kejadian_insiden: `${moment(item.waktu_kejadian_insiden).tz(
+          "Asia/Makassar"
+        )}`,
         status: item.status,
-        tanggal_laporan_dikirim: `${moment(item.tanggal_laporan_dikirim).tz("Asia/Makassar")}`,
-        tanggal_laporan_kedaluwarsa: `${moment(item.tanggal_laporan_kedaluwarsa).tz("Asia/Makassar")}`,
+        tanggal_laporan_dikirim: `${moment(item.tanggal_laporan_dikirim).tz(
+          "Asia/Makassar"
+        )}`,
+        tanggal_laporan_kedaluwarsa: `${moment(
+          item.tanggal_laporan_kedaluwarsa
+        ).tz("Asia/Makassar")}`,
         gambar: dataUri,
       };
     });
@@ -105,7 +137,11 @@ const getLaporanByIdLaporan = async (req, res) => {
     const id_laporan = req.params.id_laporan;
     const status = req.query.status;
 
-    if (status === "dalam antrian" || status === "investigasi" || status === "laporan kedaluwarsa") {
+    if (
+      status === "dalam antrian" ||
+      status === "investigasi" ||
+      status === "laporan kedaluwarsa"
+    ) {
       const laporan = await Laporan.findOne({
         where: {
           id_laporan,
@@ -155,7 +191,9 @@ const getLaporanByIdLaporan = async (req, res) => {
           },
         ],
       });
-      let dataUri = laporan.gambar ? `data:image/jpeg;base64,${laporan.gambar.toString("base64")}` : null;
+      let dataUri = laporan.gambar
+        ? `data:image/jpeg;base64,${laporan.gambar.toString("base64")}`
+        : null;
 
       const revLaporan = {
         id_laporan: laporan.id_laporan,
@@ -166,23 +204,35 @@ const getLaporanByIdLaporan = async (req, res) => {
         umur: laporan.umur,
         asuransi: laporan.asuransi,
         jenis_kelamin_pasien: laporan.jenis_kelamin_pasien,
-        waktu_mendapatkan_pelayanan: `${moment(laporan.waktu_mendapatkan_pelayanan).tz("Asia/Makassar")}`,
-        waktu_kejadian_insiden: `${moment(laporan.waktu_kejadian_insiden).tz("Asia/Makassar")}`,
+        waktu_mendapatkan_pelayanan: `${moment(
+          laporan.waktu_mendapatkan_pelayanan
+        ).tz("Asia/Makassar")}`,
+        waktu_kejadian_insiden: `${moment(laporan.waktu_kejadian_insiden).tz(
+          "Asia/Makassar"
+        )}`,
         insiden: laporan.insiden,
         kronologis_insiden: laporan.kronologis_insiden,
         insiden_terjadi_pada_pasien: laporan.insiden_terjadi_pada_pasien,
         dampak_insiden_terhadap_pasien: laporan.dampak_insiden_terhadap_pasien,
         probabilitas: laporan.probabilitas,
-        orang_pertama_melaporkan_insiden: laporan.orang_pertama_melaporkan_insiden,
+        orang_pertama_melaporkan_insiden:
+          laporan.orang_pertama_melaporkan_insiden,
         jenis_pasien: laporan.jenis_pasien.nama_jenis_pasien,
         tempat_insiden: laporan.tempat_insiden,
         departement_penyebab_insiden: laporan.departement_penyebab_insiden,
-        tindak_lanjut_setelah_kejadian_dan_hasil: laporan.tindak_lanjut_setelah_kejadian_dan_hasil,
-        yang_melakukan_tindak_lanjut_setelah_insiden: laporan.yang_melakukan_tindak_lanjut_setelah_insiden,
-        kejadian_sama_pernah_terjadi_di_unit_lain: laporan.kejadian_sama_pernah_terjadi_di_unit_lain,
+        tindak_lanjut_setelah_kejadian_dan_hasil:
+          laporan.tindak_lanjut_setelah_kejadian_dan_hasil,
+        yang_melakukan_tindak_lanjut_setelah_insiden:
+          laporan.yang_melakukan_tindak_lanjut_setelah_insiden,
+        kejadian_sama_pernah_terjadi_di_unit_lain:
+          laporan.kejadian_sama_pernah_terjadi_di_unit_lain,
         status: laporan.status,
-        tanggal_laporan_dikirim: `${moment(laporan.tanggal_laporan_dikirim).tz("Asia/Makassar")}`,
-        tanggal_laporan_kedaluwarsa: `${moment(laporan.tanggal_laporan_kedaluwarsa).tz("Asia/Makassar")}`,
+        tanggal_laporan_dikirim: `${moment(laporan.tanggal_laporan_dikirim).tz(
+          "Asia/Makassar"
+        )}`,
+        tanggal_laporan_kedaluwarsa: `${moment(
+          laporan.tanggal_laporan_kedaluwarsa
+        ).tz("Asia/Makassar")}`,
         gambar: dataUri,
 
         pelapor_id_user: laporan.pelapor ? laporan.pelapor.id_user : null,
@@ -191,10 +241,18 @@ const getLaporanByIdLaporan = async (req, res) => {
         pelapor_job: laporan.pelapor ? laporan.pelapor.job : null,
         pelapor_role: laporan.pelapor ? laporan.pelapor.role : null,
 
-        investigator_id_user: laporan.investigator ? laporan.investigator.id_user : null,
-        investigator_username: laporan.investigator ? laporan.investigator.username : null,
-        investigator_name: laporan.investigator ? laporan.investigator.name : null,
-        investigator_job: laporan.investigator ? laporan.investigator.job : null,
+        investigator_id_user: laporan.investigator
+          ? laporan.investigator.id_user
+          : null,
+        investigator_username: laporan.investigator
+          ? laporan.investigator.username
+          : null,
+        investigator_name: laporan.investigator
+          ? laporan.investigator.name
+          : null,
+        investigator_job: laporan.investigator
+          ? laporan.investigator.job
+          : null,
         investigator_role: laporan.pelapor ? laporan.pelapor.role : null,
 
         id_kajian_laporan: null,
@@ -213,7 +271,12 @@ const getLaporanByIdLaporan = async (req, res) => {
         where: {
           id_laporan,
         },
-        attributes: ["id_kajian_laporan", "jenis_insiden", "grading_risiko_kejadian", "tanggal_laporan_diterima"],
+        attributes: [
+          "id_kajian_laporan",
+          "jenis_insiden",
+          "grading_risiko_kejadian",
+          "tanggal_laporan_diterima",
+        ],
         include: [
           {
             model: Laporan,
@@ -264,7 +327,9 @@ const getLaporanByIdLaporan = async (req, res) => {
           },
         ],
       });
-      let dataUri = laporan.laporan.gambar ? `data:image/jpeg;base64,${laporan.laporan.gambar.toString("base64")}` : null;
+      let dataUri = laporan.laporan.gambar
+        ? `data:image/jpeg;base64,${laporan.laporan.gambar.toString("base64")}`
+        : null;
 
       const revLaporan = {
         id_laporan: laporan.laporan.id_laporan,
@@ -275,41 +340,78 @@ const getLaporanByIdLaporan = async (req, res) => {
         umur: laporan.laporan.umur,
         asuransi: laporan.laporan.asuransi,
         jenis_kelamin_pasien: laporan.laporan.jenis_kelamin_pasien,
-        waktu_mendapatkan_pelayanan: `${moment(laporan.laporan.waktu_mendapatkan_pelayanan).tz("Asia/Makassar")}`,
-        waktu_kejadian_insiden: `${moment(laporan.laporan.waktu_kejadian_insiden).tz("Asia/Makassar")}`,
+        waktu_mendapatkan_pelayanan: `${moment(
+          laporan.laporan.waktu_mendapatkan_pelayanan
+        ).tz("Asia/Makassar")}`,
+        waktu_kejadian_insiden: `${moment(
+          laporan.laporan.waktu_kejadian_insiden
+        ).tz("Asia/Makassar")}`,
         insiden: laporan.laporan.insiden,
         kronologis_insiden: laporan.laporan.kronologis_insiden,
-        insiden_terjadi_pada_pasien: laporan.laporan.insiden_terjadi_pada_pasien,
-        dampak_insiden_terhadap_pasien: laporan.laporan.dampak_insiden_terhadap_pasien,
+        insiden_terjadi_pada_pasien:
+          laporan.laporan.insiden_terjadi_pada_pasien,
+        dampak_insiden_terhadap_pasien:
+          laporan.laporan.dampak_insiden_terhadap_pasien,
         probabilitas: laporan.laporan.probabilitas,
-        orang_pertama_melaporkan_insiden: laporan.laporan.orang_pertama_melaporkan_insiden,
+        orang_pertama_melaporkan_insiden:
+          laporan.laporan.orang_pertama_melaporkan_insiden,
         jenis_pasien: laporan.laporan.jenis_pasien.nama_jenis_pasien,
         tempat_insiden: laporan.laporan.tempat_insiden,
-        departement_penyebab_insiden: laporan.laporan.departement_penyebab_insiden,
-        tindak_lanjut_setelah_kejadian_dan_hasil: laporan.laporan.tindak_lanjut_setelah_kejadian_dan_hasil,
-        yang_melakukan_tindak_lanjut_setelah_insiden: laporan.laporan.yang_melakukan_tindak_lanjut_setelah_insiden,
-        kejadian_sama_pernah_terjadi_di_unit_lain: laporan.laporan.kejadian_sama_pernah_terjadi_di_unit_lain,
+        departement_penyebab_insiden:
+          laporan.laporan.departement_penyebab_insiden,
+        tindak_lanjut_setelah_kejadian_dan_hasil:
+          laporan.laporan.tindak_lanjut_setelah_kejadian_dan_hasil,
+        yang_melakukan_tindak_lanjut_setelah_insiden:
+          laporan.laporan.yang_melakukan_tindak_lanjut_setelah_insiden,
+        kejadian_sama_pernah_terjadi_di_unit_lain:
+          laporan.laporan.kejadian_sama_pernah_terjadi_di_unit_lain,
         status: laporan.laporan.status,
-        tanggal_laporan_dikirim: `${moment(laporan.laporan.tanggal_laporan_dikirim).tz("Asia/Makassar")}`,
-        tanggal_laporan_kedaluwarsa: `${moment(laporan.laporan.tanggal_laporan_kedaluwarsa).tz("Asia/Makassar")}`,
+        tanggal_laporan_dikirim: `${moment(
+          laporan.laporan.tanggal_laporan_dikirim
+        ).tz("Asia/Makassar")}`,
+        tanggal_laporan_kedaluwarsa: `${moment(
+          laporan.laporan.tanggal_laporan_kedaluwarsa
+        ).tz("Asia/Makassar")}`,
         gambar: dataUri,
 
-        pelapor_id_user: laporan.laporan.pelapor ? laporan.laporan.pelapor.id_user : null,
-        pelapor_username: laporan.laporan.pelapor ? laporan.laporan.pelapor.username : null,
-        pelapor_name: laporan.laporan.pelapor ? laporan.laporan.pelapor.name : null,
-        pelapor_job: laporan.laporan.pelapor ? laporan.laporan.pelapor.job : null,
-        pelapor_role: laporan.laporan.pelapor ? laporan.laporan.pelapor.role : null,
+        pelapor_id_user: laporan.laporan.pelapor
+          ? laporan.laporan.pelapor.id_user
+          : null,
+        pelapor_username: laporan.laporan.pelapor
+          ? laporan.laporan.pelapor.username
+          : null,
+        pelapor_name: laporan.laporan.pelapor
+          ? laporan.laporan.pelapor.name
+          : null,
+        pelapor_job: laporan.laporan.pelapor
+          ? laporan.laporan.pelapor.job
+          : null,
+        pelapor_role: laporan.laporan.pelapor
+          ? laporan.laporan.pelapor.role
+          : null,
 
-        investigator_id_user: laporan.laporan.investigator ? laporan.laporan.investigator.id_user : null,
-        investigator_username: laporan.laporan.investigator ? laporan.laporan.investigator.username : null,
-        investigator_name: laporan.laporan.investigator ? laporan.laporan.investigator.name : null,
-        investigator_job: laporan.laporan.investigator ? laporan.laporan.investigator.job : null,
-        investigator_role: laporan.laporan.investigator ? laporan.laporan.investigator.role : null,
+        investigator_id_user: laporan.laporan.investigator
+          ? laporan.laporan.investigator.id_user
+          : null,
+        investigator_username: laporan.laporan.investigator
+          ? laporan.laporan.investigator.username
+          : null,
+        investigator_name: laporan.laporan.investigator
+          ? laporan.laporan.investigator.name
+          : null,
+        investigator_job: laporan.laporan.investigator
+          ? laporan.laporan.investigator.job
+          : null,
+        investigator_role: laporan.laporan.investigator
+          ? laporan.laporan.investigator.role
+          : null,
 
         id_kajian_laporan: laporan.id_kajian_laporan,
         jenis_insiden: laporan.jenis_insiden,
         grading_risiko_kejadian: laporan.grading_risiko_kejadian,
-        tanggal_laporan_diterima: `${moment(laporan.tanggal_laporan_diterima).tz("Asia/Makassar")}`,
+        tanggal_laporan_diterima: `${moment(
+          laporan.tanggal_laporan_diterima
+        ).tz("Asia/Makassar")}`,
       };
 
       res.status(200).json({
@@ -350,11 +452,15 @@ const getLaporanByUserId = async (req, res) => {
     });
 
     const revLaporan = laporan.map((item) => {
-      let dataUri = item.gambar ? `data:image/jpeg;base64,${item.gambar.toString("base64")}` : null;
+      let dataUri = item.gambar
+        ? `data:image/jpeg;base64,${item.gambar.toString("base64")}`
+        : null;
       return {
         id_laporan: item.id_laporan,
         status: item.status,
-        tanggal_laporan_dikirim: `${moment(item.tanggal_laporan_dikirim).tz("Asia/Makassar")}`,
+        tanggal_laporan_dikirim: `${moment(item.tanggal_laporan_dikirim).tz(
+          "Asia/Makassar"
+        )}`,
         gambar: dataUri,
       };
     });
@@ -391,12 +497,16 @@ const getLatestThreeLaporanByUserId = async (req, res) => {
     });
 
     const revLaporan = laporan.map((item) => {
-      let dataUri = item.gambar ? `data:image/jpeg;base64,${item.gambar.toString("base64")}` : null;
+      let dataUri = item.gambar
+        ? `data:image/jpeg;base64,${item.gambar.toString("base64")}`
+        : null;
 
       return {
         id_laporan: item.id_laporan,
         status: item.status,
-        tanggal_laporan_dikirim: `${moment(item.tanggal_laporan_dikirim).tz("Asia/Makassar")}`,
+        tanggal_laporan_dikirim: `${moment(item.tanggal_laporan_dikirim).tz(
+          "Asia/Makassar"
+        )}`,
         gambar: dataUri,
       };
     });
@@ -436,11 +546,15 @@ const getLaporanToday = async (req, res) => {
     });
 
     const revLaporan = laporan.map((item) => {
-      let dataUri = item.gambar ? `data:image/jpeg;base64,${item.gambar.toString("base64")}` : null;
+      let dataUri = item.gambar
+        ? `data:image/jpeg;base64,${item.gambar.toString("base64")}`
+        : null;
       return {
         id_laporan: item.id_laporan,
         status: item.status,
-        tanggal_laporan_dikirim: `${moment(item.tanggal_laporan_dikirim).tz("Asia/Makassar")}`,
+        tanggal_laporan_dikirim: `${moment(item.tanggal_laporan_dikirim).tz(
+          "Asia/Makassar"
+        )}`,
         gambar: dataUri,
       };
     });
@@ -476,7 +590,10 @@ const getLaporanCurrentMonth = async (req, res) => {
 
     const laporan = await Laporan.findAll({
       where: {
-        [Op.and]: [Sequelize.literal(`MONTH(tanggal_laporan_dikirim) = ${currentMonth}`), Sequelize.literal(`YEAR(tanggal_laporan_dikirim) = ${currentYear}`)],
+        [Op.and]: [
+          Sequelize.literal(`MONTH(tanggal_laporan_dikirim) = ${currentMonth}`),
+          Sequelize.literal(`YEAR(tanggal_laporan_dikirim) = ${currentYear}`),
+        ],
       },
       attributes: ["id_laporan", "status", "tanggal_laporan_dikirim", "gambar"],
       order: [["tanggal_laporan_dikirim", "DESC"]],
@@ -484,12 +601,16 @@ const getLaporanCurrentMonth = async (req, res) => {
     });
 
     const revLaporan = laporan.map((item) => {
-      let dataUri = item.gambar ? `data:image/jpeg;base64,${item.gambar.toString("base64")}` : null;
+      let dataUri = item.gambar
+        ? `data:image/jpeg;base64,${item.gambar.toString("base64")}`
+        : null;
 
       return {
         id_laporan: item.id_laporan,
         status: item.status,
-        tanggal_laporan_dikirim: `${moment(item.tanggal_laporan_dikirim).tz("Asia/Makassar")}`,
+        tanggal_laporan_dikirim: `${moment(item.tanggal_laporan_dikirim).tz(
+          "Asia/Makassar"
+        )}`,
         gambar: dataUri,
       };
     });
@@ -547,29 +668,49 @@ const getLaporanAmount = async (req, res) => {
     try {
       const amountLaporanDalamAntrian = await Laporan.count({
         where: {
-          [Op.and]: [Sequelize.literal(`MONTH(tanggal_laporan_dikirim) = ${month}`), Sequelize.literal(`YEAR(tanggal_laporan_dikirim) = ${year}`), Sequelize.literal(`status = 'dalam antrian'`)],
+          [Op.and]: [
+            Sequelize.literal(`MONTH(tanggal_laporan_dikirim) = ${month}`),
+            Sequelize.literal(`YEAR(tanggal_laporan_dikirim) = ${year}`),
+            Sequelize.literal(`status = 'dalam antrian'`),
+          ],
         },
       });
 
       const amountLaporanInvestigasi = await Laporan.count({
         where: {
-          [Op.and]: [Sequelize.literal(`MONTH(tanggal_laporan_dikirim) = ${month}`), Sequelize.literal(`YEAR(tanggal_laporan_dikirim) = ${year}`), Sequelize.literal(`status = 'investigasi'`)],
+          [Op.and]: [
+            Sequelize.literal(`MONTH(tanggal_laporan_dikirim) = ${month}`),
+            Sequelize.literal(`YEAR(tanggal_laporan_dikirim) = ${year}`),
+            Sequelize.literal(`status = 'investigasi'`),
+          ],
         },
       });
 
       const amountLaporanSelesai = await Laporan.count({
         where: {
-          [Op.and]: [Sequelize.literal(`MONTH(tanggal_laporan_dikirim) = ${month}`), Sequelize.literal(`YEAR(tanggal_laporan_dikirim) = ${year}`), Sequelize.literal(`status = 'laporan selesai'`)],
+          [Op.and]: [
+            Sequelize.literal(`MONTH(tanggal_laporan_dikirim) = ${month}`),
+            Sequelize.literal(`YEAR(tanggal_laporan_dikirim) = ${year}`),
+            Sequelize.literal(`status = 'laporan selesai'`),
+          ],
         },
       });
 
       const amountLaporanKedaluwarsa = await Laporan.count({
         where: {
-          [Op.and]: [Sequelize.literal(`MONTH(tanggal_laporan_dikirim) = ${month}`), Sequelize.literal(`YEAR(tanggal_laporan_dikirim) = ${year}`), Sequelize.literal(`status = 'laporan kedaluwarsa'`)],
+          [Op.and]: [
+            Sequelize.literal(`MONTH(tanggal_laporan_dikirim) = ${month}`),
+            Sequelize.literal(`YEAR(tanggal_laporan_dikirim) = ${year}`),
+            Sequelize.literal(`status = 'laporan kedaluwarsa'`),
+          ],
         },
       });
 
-      const amountAllLaporan = amountLaporanDalamAntrian + amountLaporanInvestigasi + amountLaporanSelesai + amountLaporanKedaluwarsa;
+      const amountAllLaporan =
+        amountLaporanDalamAntrian +
+        amountLaporanInvestigasi +
+        amountLaporanSelesai +
+        amountLaporanKedaluwarsa;
 
       res.status(200).json({
         code: "200",
@@ -740,7 +881,9 @@ const postLaporanByUser = async (req, res) => {
 //@access          Public
 const postLaporanByAnonim = async (req, res) => {
   const tanggal_laporan_dikirim = moment.tz("Asia/Makassar");
-  const tanggal_laporan_kedaluwarsa = tanggal_laporan_dikirim.clone().add(48, "hours");
+  const tanggal_laporan_kedaluwarsa = tanggal_laporan_dikirim
+    .clone()
+    .add(48, "hours");
 
   const {
     nama_pasien,

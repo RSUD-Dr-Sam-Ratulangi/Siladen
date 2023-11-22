@@ -15,7 +15,7 @@ var jenisPasien = require("./app/JenisPasien/router");
 
 var app = express();
 
-// atur cors
+// Atur CORS
 app.use(
   cors({
     origin: ["http://localhost:3000", "http://localhost:3001"],
