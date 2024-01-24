@@ -67,7 +67,8 @@ const registerUser = async (req, res) => {
     return res.status(400).json({
       code: "400",
       status: "BAD_REQUEST",
-      errors: "Name, Username, Password and password confirmation Fields Are Required",
+      errors:
+        "Name, Username, Password and password confirmation Fields Are Required",
     });
   }
 };
@@ -114,9 +115,6 @@ const loginUser = async (req, res) => {
 
       // PASSWORD TIDAK COCOK
       const match = await bcrypt.compare(password, user.password);
-      console.log(match);
-      console.log(password);
-      console.log(user.password);
 
       if (!match)
         return res.status(401).json({
