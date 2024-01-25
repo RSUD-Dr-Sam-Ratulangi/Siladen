@@ -1,3 +1,4 @@
+const { where } = require("sequelize");
 const User = require("./model");
 
 //@description     Get All User data
@@ -33,7 +34,14 @@ const getUserById = async (req, res) => {
       where: {
         id_user,
       },
-      attributes: ["id_user", "name", "username", "job", "role"],
+      attributes: [
+        "id_user",
+        "name",
+        "username",
+        "job",
+        "role",
+        "device_token",
+      ],
     });
 
     if (!user) {
@@ -58,7 +66,55 @@ const getUserById = async (req, res) => {
   }
 };
 
+//@description     Update device token user By User Id
+//@route           PATCH /api/user/device-token/:id_user
+//@access          Public
+const updateDeviceTokenById = async (req, res) => {
+  const id_user = req.params.id_user;
+  const device_token = req.body.device_token;
+  try {
+    const user = await User.findOne({
+      where: {
+        id_user,
+      },
+      attributes: ["id_user", "name", "username", "job", "role"],
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        code: "404",
+        status: "NOT_FOUND",
+        errors: "User is not found",
+      });
+    }
+
+    await User.update(
+      {
+        device_token,
+      },
+      {
+        where: {
+          id_user,
+        },
+      }
+    );
+
+    res.status(200).json({
+      code: "200",
+      status: "OK",
+      success: true,
+    });
+  } catch (error) {
+    res.status(500).json({
+      code: "500",
+      status: "INTERNAL_SERVER_ERROR",
+      errors: error,
+    });
+  }
+};
+
 module.exports = {
   getAllUser,
   getUserById,
+  updateDeviceTokenById,
 };

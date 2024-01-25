@@ -1,5 +1,12 @@
 const { Sequelize } = require("sequelize");
-const { dbName, dbUsername, dbPassword, dbHostname, port } = require("../config/index.js");
+const { Umzug, SequelizeStorage } = require("umzug");
+const {
+  dbName,
+  dbUsername,
+  dbPassword,
+  dbHostname,
+  port,
+} = require("../config/index.js");
 
 const db = new Sequelize(dbName, dbUsername, dbPassword, {
   host: dbHostname,
@@ -10,8 +17,16 @@ const db = new Sequelize(dbName, dbUsername, dbPassword, {
   timezone: "+08:00",
 });
 
+const umzug = new Umzug({
+  migrations: { glob: "migrations/*.js" },
+  context: db.getQueryInterface(),
+  storage: new SequelizeStorage({ sequelize: db }),
+  logger: console,
+});
+
 db.authenticate()
-  .then(() => {
+  .then(async () => {
+    await umzug.up();
     console.log("Koneksi berhasil");
     // db.sync({ force: true })
     //   .then(() => {
